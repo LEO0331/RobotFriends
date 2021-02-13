@@ -4,6 +4,7 @@ import Cardlist from '../Components/Cardlist';//first dot: leave the current fol
 import SearchBar from '../Components/SearchBar';
 import './App.css';
 import Scroll from '../Components/Scroll';
+import ErrorBoundry from '../Components/ErrorBoundry';
 //state: Object, discribe application, able to change VS props: things come out of state 
 //className attribute: 指定一個 CSS class
 /*
@@ -70,7 +71,9 @@ class App extends Component{//Classes Are Functions:https://www.digitalocean.com
 				<h1 className='f2'>RobotsFriends</h1>
 				<SearchBar searchChange={this.searchChange}/>
 				<Scroll>
-					<Cardlist robots={filterRobots}/> 
+					<ErrorBoundry>
+						<Cardlist robots={filterRobots}/> 
+					</ErrorBoundry>
 				</Scroll>
 			</div>
 			);
