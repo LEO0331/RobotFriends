@@ -82,19 +82,50 @@ class App extends Component{//Classes Are Functions:https://www.digitalocean.com
 }
 
 export default App;
-/*
-const App = () => {
-	return (
-		<div classname='tc'>
-			<h1>RobotsFriends</h1>
-			<SearchBar />
-			<Cardlist robots={robots}/> robots: properties
-				2. <SearchBar searchChange={this.searchChange}/>
-				2. <Cardlist robots={this.state.robots}/> 
-		</div>
-	);
+
+/*HOOK: convert Class into functional Component
+import {useSTATE, useEffect} from 'react';
+
+function App() {
+	//name, change, initial value
+	const [robots, setRobots] = useState([])
+	const [searchfield, setSearchfield] = useState('')
+	const [count, setCount] = useState(0)
+
+	useEffect(() => {//if no second param, looping
+		fetch('https://jsonplaceholder.typicode.com/users')
+			.then(response => response.json()) 
+			.then(user => setRobots(user));
+	},[])
+	//second param: only run when things(e.g. searchfield) change --> [searchfield]; []: shortcut for componentDidMount()
+	//[count]: counter, only run if count changes
+	const searchChange = (event) => {
+		setSearchfield(event.target.value);
+	}
+	
+	//const setCount = () => {setCount(count+1);}
+	
+	const filterRobots = robots.filter((robot) => {
+			return robot.name.toLowerCase().includes(searchfield.toLowerCase())
+		})
+		if(!robots.length){
+			return <h1 className='f2 tc'>Loading</h1>
+		} else{
+			return (
+			<div className='tc'>
+				<h1 className='f2'>RobotsFriends</h1>
+				<button onClick={() => setCount(count+1)}>CLICK!!!</button>
+				<SearchBar searchChange={searchChange}/>
+				<Scroll>
+					<ErrorBoundry>
+						<Cardlist robots={filterRobots}/> 
+					</ErrorBoundry>
+				</Scroll>
+			</div>
+			);
+		}
+	}
 }
-!robots.length ?
-	<h1 className='f2 tc'>Loading</h1> :
-	(THINGS TO BE RETURNED)
+export default App;
+}
 */
