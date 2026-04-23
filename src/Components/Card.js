@@ -1,18 +1,17 @@
 import React from 'react';
 
 const Card = (props) => {
-  const { name, email, id } = props;
+  const { name, email } = props;
+  const initials = name
+    .split(' ')
+    .map((part) => part[0])
+    .join('')
+    .slice(0, 2)
+    .toUpperCase();
 
   return (
-    <div className='tc bg-light-green dib br3 pa3 ma2 grow bw2 shadow-5'>
-      <img
-        alt={`Avatar for ${name}`}
-        src={`https://robohash.org/${id}?200x200`}
-        width='200'
-        height='200'
-        loading='lazy'
-        decoding='async'
-      />
+    <div className='card'>
+      <div className='avatar' aria-hidden='true'>{initials}</div>
       <div>
         <h2>{name}</h2>
         <p>{email}</p>

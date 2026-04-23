@@ -1,10 +1,10 @@
 import React from 'react';
 const SearchBar = ({ searchChange }) => {
   return (
-    <div className='pa2'>
+    <div className='search-wrap'>
       <label className='sr-only' htmlFor='robot-search'>Search robots</label>
       <input
-        className='pa3 bg-light-blue ba b--green'
+        className='search-input'
         id='robot-search'
         type='search'
         placeholder='search robots'

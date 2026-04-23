@@ -29,13 +29,11 @@ class App extends Component {
       robot.name.toLowerCase().includes(searchfield.toLowerCase())
     );
 
-    if (!robots.length) {
-      return <h1 className='f2 tc'>Loading</h1>;
-    }
+    if (!robots.length) return <h1 className='title centered'>Loading</h1>;
 
     return (
-      <div className='tc'>
-        <h1 className='f2'>RobotFriends</h1>
+      <div className='centered'>
+        <h1 className='title'>RobotFriends</h1>
         <SearchBar searchChange={this.searchChange} />
         <Scroll>
           <ErrorBoundry>

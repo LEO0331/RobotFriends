@@ -5,7 +5,7 @@
     <link rel="icon" href="%PUBLIC_URL%/favicon.ico" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <meta name="theme-color" content="#0a5f5f" />
-    <meta http-equiv="Content-Security-Policy" content="default-src 'self'; img-src 'self' https://robohash.org data:; script-src 'self'; style-src 'self' 'unsafe-inline'; font-src 'self' data:; connect-src 'self' https://jsonplaceholder.typicode.com; object-src 'none'; base-uri 'self'; frame-ancestors 'none';" />
+    <meta http-equiv="Content-Security-Policy" content="default-src 'self'; img-src 'self' data:; script-src 'self'; style-src 'self' 'unsafe-inline'; font-src 'self' data:; connect-src 'self' https://jsonplaceholder.typicode.com; object-src 'none'; base-uri 'self';" />
     <meta name="referrer" content="strict-origin-when-cross-origin" />
     <meta name="google-site-verification" content="wT4NszFGw6QkmwmC6ZyjJMiGm-n4AZU3t7JM4Zj2sYg" />
     <meta
@@ -16,6 +16,8 @@
     <meta property="og:description" content="Search and browse robot profiles instantly." />
     <meta property="og:type" content="website" />
     <link rel="apple-touch-icon" href="%PUBLIC_URL%/logo192.png" />
+    <link rel="preconnect" href="https://jsonplaceholder.typicode.com" crossorigin />
+    <link rel="dns-prefetch" href="//jsonplaceholder.typicode.com" />
     <!--
       manifest.json provides metadata used when your web app is installed on a
       user's mobile device or desktop. See https://developers.google.com/web/fundamentals/web-app-manifest/
