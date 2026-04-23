@@ -28,8 +28,13 @@ class App extends Component {
     const filterRobots = robots.filter((robot) =>
       robot.name.toLowerCase().includes(searchfield.toLowerCase())
     );
-
-    if (!robots.length) return <h1 className='title centered'>Loading</h1>;
+    const skeletonCards = Array.from({ length: 9 }, (_, index) => (
+      <div key={`skeleton-${index}`} className='card card-skeleton' aria-hidden='true'>
+        <div className='avatar avatar-skeleton' />
+        <div className='text-skeleton title-skeleton' />
+        <div className='text-skeleton line-skeleton' />
+      </div>
+    ));
 
     return (
       <div className='centered'>
@@ -37,7 +42,7 @@ class App extends Component {
         <SearchBar searchChange={this.searchChange} />
         <Scroll>
           <ErrorBoundry>
-            <Cardlist robots={filterRobots} />
+            {robots.length ? <Cardlist robots={filterRobots} /> : <div>{skeletonCards}</div>}
           </ErrorBoundry>
         </Scroll>
       </div>
