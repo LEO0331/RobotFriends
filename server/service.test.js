@@ -11,15 +11,23 @@ const { parseCsv } = require('./http');
 test('CSV adapter returns dated price rows', () => {
   assert.deepEqual(parseCsv('Date,Close\n2026-01-02,12.5\n'), [{ Date: '2026-01-02', Close: '12.5' }]);
 });
-test('store replaces only observations for the same source', async () => {
+test('store retains historical observations instead of replacing a source', async () => {
   const directory = await fs.mkdtemp(path.join(os.tmpdir(), 'gridline-test-')); const store = createStore(directory);
-  await store.saveObservations('sec', [{ source: 'sec', value: 1 }]); await store.saveObservations('prices', [{ source: 'prices', value: 2 }]); await store.saveObservations('sec', [{ source: 'sec', value: 3 }]);
-  assert.deepEqual(await store.observations(), [{ source: 'prices', value: 2 }, { source: 'sec', value: 3 }]);
+  await store.saveObservations('sec', [{ id: 'sec-1', source: 'sec', value: 1, observedAt: '2026-01-01T00:00:00Z' }]);
+  await store.saveObservations('prices', [{ id: 'price-1', source: 'prices', value: 2, observedAt: '2026-01-01T00:00:00Z' }]);
+  await store.saveObservations('sec', [{ id: 'sec-2', source: 'sec', value: 3, observedAt: '2026-02-01T00:00:00Z' }]);
+  const rows = await store.observations();
+  assert.equal(rows.length, 3);
+  assert.deepEqual(rows.map(item => item.value).sort((a, b) => a - b), [1, 2, 3]);
+  store.close();
   await fs.rm(directory, { recursive: true, force: true });
 });
-test('service reports supported adapters without configuration', () => {
-  const service = createService({ dataDir: path.join(os.tmpdir(), 'gridline-source-list'), cacheMinutes: 1 });
+test('service reports supported adapters without configuration', async () => {
+  const directory = await fs.mkdtemp(path.join(os.tmpdir(), 'gridline-source-list-'));
+  const service = createService({ dataDir: directory, cacheMinutes: 1 });
   assert.deepEqual(service.sources(), ['sec', 'eia', 'pjm', 'ferc', 'company-ir', 'prices']);
+  service.store.close();
+  await fs.rm(directory, { recursive: true, force: true });
 });
 test('post-close scheduler excludes weekends and runs after 4:15pm ET', () => {
   assert.equal(dueAfterClose(new Date('2026-09-14T20:14:00Z')).due, false);
