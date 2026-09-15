@@ -53,4 +53,6 @@ Each source is tried up to three times with 1s and 2s backoff. A failure retains
 
 Where EIA observations appear, the dashboard identifies the **U.S. Energy Information Administration (EIA)** as the source and links to EIA Open Data. Gridline may transform or aggregate EIA observations for display, while source records retain their observation and retrieval timestamps. Gridline scores are not produced, endorsed, or approved by EIA; no EIA logo is used. See the [EIA Open Data API](https://www.eia.gov/opendata/) and [Privacy and Security Policy](https://www.eia.gov/about/privacy_security_policy.php).
 
+EIA API data in this project is limited to Gridline’s own research and decision-support dashboard. It is not forwarded to unrelated products, users, or services. Keep EIA-derived observations, attribution, and source timestamps with any displayed research result.
+
 Traditional Chinese documentation: [README.zh-TW.md](README.zh-TW.md). Deployment runbook: [English](docs/static-snapshot-deployment.en.md) · [繁體中文](docs/static-snapshot-deployment.zh-TW.md).

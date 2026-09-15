@@ -33,6 +33,8 @@ npm start
 
 顯示 EIA 觀察值之處，儀表板會標示**美國能源資訊署（EIA）**為來源，並連結至 EIA Open Data。Gridline 為呈現目的可能轉換或彙總 EIA 觀察值，但來源紀錄保留觀察與擷取時間戳記。Gridline 分數不是由 EIA 製作、背書或核准，且不使用 EIA 標誌。請參閱 [EIA Open Data API](https://www.eia.gov/opendata/) 與 [隱私及安全政策](https://www.eia.gov/about/privacy_security_policy.php)。
 
+本專案中的 EIA API 資料僅限 Gridline 自身研究與決策輔助儀表板使用，不會轉傳至不相關的產品、使用者或服務。任何顯示的研究結果均應保留 EIA 衍生觀察值、來源標示及時間戳記。
+
 ## 驗證
 
 ```bash

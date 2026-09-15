@@ -26,6 +26,8 @@ No missing response is converted to zero. A failed adapter is reported as `degra
 
 When an EIA-derived observation is displayed, identify the U.S. Energy Information Administration (EIA) as its source and link to EIA Open Data. Keep the raw EIA observation, observation period, and retrieval time separate from Gridline-derived metrics. Do not use the EIA logo or language that implies EIA endorsement of the dashboard, scores, or investment conclusions.
 
+EIA data is scoped to Gridline’s research and decision-support use only. Do not send it to unrelated products or services, and do not remove its attribution or time context when presenting it.
+
 ## Post-close schedule
 
 With `SCHEDULE_ENABLED=true` (the default), the local API checks once per minute and triggers one refresh at or after **4:15 PM America/New_York**, Monday through Friday. It runs once per trading weekday; holidays are harmless because providers simply retain the latest valid observation. The source list is configurable with `SCHEDULE_SOURCES`.
