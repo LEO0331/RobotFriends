@@ -42,3 +42,11 @@ npm run build
 ```
 
 Provider credentials are never committed. A missing key, rate-limit response, or provider failure is exposed as a `degraded` source-health state and is never represented as zero data.
+
+## Static daily snapshot deployment
+
+For the GitHub Pages demo, [.github/workflows/daily-snapshot.yml](.github/workflows/daily-snapshot.yml) runs at 22:00 UTC on weekdays (after the regular US close in EST and EDT). It refreshes the configured sources, writes `public/data/dashboard-snapshot.json`, and commits that static file only when it changes. GitHub Pages then serves the latest snapshot without a continuously running API.
+
+Each source is tried up to three times with 1s and 2s backoff. A failure retains the last known-good records from the previously committed snapshot and records a degraded source-health state. Add provider secrets in the repository’s Actions secrets before enabling real ingestion.
+
+Traditional Chinese documentation: [README.zh-TW.md](README.zh-TW.md). Deployment runbook: [English](docs/static-snapshot-deployment.en.md) · [繁體中文](docs/static-snapshot-deployment.zh-TW.md).

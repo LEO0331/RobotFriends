@@ -16,6 +16,7 @@
     "start": "react-scripts start",
     "api": "node server/index.js",
     "ingest": "node server/cli.js ingest",
+    "snapshot": "node server/export-static-snapshot.js",
     "test:api": "node --test server/**/*.test.js",
     "build": "react-scripts build",
     "test": "react-scripts test",
