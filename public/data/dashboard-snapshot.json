@@ -1,9 +1,10 @@
 {
-  "schemaVersion": 1,
+  "schemaVersion": 2,
   "generatedAt": null,
   "freshness": "demo",
   "sourceHealth": {},
   "outcomes": [],
   "observations": [],
-  "note": "Static demo snapshot. Values are point-in-time observations and not investment advice."
+  "companyHistory": [],
+  "note": "Static dashboard snapshot. Historical price and score windows become available as daily snapshots accumulate. Not investment advice."
 }
