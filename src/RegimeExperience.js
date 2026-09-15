@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import App from './Containers/App';
+import ExposurePeriodPortal from './ExposurePeriodMonitor';
 import './RegimeExperience.css';
 
 const getRoute = () => (window.location.hash.replace(/^#/, '').split('?')[0] || 'overview').toLowerCase();
@@ -68,7 +69,7 @@ function RegimeExperience() {
     );
   }
 
-  return <App />;
+  return <><App /><ExposurePeriodPortal /></>;
 }
 
 function RegimeDetail({ language, setLanguage, navigate }) {
