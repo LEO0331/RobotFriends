@@ -36,6 +36,7 @@ async function main() {
     confidence: score.confidence,
   }));
   const companyHistory = mergeCompanyHistory(previous.companyHistory || [], scoreSnapshots, generatedAt);
+  await service.store.saveScoreSnapshots(scores);
   const snapshot = {
     schemaVersion: 3,
     generatedAt,
