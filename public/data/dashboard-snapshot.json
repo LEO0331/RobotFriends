@@ -1,10 +1,1079 @@
 {
-  "schemaVersion": 2,
-  "generatedAt": null,
-  "freshness": "demo",
-  "sourceHealth": {},
-  "outcomes": [],
-  "observations": [],
-  "companyHistory": [],
-  "note": "Static dashboard snapshot. Historical price and score windows become available as daily snapshots accumulate. Not investment advice."
+  "schemaVersion": 3,
+  "generatedAt": "2026-09-15T23:50:59.799Z",
+  "freshness": "partial",
+  "sourceHealth": {
+    "company-ir": {
+      "status": "degraded",
+      "cacheMinutes": 60,
+      "message": "COMPANY_IR_FEEDS has no configured official feed URLs.",
+      "checkedAt": "2026-09-15T23:50:51.091Z"
+    },
+    "eia": {
+      "status": "ok",
+      "lastSuccessAt": "2026-09-15T23:50:53.786Z",
+      "cacheMinutes": 60,
+      "recordCount": 24,
+      "message": "24 EIA records ingested",
+      "checkedAt": "2026-09-15T23:50:53.786Z"
+    },
+    "ferc": {
+      "status": "degraded",
+      "cacheMinutes": 60,
+      "message": "FERC_API_KEY is not configured.",
+      "checkedAt": "2026-09-15T23:50:59.798Z"
+    },
+    "pjm": {
+      "status": "degraded",
+      "cacheMinutes": 60,
+      "message": "PJM_API_KEY is not configured.",
+      "checkedAt": "2026-09-15T23:50:56.790Z"
+    },
+    "prices": {
+      "status": "ok",
+      "lastSuccessAt": "2026-09-15T23:50:48.087Z",
+      "cacheMinutes": 60,
+      "recordCount": 0,
+      "message": "0 daily price observations ingested",
+      "checkedAt": "2026-09-15T23:50:48.087Z"
+    },
+    "sec": {
+      "status": "degraded",
+      "cacheMinutes": 60,
+      "message": "403 Forbidden",
+      "checkedAt": "2026-09-15T23:50:46.430Z"
+    }
+  },
+  "outcomes": [
+    {
+      "source": "sec",
+      "status": "degraded",
+      "message": "403 Forbidden",
+      "attempts": 3
+    },
+    {
+      "source": "prices",
+      "status": "ok",
+      "rawFile": "/home/runner/work/RobotFriends/RobotFriends/data/bronze/prices/2026-09-15T23-50-48-086Z.json",
+      "recordCount": 0,
+      "message": "0 daily price observations ingested",
+      "attempts": 1
+    },
+    {
+      "source": "company-ir",
+      "status": "degraded",
+      "message": "COMPANY_IR_FEEDS has no configured official feed URLs.",
+      "attempts": 3
+    },
+    {
+      "source": "eia",
+      "status": "ok",
+      "rawFile": "/home/runner/work/RobotFriends/RobotFriends/data/bronze/eia/2026-09-15T23-50-53-782Z.json",
+      "recordCount": 24,
+      "message": "24 EIA records ingested",
+      "attempts": 1
+    },
+    {
+      "source": "pjm",
+      "status": "degraded",
+      "message": "PJM_API_KEY is not configured.",
+      "attempts": 3
+    },
+    {
+      "source": "ferc",
+      "status": "degraded",
+      "message": "FERC_API_KEY is not configured.",
+      "attempts": 3
+    }
+  ],
+  "observations": [
+    {
+      "id": "obs_af1dc41d506027f5b58bce95",
+      "source": "eia",
+      "type": "rtoLoad",
+      "value": 92063,
+      "observedAt": "2026-09-15T14",
+      "retrievedAt": "2026-09-15T23:50:53.782Z",
+      "confidence": 1,
+      "region": "PJM",
+      "unit": "megawatthours",
+      "observationId": "obs_af1dc41d506027f5b58bce95",
+      "provenance": {
+        "observationId": "obs_af1dc41d506027f5b58bce95",
+        "source": "eia",
+        "provider": "U.S. Energy Information Administration",
+        "dataClass": "primary",
+        "originUrl": "https://www.eia.gov/opendata/",
+        "observedAt": "2026-09-15T14",
+        "retrievedAt": "2026-09-15T23:50:53.782Z",
+        "confidence": 1,
+        "lineage": [
+          "obs_af1dc41d506027f5b58bce95"
+        ],
+        "transformation": "normalized-observation-v1"
+      }
+    },
+    {
+      "id": "obs_1a9ee3b04f56c9cad3925f01",
+      "source": "eia",
+      "type": "rtoLoad",
+      "value": 95462,
+      "observedAt": "2026-09-15T15",
+      "retrievedAt": "2026-09-15T23:50:53.782Z",
+      "confidence": 1,
+      "region": "PJM",
+      "unit": "megawatthours",
+      "observationId": "obs_1a9ee3b04f56c9cad3925f01",
+      "provenance": {
+        "observationId": "obs_1a9ee3b04f56c9cad3925f01",
+        "source": "eia",
+        "provider": "U.S. Energy Information Administration",
+        "dataClass": "primary",
+        "originUrl": "https://www.eia.gov/opendata/",
+        "observedAt": "2026-09-15T15",
+        "retrievedAt": "2026-09-15T23:50:53.782Z",
+        "confidence": 1,
+        "lineage": [
+          "obs_1a9ee3b04f56c9cad3925f01"
+        ],
+        "transformation": "normalized-observation-v1"
+      }
+    },
+    {
+      "id": "obs_594b5a2629abc11f0e09e6c5",
+      "source": "eia",
+      "type": "rtoLoad",
+      "value": 93716,
+      "observedAt": "2026-09-15T15",
+      "retrievedAt": "2026-09-15T23:50:53.782Z",
+      "confidence": 1,
+      "region": "PJM",
+      "unit": "megawatthours",
+      "observationId": "obs_594b5a2629abc11f0e09e6c5",
+      "provenance": {
+        "observationId": "obs_594b5a2629abc11f0e09e6c5",
+        "source": "eia",
+        "provider": "U.S. Energy Information Administration",
+        "dataClass": "primary",
+        "originUrl": "https://www.eia.gov/opendata/",
+        "observedAt": "2026-09-15T15",
+        "retrievedAt": "2026-09-15T23:50:53.782Z",
+        "confidence": 1,
+        "lineage": [
+          "obs_594b5a2629abc11f0e09e6c5"
+        ],
+        "transformation": "normalized-observation-v1"
+      }
+    },
+    {
+      "id": "obs_3e38d7dec0c27c2fe8ec5c87",
+      "source": "eia",
+      "type": "rtoLoad",
+      "value": 94490,
+      "observedAt": "2026-09-15T16",
+      "retrievedAt": "2026-09-15T23:50:53.782Z",
+      "confidence": 1,
+      "region": "PJM",
+      "unit": "megawatthours",
+      "observationId": "obs_3e38d7dec0c27c2fe8ec5c87",
+      "provenance": {
+        "observationId": "obs_3e38d7dec0c27c2fe8ec5c87",
+        "source": "eia",
+        "provider": "U.S. Energy Information Administration",
+        "dataClass": "primary",
+        "originUrl": "https://www.eia.gov/opendata/",
+        "observedAt": "2026-09-15T16",
+        "retrievedAt": "2026-09-15T23:50:53.782Z",
+        "confidence": 1,
+        "lineage": [
+          "obs_3e38d7dec0c27c2fe8ec5c87"
+        ],
+        "transformation": "normalized-observation-v1"
+      }
+    },
+    {
+      "id": "obs_6be9aac343c7d3df4ba595a4",
+      "source": "eia",
+      "type": "rtoLoad",
+      "value": 98392,
+      "observedAt": "2026-09-15T16",
+      "retrievedAt": "2026-09-15T23:50:53.782Z",
+      "confidence": 1,
+      "region": "PJM",
+      "unit": "megawatthours",
+      "observationId": "obs_6be9aac343c7d3df4ba595a4",
+      "provenance": {
+        "observationId": "obs_6be9aac343c7d3df4ba595a4",
+        "source": "eia",
+        "provider": "U.S. Energy Information Administration",
+        "dataClass": "primary",
+        "originUrl": "https://www.eia.gov/opendata/",
+        "observedAt": "2026-09-15T16",
+        "retrievedAt": "2026-09-15T23:50:53.782Z",
+        "confidence": 1,
+        "lineage": [
+          "obs_6be9aac343c7d3df4ba595a4"
+        ],
+        "transformation": "normalized-observation-v1"
+      }
+    },
+    {
+      "id": "obs_84830c4f0fda942e2ea4d443",
+      "source": "eia",
+      "type": "rtoLoad",
+      "value": 101737,
+      "observedAt": "2026-09-15T17",
+      "retrievedAt": "2026-09-15T23:50:53.782Z",
+      "confidence": 1,
+      "region": "PJM",
+      "unit": "megawatthours",
+      "observationId": "obs_84830c4f0fda942e2ea4d443",
+      "provenance": {
+        "observationId": "obs_84830c4f0fda942e2ea4d443",
+        "source": "eia",
+        "provider": "U.S. Energy Information Administration",
+        "dataClass": "primary",
+        "originUrl": "https://www.eia.gov/opendata/",
+        "observedAt": "2026-09-15T17",
+        "retrievedAt": "2026-09-15T23:50:53.782Z",
+        "confidence": 1,
+        "lineage": [
+          "obs_84830c4f0fda942e2ea4d443"
+        ],
+        "transformation": "normalized-observation-v1"
+      }
+    },
+    {
+      "id": "obs_f215507a30e3ceacb3ea1a2a",
+      "source": "eia",
+      "type": "rtoLoad",
+      "value": 96665,
+      "observedAt": "2026-09-15T17",
+      "retrievedAt": "2026-09-15T23:50:53.782Z",
+      "confidence": 1,
+      "region": "PJM",
+      "unit": "megawatthours",
+      "observationId": "obs_f215507a30e3ceacb3ea1a2a",
+      "provenance": {
+        "observationId": "obs_f215507a30e3ceacb3ea1a2a",
+        "source": "eia",
+        "provider": "U.S. Energy Information Administration",
+        "dataClass": "primary",
+        "originUrl": "https://www.eia.gov/opendata/",
+        "observedAt": "2026-09-15T17",
+        "retrievedAt": "2026-09-15T23:50:53.782Z",
+        "confidence": 1,
+        "lineage": [
+          "obs_f215507a30e3ceacb3ea1a2a"
+        ],
+        "transformation": "normalized-observation-v1"
+      }
+    },
+    {
+      "id": "obs_0648cfa873718b2bed0bf8b2",
+      "source": "eia",
+      "type": "rtoLoad",
+      "value": 104926,
+      "observedAt": "2026-09-15T18",
+      "retrievedAt": "2026-09-15T23:50:53.782Z",
+      "confidence": 1,
+      "region": "PJM",
+      "unit": "megawatthours",
+      "observationId": "obs_0648cfa873718b2bed0bf8b2",
+      "provenance": {
+        "observationId": "obs_0648cfa873718b2bed0bf8b2",
+        "source": "eia",
+        "provider": "U.S. Energy Information Administration",
+        "dataClass": "primary",
+        "originUrl": "https://www.eia.gov/opendata/",
+        "observedAt": "2026-09-15T18",
+        "retrievedAt": "2026-09-15T23:50:53.782Z",
+        "confidence": 1,
+        "lineage": [
+          "obs_0648cfa873718b2bed0bf8b2"
+        ],
+        "transformation": "normalized-observation-v1"
+      }
+    },
+    {
+      "id": "obs_56761887c64143178299c679",
+      "source": "eia",
+      "type": "rtoLoad",
+      "value": 100804,
+      "observedAt": "2026-09-15T18",
+      "retrievedAt": "2026-09-15T23:50:53.782Z",
+      "confidence": 1,
+      "region": "PJM",
+      "unit": "megawatthours",
+      "observationId": "obs_56761887c64143178299c679",
+      "provenance": {
+        "observationId": "obs_56761887c64143178299c679",
+        "source": "eia",
+        "provider": "U.S. Energy Information Administration",
+        "dataClass": "primary",
+        "originUrl": "https://www.eia.gov/opendata/",
+        "observedAt": "2026-09-15T18",
+        "retrievedAt": "2026-09-15T23:50:53.782Z",
+        "confidence": 1,
+        "lineage": [
+          "obs_56761887c64143178299c679"
+        ],
+        "transformation": "normalized-observation-v1"
+      }
+    },
+    {
+      "id": "obs_3be4a882ebd077a9150041ac",
+      "source": "eia",
+      "type": "rtoLoad",
+      "value": 108035,
+      "observedAt": "2026-09-15T19",
+      "retrievedAt": "2026-09-15T23:50:53.782Z",
+      "confidence": 1,
+      "region": "PJM",
+      "unit": "megawatthours",
+      "observationId": "obs_3be4a882ebd077a9150041ac",
+      "provenance": {
+        "observationId": "obs_3be4a882ebd077a9150041ac",
+        "source": "eia",
+        "provider": "U.S. Energy Information Administration",
+        "dataClass": "primary",
+        "originUrl": "https://www.eia.gov/opendata/",
+        "observedAt": "2026-09-15T19",
+        "retrievedAt": "2026-09-15T23:50:53.782Z",
+        "confidence": 1,
+        "lineage": [
+          "obs_3be4a882ebd077a9150041ac"
+        ],
+        "transformation": "normalized-observation-v1"
+      }
+    },
+    {
+      "id": "obs_f3602a517a2d2e00606ee09c",
+      "source": "eia",
+      "type": "rtoLoad",
+      "value": 105227,
+      "observedAt": "2026-09-15T19",
+      "retrievedAt": "2026-09-15T23:50:53.782Z",
+      "confidence": 1,
+      "region": "PJM",
+      "unit": "megawatthours",
+      "observationId": "obs_f3602a517a2d2e00606ee09c",
+      "provenance": {
+        "observationId": "obs_f3602a517a2d2e00606ee09c",
+        "source": "eia",
+        "provider": "U.S. Energy Information Administration",
+        "dataClass": "primary",
+        "originUrl": "https://www.eia.gov/opendata/",
+        "observedAt": "2026-09-15T19",
+        "retrievedAt": "2026-09-15T23:50:53.782Z",
+        "confidence": 1,
+        "lineage": [
+          "obs_f3602a517a2d2e00606ee09c"
+        ],
+        "transformation": "normalized-observation-v1"
+      }
+    },
+    {
+      "id": "obs_1df590a6f27138c5e45938be",
+      "source": "eia",
+      "type": "rtoLoad",
+      "value": 109904,
+      "observedAt": "2026-09-15T20",
+      "retrievedAt": "2026-09-15T23:50:53.782Z",
+      "confidence": 1,
+      "region": "PJM",
+      "unit": "megawatthours",
+      "observationId": "obs_1df590a6f27138c5e45938be",
+      "provenance": {
+        "observationId": "obs_1df590a6f27138c5e45938be",
+        "source": "eia",
+        "provider": "U.S. Energy Information Administration",
+        "dataClass": "primary",
+        "originUrl": "https://www.eia.gov/opendata/",
+        "observedAt": "2026-09-15T20",
+        "retrievedAt": "2026-09-15T23:50:53.782Z",
+        "confidence": 1,
+        "lineage": [
+          "obs_1df590a6f27138c5e45938be"
+        ],
+        "transformation": "normalized-observation-v1"
+      }
+    },
+    {
+      "id": "obs_f498aad3951e202af0e8827b",
+      "source": "eia",
+      "type": "rtoLoad",
+      "value": 111352,
+      "observedAt": "2026-09-15T20",
+      "retrievedAt": "2026-09-15T23:50:53.782Z",
+      "confidence": 1,
+      "region": "PJM",
+      "unit": "megawatthours",
+      "observationId": "obs_f498aad3951e202af0e8827b",
+      "provenance": {
+        "observationId": "obs_f498aad3951e202af0e8827b",
+        "source": "eia",
+        "provider": "U.S. Energy Information Administration",
+        "dataClass": "primary",
+        "originUrl": "https://www.eia.gov/opendata/",
+        "observedAt": "2026-09-15T20",
+        "retrievedAt": "2026-09-15T23:50:53.782Z",
+        "confidence": 1,
+        "lineage": [
+          "obs_f498aad3951e202af0e8827b"
+        ],
+        "transformation": "normalized-observation-v1"
+      }
+    },
+    {
+      "id": "obs_3364a14278d49c1b53d67d7a",
+      "source": "eia",
+      "type": "rtoLoad",
+      "value": 113646,
+      "observedAt": "2026-09-15T21",
+      "retrievedAt": "2026-09-15T23:50:53.782Z",
+      "confidence": 1,
+      "region": "PJM",
+      "unit": "megawatthours",
+      "observationId": "obs_3364a14278d49c1b53d67d7a",
+      "provenance": {
+        "observationId": "obs_3364a14278d49c1b53d67d7a",
+        "source": "eia",
+        "provider": "U.S. Energy Information Administration",
+        "dataClass": "primary",
+        "originUrl": "https://www.eia.gov/opendata/",
+        "observedAt": "2026-09-15T21",
+        "retrievedAt": "2026-09-15T23:50:53.782Z",
+        "confidence": 1,
+        "lineage": [
+          "obs_3364a14278d49c1b53d67d7a"
+        ],
+        "transformation": "normalized-observation-v1"
+      }
+    },
+    {
+      "id": "obs_5e08c287a1a67feb03b5edf1",
+      "source": "eia",
+      "type": "rtoLoad",
+      "value": 114683,
+      "observedAt": "2026-09-15T21",
+      "retrievedAt": "2026-09-15T23:50:53.782Z",
+      "confidence": 1,
+      "region": "PJM",
+      "unit": "megawatthours",
+      "observationId": "obs_5e08c287a1a67feb03b5edf1",
+      "provenance": {
+        "observationId": "obs_5e08c287a1a67feb03b5edf1",
+        "source": "eia",
+        "provider": "U.S. Energy Information Administration",
+        "dataClass": "primary",
+        "originUrl": "https://www.eia.gov/opendata/",
+        "observedAt": "2026-09-15T21",
+        "retrievedAt": "2026-09-15T23:50:53.782Z",
+        "confidence": 1,
+        "lineage": [
+          "obs_5e08c287a1a67feb03b5edf1"
+        ],
+        "transformation": "normalized-observation-v1"
+      }
+    },
+    {
+      "id": "obs_7019da5bf20c40f7195c6cfe",
+      "source": "eia",
+      "type": "rtoLoad",
+      "value": 117682,
+      "observedAt": "2026-09-15T22",
+      "retrievedAt": "2026-09-15T23:50:53.782Z",
+      "confidence": 1,
+      "region": "PJM",
+      "unit": "megawatthours",
+      "observationId": "obs_7019da5bf20c40f7195c6cfe",
+      "provenance": {
+        "observationId": "obs_7019da5bf20c40f7195c6cfe",
+        "source": "eia",
+        "provider": "U.S. Energy Information Administration",
+        "dataClass": "primary",
+        "originUrl": "https://www.eia.gov/opendata/",
+        "observedAt": "2026-09-15T22",
+        "retrievedAt": "2026-09-15T23:50:53.782Z",
+        "confidence": 1,
+        "lineage": [
+          "obs_7019da5bf20c40f7195c6cfe"
+        ],
+        "transformation": "normalized-observation-v1"
+      }
+    },
+    {
+      "id": "obs_779a30dc05fbb583bfcc694f",
+      "source": "eia",
+      "type": "rtoLoad",
+      "value": 113521,
+      "observedAt": "2026-09-15T22",
+      "retrievedAt": "2026-09-15T23:50:53.782Z",
+      "confidence": 1,
+      "region": "PJM",
+      "unit": "megawatthours",
+      "observationId": "obs_779a30dc05fbb583bfcc694f",
+      "provenance": {
+        "observationId": "obs_779a30dc05fbb583bfcc694f",
+        "source": "eia",
+        "provider": "U.S. Energy Information Administration",
+        "dataClass": "primary",
+        "originUrl": "https://www.eia.gov/opendata/",
+        "observedAt": "2026-09-15T22",
+        "retrievedAt": "2026-09-15T23:50:53.782Z",
+        "confidence": 1,
+        "lineage": [
+          "obs_779a30dc05fbb583bfcc694f"
+        ],
+        "transformation": "normalized-observation-v1"
+      }
+    },
+    {
+      "id": "obs_804e76121a111b17931e1cd8",
+      "source": "eia",
+      "type": "rtoLoad",
+      "value": 111497,
+      "observedAt": "2026-09-15T23",
+      "retrievedAt": "2026-09-15T23:50:53.782Z",
+      "confidence": 1,
+      "region": "PJM",
+      "unit": "megawatthours",
+      "observationId": "obs_804e76121a111b17931e1cd8",
+      "provenance": {
+        "observationId": "obs_804e76121a111b17931e1cd8",
+        "source": "eia",
+        "provider": "U.S. Energy Information Administration",
+        "dataClass": "primary",
+        "originUrl": "https://www.eia.gov/opendata/",
+        "observedAt": "2026-09-15T23",
+        "retrievedAt": "2026-09-15T23:50:53.782Z",
+        "confidence": 1,
+        "lineage": [
+          "obs_804e76121a111b17931e1cd8"
+        ],
+        "transformation": "normalized-observation-v1"
+      }
+    },
+    {
+      "id": "obs_d53a6f4574f5ead47330f63c",
+      "source": "eia",
+      "type": "rtoLoad",
+      "value": 117294,
+      "observedAt": "2026-09-15T23",
+      "retrievedAt": "2026-09-15T23:50:53.782Z",
+      "confidence": 1,
+      "region": "PJM",
+      "unit": "megawatthours",
+      "observationId": "obs_d53a6f4574f5ead47330f63c",
+      "provenance": {
+        "observationId": "obs_d53a6f4574f5ead47330f63c",
+        "source": "eia",
+        "provider": "U.S. Energy Information Administration",
+        "dataClass": "primary",
+        "originUrl": "https://www.eia.gov/opendata/",
+        "observedAt": "2026-09-15T23",
+        "retrievedAt": "2026-09-15T23:50:53.782Z",
+        "confidence": 1,
+        "lineage": [
+          "obs_d53a6f4574f5ead47330f63c"
+        ],
+        "transformation": "normalized-observation-v1"
+      }
+    },
+    {
+      "id": "obs_88d6fd3e876b9d460d19de4d",
+      "source": "eia",
+      "type": "rtoLoad",
+      "value": 108847,
+      "observedAt": "2026-09-16T00",
+      "retrievedAt": "2026-09-15T23:50:53.782Z",
+      "confidence": 1,
+      "region": "PJM",
+      "unit": "megawatthours",
+      "observationId": "obs_88d6fd3e876b9d460d19de4d",
+      "provenance": {
+        "observationId": "obs_88d6fd3e876b9d460d19de4d",
+        "source": "eia",
+        "provider": "U.S. Energy Information Administration",
+        "dataClass": "primary",
+        "originUrl": "https://www.eia.gov/opendata/",
+        "observedAt": "2026-09-16T00",
+        "retrievedAt": "2026-09-15T23:50:53.782Z",
+        "confidence": 1,
+        "lineage": [
+          "obs_88d6fd3e876b9d460d19de4d"
+        ],
+        "transformation": "normalized-observation-v1"
+      }
+    },
+    {
+      "id": "obs_759ae204145f1e9b6c008571",
+      "source": "eia",
+      "type": "rtoLoad",
+      "value": 104102,
+      "observedAt": "2026-09-16T01",
+      "retrievedAt": "2026-09-15T23:50:53.782Z",
+      "confidence": 1,
+      "region": "PJM",
+      "unit": "megawatthours",
+      "observationId": "obs_759ae204145f1e9b6c008571",
+      "provenance": {
+        "observationId": "obs_759ae204145f1e9b6c008571",
+        "source": "eia",
+        "provider": "U.S. Energy Information Administration",
+        "dataClass": "primary",
+        "originUrl": "https://www.eia.gov/opendata/",
+        "observedAt": "2026-09-16T01",
+        "retrievedAt": "2026-09-15T23:50:53.782Z",
+        "confidence": 1,
+        "lineage": [
+          "obs_759ae204145f1e9b6c008571"
+        ],
+        "transformation": "normalized-observation-v1"
+      }
+    },
+    {
+      "id": "obs_5831d8060428a200037d0aa5",
+      "source": "eia",
+      "type": "rtoLoad",
+      "value": 97753,
+      "observedAt": "2026-09-16T02",
+      "retrievedAt": "2026-09-15T23:50:53.782Z",
+      "confidence": 1,
+      "region": "PJM",
+      "unit": "megawatthours",
+      "observationId": "obs_5831d8060428a200037d0aa5",
+      "provenance": {
+        "observationId": "obs_5831d8060428a200037d0aa5",
+        "source": "eia",
+        "provider": "U.S. Energy Information Administration",
+        "dataClass": "primary",
+        "originUrl": "https://www.eia.gov/opendata/",
+        "observedAt": "2026-09-16T02",
+        "retrievedAt": "2026-09-15T23:50:53.782Z",
+        "confidence": 1,
+        "lineage": [
+          "obs_5831d8060428a200037d0aa5"
+        ],
+        "transformation": "normalized-observation-v1"
+      }
+    },
+    {
+      "id": "obs_44560c5f545f4b3c621f7f5a",
+      "source": "eia",
+      "type": "rtoLoad",
+      "value": 91237,
+      "observedAt": "2026-09-16T03",
+      "retrievedAt": "2026-09-15T23:50:53.782Z",
+      "confidence": 1,
+      "region": "PJM",
+      "unit": "megawatthours",
+      "observationId": "obs_44560c5f545f4b3c621f7f5a",
+      "provenance": {
+        "observationId": "obs_44560c5f545f4b3c621f7f5a",
+        "source": "eia",
+        "provider": "U.S. Energy Information Administration",
+        "dataClass": "primary",
+        "originUrl": "https://www.eia.gov/opendata/",
+        "observedAt": "2026-09-16T03",
+        "retrievedAt": "2026-09-15T23:50:53.782Z",
+        "confidence": 1,
+        "lineage": [
+          "obs_44560c5f545f4b3c621f7f5a"
+        ],
+        "transformation": "normalized-observation-v1"
+      }
+    },
+    {
+      "id": "obs_c412aaa0fd7a3d45f67444fb",
+      "source": "eia",
+      "type": "rtoLoad",
+      "value": 86196,
+      "observedAt": "2026-09-16T04",
+      "retrievedAt": "2026-09-15T23:50:53.782Z",
+      "confidence": 1,
+      "region": "PJM",
+      "unit": "megawatthours",
+      "observationId": "obs_c412aaa0fd7a3d45f67444fb",
+      "provenance": {
+        "observationId": "obs_c412aaa0fd7a3d45f67444fb",
+        "source": "eia",
+        "provider": "U.S. Energy Information Administration",
+        "dataClass": "primary",
+        "originUrl": "https://www.eia.gov/opendata/",
+        "observedAt": "2026-09-16T04",
+        "retrievedAt": "2026-09-15T23:50:53.782Z",
+        "confidence": 1,
+        "lineage": [
+          "obs_c412aaa0fd7a3d45f67444fb"
+        ],
+        "transformation": "normalized-observation-v1"
+      }
+    }
+  ],
+  "scores": [
+    {
+      "ticker": "NBIS",
+      "name": "Nebius Group",
+      "methodologyVersion": "gridline-company-v1.0.0",
+      "asOf": "2026-09-15T23:50:59.799Z",
+      "calculatedAt": "2026-09-15T23:50:59.800Z",
+      "fundamentals": 83,
+      "emotion": 39,
+      "exposure": 92,
+      "gap": "Positive",
+      "confidence": 86,
+      "scores": {
+        "fundamentals": {
+          "value": 83,
+          "components": [
+            {
+              "key": "revenueQuality",
+              "label": "Revenue durability and growth quality",
+              "score": 84,
+              "weight": 0.25,
+              "contribution": 21
+            },
+            {
+              "key": "capexCommitment",
+              "label": "Capital commitment to AI/data-center capacity",
+              "score": 92,
+              "weight": 0.2,
+              "contribution": 18.400000000000002
+            },
+            {
+              "key": "balanceSheet",
+              "label": "Balance-sheet capacity to fund the buildout",
+              "score": 75,
+              "weight": 0.2,
+              "contribution": 15
+            },
+            {
+              "key": "execution",
+              "label": "Delivery and operating execution",
+              "score": 88,
+              "weight": 0.2,
+              "contribution": 17.6
+            },
+            {
+              "key": "powerConfidence",
+              "label": "Confidence that planned capacity can obtain power",
+              "score": 76,
+              "weight": 0.15,
+              "contribution": 11.4
+            }
+          ]
+        },
+        "marketEmotion": {
+          "value": 39,
+          "mode": "curated-fallback",
+          "components": [],
+          "lineage": []
+        },
+        "dcExposure": {
+          "value": 92,
+          "mode": "curated-structural-exposure-v1"
+        },
+        "expectationsGap": {
+          "label": "Positive",
+          "spread": 44
+        }
+      },
+      "lineage": [],
+      "provenance": {
+        "methodologyVersion": "gridline-company-v1.0.0",
+        "inputSummary": {
+          "observationCount": 0,
+          "sources": [],
+          "primarySourceRatio": 0,
+          "originUrlCoverage": 0
+        },
+        "lineage": [],
+        "pointInTimeCutoff": "2026-09-15T23:50:59.799Z"
+      }
+    },
+    {
+      "ticker": "CRWV",
+      "name": "CoreWeave",
+      "methodologyVersion": "gridline-company-v1.0.0",
+      "asOf": "2026-09-15T23:50:59.799Z",
+      "calculatedAt": "2026-09-15T23:50:59.800Z",
+      "fundamentals": 76,
+      "emotion": 66,
+      "exposure": 94,
+      "gap": "Elevated",
+      "confidence": 86,
+      "scores": {
+        "fundamentals": {
+          "value": 76,
+          "components": [
+            {
+              "key": "revenueQuality",
+              "label": "Revenue durability and growth quality",
+              "score": 78,
+              "weight": 0.25,
+              "contribution": 19.5
+            },
+            {
+              "key": "capexCommitment",
+              "label": "Capital commitment to AI/data-center capacity",
+              "score": 90,
+              "weight": 0.2,
+              "contribution": 18
+            },
+            {
+              "key": "balanceSheet",
+              "label": "Balance-sheet capacity to fund the buildout",
+              "score": 60,
+              "weight": 0.2,
+              "contribution": 12
+            },
+            {
+              "key": "execution",
+              "label": "Delivery and operating execution",
+              "score": 84,
+              "weight": 0.2,
+              "contribution": 16.8
+            },
+            {
+              "key": "powerConfidence",
+              "label": "Confidence that planned capacity can obtain power",
+              "score": 65,
+              "weight": 0.15,
+              "contribution": 9.75
+            }
+          ]
+        },
+        "marketEmotion": {
+          "value": 66,
+          "mode": "curated-fallback",
+          "components": [],
+          "lineage": []
+        },
+        "dcExposure": {
+          "value": 94,
+          "mode": "curated-structural-exposure-v1"
+        },
+        "expectationsGap": {
+          "label": "Elevated",
+          "spread": 10
+        }
+      },
+      "lineage": [],
+      "provenance": {
+        "methodologyVersion": "gridline-company-v1.0.0",
+        "inputSummary": {
+          "observationCount": 0,
+          "sources": [],
+          "primarySourceRatio": 0,
+          "originUrlCoverage": 0
+        },
+        "lineage": [],
+        "pointInTimeCutoff": "2026-09-15T23:50:59.799Z"
+      }
+    },
+    {
+      "ticker": "ORCL",
+      "name": "Oracle",
+      "methodologyVersion": "gridline-company-v1.0.0",
+      "asOf": "2026-09-15T23:50:59.799Z",
+      "calculatedAt": "2026-09-15T23:50:59.800Z",
+      "fundamentals": 71,
+      "emotion": 58,
+      "exposure": 68,
+      "gap": "Balanced",
+      "confidence": 86,
+      "scores": {
+        "fundamentals": {
+          "value": 71,
+          "components": [
+            {
+              "key": "revenueQuality",
+              "label": "Revenue durability and growth quality",
+              "score": 75,
+              "weight": 0.25,
+              "contribution": 18.75
+            },
+            {
+              "key": "capexCommitment",
+              "label": "Capital commitment to AI/data-center capacity",
+              "score": 82,
+              "weight": 0.2,
+              "contribution": 16.400000000000002
+            },
+            {
+              "key": "balanceSheet",
+              "label": "Balance-sheet capacity to fund the buildout",
+              "score": 86,
+              "weight": 0.2,
+              "contribution": 17.2
+            },
+            {
+              "key": "execution",
+              "label": "Delivery and operating execution",
+              "score": 62,
+              "weight": 0.2,
+              "contribution": 12.4
+            },
+            {
+              "key": "powerConfidence",
+              "label": "Confidence that planned capacity can obtain power",
+              "score": 44,
+              "weight": 0.15,
+              "contribution": 6.6
+            }
+          ]
+        },
+        "marketEmotion": {
+          "value": 58,
+          "mode": "curated-fallback",
+          "components": [],
+          "lineage": []
+        },
+        "dcExposure": {
+          "value": 68,
+          "mode": "curated-structural-exposure-v1"
+        },
+        "expectationsGap": {
+          "label": "Balanced",
+          "spread": 13
+        }
+      },
+      "lineage": [],
+      "provenance": {
+        "methodologyVersion": "gridline-company-v1.0.0",
+        "inputSummary": {
+          "observationCount": 0,
+          "sources": [],
+          "primarySourceRatio": 0,
+          "originUrlCoverage": 0
+        },
+        "lineage": [],
+        "pointInTimeCutoff": "2026-09-15T23:50:59.799Z"
+      }
+    },
+    {
+      "ticker": "AVGO",
+      "name": "Broadcom",
+      "methodologyVersion": "gridline-company-v1.0.0",
+      "asOf": "2026-09-15T23:50:59.799Z",
+      "calculatedAt": "2026-09-15T23:50:59.800Z",
+      "fundamentals": 81,
+      "emotion": 72,
+      "exposure": 62,
+      "gap": "Elevated",
+      "confidence": 86,
+      "scores": {
+        "fundamentals": {
+          "value": 81,
+          "components": [
+            {
+              "key": "revenueQuality",
+              "label": "Revenue durability and growth quality",
+              "score": 92,
+              "weight": 0.25,
+              "contribution": 23
+            },
+            {
+              "key": "capexCommitment",
+              "label": "Capital commitment to AI/data-center capacity",
+              "score": 78,
+              "weight": 0.2,
+              "contribution": 15.600000000000001
+            },
+            {
+              "key": "balanceSheet",
+              "label": "Balance-sheet capacity to fund the buildout",
+              "score": 88,
+              "weight": 0.2,
+              "contribution": 17.6
+            },
+            {
+              "key": "execution",
+              "label": "Delivery and operating execution",
+              "score": 80,
+              "weight": 0.2,
+              "contribution": 16
+            },
+            {
+              "key": "powerConfidence",
+              "label": "Confidence that planned capacity can obtain power",
+              "score": 58,
+              "weight": 0.15,
+              "contribution": 8.7
+            }
+          ]
+        },
+        "marketEmotion": {
+          "value": 72,
+          "mode": "curated-fallback",
+          "components": [],
+          "lineage": []
+        },
+        "dcExposure": {
+          "value": 62,
+          "mode": "curated-structural-exposure-v1"
+        },
+        "expectationsGap": {
+          "label": "Elevated",
+          "spread": 9
+        }
+      },
+      "lineage": [],
+      "provenance": {
+        "methodologyVersion": "gridline-company-v1.0.0",
+        "inputSummary": {
+          "observationCount": 0,
+          "sources": [],
+          "primarySourceRatio": 0,
+          "originUrlCoverage": 0
+        },
+        "lineage": [],
+        "pointInTimeCutoff": "2026-09-15T23:50:59.799Z"
+      }
+    }
+  ],
+  "methodologies": {
+    "companyScore": "gridline-company-v1.0.0"
+  },
+  "companyHistory": [
+    {
+      "ticker": "AVGO",
+      "observedAt": "2026-09-15T23:50:59.799Z",
+      "emotion": 72,
+      "fundamentals": 81,
+      "exposure": 62,
+      "gap": "Elevated",
+      "confidence": 86
+    },
+    {
+      "ticker": "CRWV",
+      "observedAt": "2026-09-15T23:50:59.799Z",
+      "emotion": 66,
+      "fundamentals": 76,
+      "exposure": 94,
+      "gap": "Elevated",
+      "confidence": 86
+    },
+    {
+      "ticker": "NBIS",
+      "observedAt": "2026-09-15T23:50:59.799Z",
+      "emotion": 39,
+      "fundamentals": 83,
+      "exposure": 92,
+      "gap": "Positive",
+      "confidence": 86
+    },
+    {
+      "ticker": "ORCL",
+      "observedAt": "2026-09-15T23:50:59.799Z",
+      "emotion": 58,
+      "fundamentals": 71,
+      "exposure": 68,
+      "gap": "Balanced",
+      "confidence": 86
+    }
+  ],
+  "note": "Static dashboard snapshot. External observations carry provenance, derived scores carry methodology versions and lineage, and historical scores are stored point-in-time to avoid look-ahead bias. Not investment advice."
 }
