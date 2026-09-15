@@ -14,10 +14,14 @@
   },
   "scripts": {
     "start": "react-scripts start",
+    "api": "node server/index.js",
+    "ingest": "node server/cli.js ingest",
+    "test:api": "node --test server/**/*.test.js",
     "build": "react-scripts build",
     "test": "react-scripts test",
     "eject": "react-scripts eject"
   },
+  "proxy": "http://localhost:8787",
   "overrides": {
     "loader-utils": "^2.0.4",
     "serialize-javascript": "^7.0.0",
