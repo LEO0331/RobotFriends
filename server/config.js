@@ -1,4 +1,14 @@
 const path = require('path');
+const fs = require('fs');
+
+for (const filename of ['.env.local', '.env']) {
+  const file = path.resolve(__dirname, '..', filename);
+  if (!fs.existsSync(file)) continue;
+  fs.readFileSync(file, 'utf8').split(/\r?\n/).forEach(line => {
+    const match = line.match(/^\s*([A-Z0-9_]+)\s*=\s*(.*)\s*$/);
+    if (match && !process.env[match[1]]) process.env[match[1]] = match[2].replace(/^['"]|['"]$/g, '');
+  });
+}
 
 const root = path.resolve(__dirname, '..');
 const parseJson = (value, fallback) => {
@@ -16,4 +26,6 @@ module.exports = {
   companyIrFeeds: parseJson(process.env.COMPANY_IR_FEEDS, {}),
   priceBaseUrl: process.env.PRICE_BASE_URL || 'https://stooq.com/q/d/l/',
   cacheMinutes: Number(process.env.CACHE_MINUTES || 60),
+  scheduleEnabled: process.env.SCHEDULE_ENABLED !== 'false',
+  scheduleSources: (process.env.SCHEDULE_SOURCES || 'sec,prices,company-ir,eia,pjm,ferc').split(',').map(value => value.trim()).filter(Boolean),
 };

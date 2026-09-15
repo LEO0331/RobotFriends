@@ -21,3 +21,9 @@ The service writes immutable raw responses to `data/bronze`, normalized source-r
 - **Prices:** the default Stooq CSV adapter is convenient for local development but should be replaced by a licensed market-data provider for production use.
 
 No missing response is converted to zero. A failed adapter is reported as `degraded` while cached records remain available.
+
+## Post-close schedule
+
+With `SCHEDULE_ENABLED=true` (the default), the local API checks once per minute and triggers one refresh at or after **4:15 PM America/New_York**, Monday through Friday. It runs once per trading weekday; holidays are harmless because providers simply retain the latest valid observation. The source list is configurable with `SCHEDULE_SOURCES`.
+
+For a demo, this is deliberately a low-frequency, low-connection model: one compact request sequence after close rather than continuous polling. SEC is free/public with a declared User-Agent; EIA, PJM and FERC offer free keys/accounts; official IR feeds are configured explicitly; Stooq is a free convenience price feed. Replace the price adapter with a licensed provider before commercial use.

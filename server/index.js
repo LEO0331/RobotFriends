@@ -2,6 +2,7 @@ const http = require('http');
 const { URL } = require('url');
 const config = require('./config');
 const { createService } = require('./service');
+const { startScheduler } = require('./scheduler');
 
 const service = createService(config);
 function send(response, status, payload) { response.writeHead(status, { 'Content-Type': 'application/json; charset=utf-8', 'Access-Control-Allow-Origin': '*', 'Cache-Control': 'no-store' }); response.end(JSON.stringify(payload)); }
@@ -16,4 +17,7 @@ async function handler(request, response) {
     return send(response, 404, { error: 'Not found' });
   } catch (error) { return send(response, 500, { error: error.message }); }
 }
-http.createServer(handler).listen(config.port, () => console.log(`Gridline API listening on http://localhost:${config.port}`));
+http.createServer(handler).listen(config.port, () => {
+  console.log(`Gridline API listening on http://localhost:${config.port}`);
+  if (config.scheduleEnabled) startScheduler(service, config);
+});

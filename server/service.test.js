@@ -5,6 +5,7 @@ const os = require('os');
 const path = require('path');
 const { createStore } = require('./store');
 const { createService } = require('./service');
+const { dueAfterClose } = require('./scheduler');
 const { parseCsv } = require('./http');
 
 test('CSV adapter returns dated price rows', () => {
@@ -19,4 +20,9 @@ test('store replaces only observations for the same source', async () => {
 test('service reports supported adapters without configuration', () => {
   const service = createService({ dataDir: path.join(os.tmpdir(), 'gridline-source-list'), cacheMinutes: 1 });
   assert.deepEqual(service.sources(), ['sec', 'eia', 'pjm', 'ferc', 'company-ir', 'prices']);
+});
+test('post-close scheduler excludes weekends and runs after 4:15pm ET', () => {
+  assert.equal(dueAfterClose(new Date('2026-09-14T20:14:00Z')).due, false);
+  assert.equal(dueAfterClose(new Date('2026-09-14T20:15:00Z')).due, true);
+  assert.equal(dueAfterClose(new Date('2026-09-13T20:16:00Z')).due, false);
 });
