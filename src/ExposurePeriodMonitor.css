@@ -1,0 +1,97 @@
+.period-aware-exposure > .company-title,
+.period-aware-exposure > .companies,
+.period-aware-exposure > .bottom > .thesis {
+  display: none !important;
+}
+
+.period-aware-exposure > .bottom {
+  grid-template-columns: 1fr !important;
+  margin-top: 12px;
+}
+
+.exposure-period-host {
+  display: block;
+}
+
+.period-aware-monitor .period-company-title {
+  margin-top: 50px;
+}
+
+.period-coverage {
+  margin: 6px 0 0;
+  color: #72849a;
+  font: 9px 'DM Mono';
+  line-height: 1.5;
+  max-width: 680px;
+}
+
+.period-companies .company-top > span {
+  display: grid;
+  justify-items: end;
+  gap: 2px;
+}
+
+.period-companies .company-top > span small {
+  color: #6f8197;
+  font: 8px 'DM Mono';
+}
+
+.period-unavailable {
+  color: #7b8a9d !important;
+}
+
+.period-delta {
+  display: block;
+  margin-top: 3px;
+  color: #72849a;
+  font: 8px 'DM Mono';
+  font-weight: 400;
+}
+
+.period-selected-setup {
+  margin-top: 36px;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+}
+
+.period-thesis {
+  padding: 24px;
+}
+
+.period-thesis .confidence {
+  color: var(--green);
+  background: rgba(85, 215, 170, .12);
+  padding: 6px 8px;
+  font: 9px 'DM Mono';
+}
+
+.period-window-meta {
+  margin-top: 16px;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px 18px;
+  color: #73859a;
+  font: 8px 'DM Mono';
+}
+
+.period-window-meta b {
+  margin-left: 5px;
+  color: #b9c7d6;
+}
+
+.period-thesis .ring {
+  position: relative;
+  flex: 0 0 auto;
+}
+
+@media (max-width: 700px) {
+  .period-aware-monitor .period-company-title {
+    align-items: flex-start;
+    gap: 14px;
+  }
+
+  .period-window-meta {
+    display: grid;
+    gap: 7px;
+  }
+}

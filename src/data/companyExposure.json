@@ -1,0 +1,50 @@
+[
+  {
+    "ticker": "NBIS",
+    "name": "Nebius Group",
+    "price": 34.82,
+    "emotion": 39,
+    "fundamentals": 83,
+    "exposure": 92,
+    "gap": "Positive",
+    "color": "#ffb45d",
+    "irUrl": "https://nebius.com/investor-hub",
+    "confidence": 86
+  },
+  {
+    "ticker": "CRWV",
+    "name": "CoreWeave",
+    "price": 71.44,
+    "emotion": 66,
+    "fundamentals": 76,
+    "exposure": 94,
+    "gap": "Elevated",
+    "color": "#6fa9ff",
+    "irUrl": "https://investors.coreweave.com/overview/default.aspx",
+    "confidence": 86
+  },
+  {
+    "ticker": "ORCL",
+    "name": "Oracle",
+    "price": 186.25,
+    "emotion": 58,
+    "fundamentals": 71,
+    "exposure": 68,
+    "gap": "Balanced",
+    "color": "#b787ff",
+    "irUrl": "https://investor.oracle.com/",
+    "confidence": 86
+  },
+  {
+    "ticker": "AVGO",
+    "name": "Broadcom",
+    "price": 294.61,
+    "emotion": 72,
+    "fundamentals": 81,
+    "exposure": 62,
+    "gap": "Elevated",
+    "color": "#5de0bd",
+    "irUrl": "https://investors.broadcom.com/",
+    "confidence": 86
+  }
+]
