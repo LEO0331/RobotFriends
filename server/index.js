@@ -3,8 +3,17 @@ const { URL } = require('url');
 const config = require('./config');
 const { createService } = require('./service');
 const { startScheduler } = require('./scheduler');
+const { runScenario } = require('./scenario-engine');
 
 const service = createService(config);
+async function readJsonBody(request) {
+  const chunks = [];
+  for await (const chunk of request) chunks.push(chunk);
+  if (!chunks.length) return {};
+  const raw = Buffer.concat(chunks).toString('utf8');
+  if (raw.length > 64 * 1024) throw new Error('Request body too large');
+  return JSON.parse(raw);
+}
 function send(response, status, payload) { response.writeHead(status, { 'Content-Type': 'application/json; charset=utf-8', 'Access-Control-Allow-Origin': '*', 'Cache-Control': 'no-store' }); response.end(JSON.stringify(payload)); }
 async function handler(request, response) {
   if (request.method === 'OPTIONS') { response.writeHead(204, { 'Access-Control-Allow-Origin': '*', 'Access-Control-Allow-Methods': 'GET,POST,OPTIONS', 'Access-Control-Allow-Headers': 'Content-Type' }); return response.end(); }
@@ -25,6 +34,13 @@ async function handler(request, response) {
       const ticker = url.searchParams.get('ticker');
       return send(response, 200, await service.store.scoreSnapshots({ ticker: ticker?.toUpperCase(), since: url.searchParams.get('since'), until: url.searchParams.get('until') }));
     }
+    if (request.method === 'POST' && url.pathname === '/api/scenario') {
+      const input = await readJsonBody(request);
+      const output = runScenario(input);
+      const run = await service.store.saveScenarioRun(input, output, output.methodologyVersion);
+      return send(response, 200, { run, ...output });
+    }
+    if (request.method === 'GET' && url.pathname === '/api/scenario/runs') return send(response, 200, await service.store.scenarioRuns(Number(url.searchParams.get('limit') || 20)));
     if (request.method === 'POST' && url.pathname === '/api/ingest') { if (!source) return send(response, 400, { error: 'source query parameter is required', supportedSources: service.sources() }); return send(response, 200, await service.ingest(source, url.searchParams.get('force') === 'true')); }
     if (request.method === 'POST' && url.pathname === '/api/ingest/all') { const outcomes = await Promise.all(service.sources().map(item => service.ingest(item, url.searchParams.get('force') === 'true'))); return send(response, 200, { outcomes }); }
     return send(response, 404, { error: 'Not found' });
