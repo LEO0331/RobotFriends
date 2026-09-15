@@ -4,6 +4,7 @@ const config = require('./config');
 const { createService } = require('./service');
 const { startScheduler } = require('./scheduler');
 const { runScenario } = require('./scenario-engine');
+const { runBacktest } = require('./backtest');
 
 const service = createService(config);
 async function readJsonBody(request) {
@@ -41,6 +42,17 @@ async function handler(request, response) {
       return send(response, 200, { run, ...output });
     }
     if (request.method === 'GET' && url.pathname === '/api/scenario/runs') return send(response, 200, await service.store.scenarioRuns(Number(url.searchParams.get('limit') || 20)));
+    if (request.method === 'POST' && url.pathname === '/api/backtest') {
+      const input = await readJsonBody(request);
+      const ticker = String(input.ticker || '').toUpperCase();
+      if (!ticker) return send(response, 400, { error: 'ticker is required' });
+      const scores = await service.store.scoreSnapshots({ ticker });
+      const observations = await service.observations({ ticker, type: 'close' });
+      const output = runBacktest({ ...input, ticker }, scores, observations);
+      const run = await service.store.saveBacktestRun({ ...input, ticker }, output, output.backtestVersion);
+      return send(response, 200, { run, ...output });
+    }
+    if (request.method === 'GET' && url.pathname === '/api/backtest/runs') return send(response, 200, await service.store.backtestRuns(Number(url.searchParams.get('limit') || 20)));
     if (request.method === 'POST' && url.pathname === '/api/ingest') { if (!source) return send(response, 400, { error: 'source query parameter is required', supportedSources: service.sources() }); return send(response, 200, await service.ingest(source, url.searchParams.get('force') === 'true')); }
     if (request.method === 'POST' && url.pathname === '/api/ingest/all') { const outcomes = await Promise.all(service.sources().map(item => service.ingest(item, url.searchParams.get('force') === 'true'))); return send(response, 200, { outcomes }); }
     return send(response, 404, { error: 'Not found' });

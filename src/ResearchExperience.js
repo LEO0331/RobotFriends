@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import RegimeExperience from './RegimeExperience';
 import ScenarioLab from './ScenarioLab';
+import BacktestLab from './BacktestLab';
 import './ResearchExperience.css';
 
 const routeFromHash = () => (window.location.hash.replace(/^#/, '').split('?')[0] || 'overview').toLowerCase();
@@ -17,5 +18,6 @@ export default function ResearchExperience() {
     return () => { window.removeEventListener('hashchange', sync); window.removeEventListener('popstate', sync); window.history.pushState = originalPushState; };
   }, []);
   if (route === 'scenario') return <ScenarioLab onBack={() => go('regime')} />;
-  return <><RegimeExperience /><div className="research-dock"><span>RESEARCH LAB</span><button onClick={() => go('scenario')}>Scenario analysis →</button></div></>;
+  if (route === 'backtest') return <BacktestLab onBack={() => go('regime')} />;
+  return <><RegimeExperience /><div className="research-dock"><span>RESEARCH LAB</span><button onClick={() => go('scenario')}>Scenario analysis →</button><button onClick={() => go('backtest')}>Point-in-time backtest →</button></div></>;
 }
