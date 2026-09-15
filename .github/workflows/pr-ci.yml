@@ -34,7 +34,6 @@ jobs:
   dependency-audit:
     name: Dependency audit (advisory)
     runs-on: ubuntu-latest
-    continue-on-error: true
     steps:
       - uses: actions/checkout@v6
       - uses: actions/setup-node@v6
@@ -42,4 +41,6 @@ jobs:
           node-version: 22
           cache: npm
       - run: npm ci
-      - run: npm audit --omit=dev --audit-level=critical
+      - name: Report critical dependency findings without blocking this legacy CRA migration
+        continue-on-error: true
+        run: npm audit --omit=dev --audit-level=critical

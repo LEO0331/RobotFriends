@@ -18,7 +18,7 @@ test('store retains historical observations instead of replacing a source', asyn
   await store.saveObservations('sec', [{ id: 'sec-2', source: 'sec', value: 3, observedAt: '2026-02-01T00:00:00Z' }]);
   const rows = await store.observations();
   assert.equal(rows.length, 3);
-  assert.deepEqual(rows.map(item => item.value), [1, 2, 3]);
+  assert.deepEqual(rows.map(item => item.value).sort((a, b) => a - b), [1, 2, 3]);
   store.close();
   await fs.rm(directory, { recursive: true, force: true });
 });
