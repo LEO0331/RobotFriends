@@ -1,53 +1,34 @@
-import React, { Component } from 'react';
-import Cardlist from '../Components/Cardlist';
-import SearchBar from '../Components/SearchBar';
+import React, { useMemo, useState } from 'react';
 import './App.css';
-import Scroll from '../Components/Scroll';
-import ErrorBoundry from '../Components/ErrorBoundry';
-class App extends Component {
-  constructor() {
-    super();
-    this.state = {
-      robots: [],
-      searchfield: ''
-    };
-  }
 
-  componentDidMount() {
-    fetch('https://jsonplaceholder.typicode.com/users')
-      .then((response) => response.json())
-      .then((user) => this.setState({ robots: user }));
-  }
-
-  searchChange = (event) => {
-    this.setState({ searchfield: event.target.value });
-  };
-
-  render() {
-    const { robots, searchfield } = this.state;
-    const filterRobots = robots.filter((robot) =>
-      robot.name.toLowerCase().includes(searchfield.toLowerCase())
-    );
-    const skeletonCards = Array.from({ length: 9 }, (_, index) => (
-      <div key={`skeleton-${index}`} className='card card-skeleton' aria-hidden='true'>
-        <div className='avatar avatar-skeleton' />
-        <div className='text-skeleton title-skeleton' />
-        <div className='text-skeleton line-skeleton' />
-      </div>
-    ));
-
-    return (
-      <div className='centered'>
-        <h1 className='title'>RobotFriends</h1>
-        <SearchBar searchChange={this.searchChange} />
-        <Scroll>
-          <ErrorBoundry>
-            {robots.length ? <Cardlist robots={filterRobots} /> : <div>{skeletonCards}</div>}
-          </ErrorBoundry>
-        </Scroll>
-      </div>
-    );
-  }
+const companies = [
+  { ticker: 'NBIS', name: 'Nebius Group', price: '34.82', change: '-2.8%', emotion: 39, fundamentals: 83, exposure: 92, gap: 'Positive', color: '#ffb45d' },
+  { ticker: 'CRWV', name: 'CoreWeave', price: '71.44', change: '+1.6%', emotion: 66, fundamentals: 76, exposure: 94, gap: 'Elevated', color: '#6fa9ff' },
+  { ticker: 'ORCL', name: 'Oracle', price: '186.25', change: '+0.4%', emotion: 58, fundamentals: 71, exposure: 68, gap: 'Balanced', color: '#b787ff' },
+  { ticker: 'AVGO', name: 'Broadcom', price: '294.61', change: '+1.1%', emotion: 72, fundamentals: 81, exposure: 62, gap: 'Elevated', color: '#5de0bd' },
+];
+const evidence = [
+  { type: 'POWER', title: 'PJM load forecast revised higher through 2030', impact: '+', detail: 'Grid readiness · Mid-Atlantic', source: 'PJM Load Forecast', time: '2h ago' },
+  { type: 'PERMIT', title: '310 MW campus receives zoning approval in Virginia', impact: '+', detail: 'Project velocity · Northern Virginia', source: 'County planning record', time: '6h ago' },
+  { type: 'CONSTRAINT', title: '800 MW delivery schedule moves beyond 2028', impact: '−', detail: 'Interconnection delay · Texas', source: 'Utility filing', time: '1d ago' },
+  { type: 'CAPEX', title: 'OCI capacity investment guidance increased', impact: '+', detail: 'Corporate investment · Oracle', source: 'Company earnings release', time: '2d ago' },
+];
+function Ring({ value, label, tone = 'blue' }) { return <div className={`ring ${tone}`} style={{ '--score': `${value * 3.6}deg` }}><div><strong>{value}</strong><span>/100</span><small>{label}</small></div></div>; }
+function App() {
+  const [period, setPeriod] = useState('30D'); const [ticker, setTicker] = useState('NBIS'); const [filter, setFilter] = useState('All evidence'); const [weights, setWeights] = useState(false); const [weight, setWeight] = useState(100);
+  const active = companies.find(c => c.ticker === ticker); const filtered = useMemo(() => filter === 'All evidence' ? evidence : evidence.filter(e => e.type === filter), [filter]); const expansion = Math.round(76 * weight / 100);
+  return <main className="shell">
+    <header><div className="brand"><i>◫</i><div><b>GRIDLINE</b><small>INFRASTRUCTURE INTELLIGENCE</small></div></div><nav><button className="current">Overview</button><button>Infrastructure</button><button>Events</button><button>Methodology</button></nav><div className="head-actions"><span className="live">Live snapshot</span><button className="key">⌘ K</button><button className="avatar">MK</button></div></header>
+    <section className="hero"><div><p className="eyebrow">MARKET INTELLIGENCE / US DATA CENTER BUILDOUT</p><h1>Data center buildout,<br/><em>made inspectable.</em></h1><p className="copy">Physical capacity, power delivery, regulation and market expectations—connected to the evidence behind every signal.</p></div><div className="asof"><span>AS OF</span><b>SEP 15, 2026 · 09:42 ET</b><small>12 sources refreshed in the last 24 hours</small></div></section>
+    <section className="regime"><div className="regime-name"><span className="pulse">●</span><div><p className="eyebrow">DC BUILDOUT REGIME</p><h2>EXPANDING <em>— BUT CONSTRAINED</em></h2><p>Demand remains durable; power delivery is increasingly the limiting variable.</p></div></div><div className="regime-scores"><div><Ring value={expansion} label="EXPANSION" tone="amber"/><p>+5 <small>vs 30D</small></p></div><div><Ring value={58} label="PUSHBACK" tone="coral"/><p>+14 <small>vs 30D</small></p></div></div><div className="regime-buttons"><button onClick={() => setWeights(!weights)}>⚙ Methodology weights</button><button className="primary">Explore the regime →</button></div></section>
+    {weights && <section className="weights"><div><b>Capacity momentum weight</b><small>Adjusts the illustrative expansion score locally.</small></div><input aria-label="Capacity momentum weight" type="range" min="40" max="130" value={weight} onChange={e => setWeight(+e.target.value)}/><output>{weight}%</output><button onClick={() => setWeight(100)}>Reset defaults</button></section>}
+    <Section title="What changed the picture" label="REGIME DRIVERS" action="View all events →"/><section className="drivers">{[['↗','CAPACITY MOMENTUM','+1.2 GW','New power capacity secured','amber'],['⌁','PROJECT VELOCITY','+310 MW','Approved this week','blue'],['!','GRID FRICTION','−800 MW','Delivery delayed','red'],['◌','REGULATORY PRESSURE','2','New restrictions proposed','purple']].map(x=><article key={x[1]}><span className={`driver-icon ${x[4]}`}>{x[0]}</span><p className="label">{x[1]}</p><strong>{x[2]}</strong><small>{x[3]}</small><div className={`bars ${x[4]}`}>{[22,40,32,65,48,82,100].map((h,i)=><i key={i} style={{height:`${h}%`}}/>)}</div></article>)}</section>
+    <section className="section company-title"><div><p className="eyebrow">EXPOSURE MONITOR</p><h3>Where the regime matters</h3></div><div className="segmented">{['30D','90D','1Y'].map(p=><button key={p} onClick={()=>setPeriod(p)} className={period===p?'selected':''}>{p}</button>)}</div></section>
+    <section className="companies">{companies.map(c=><button className={`company ${ticker===c.ticker?'selected-card':''}`} onClick={()=>setTicker(c.ticker)} key={c.ticker}><div className="company-top"><div><b>{c.ticker}</b><small>{c.name}</small></div><span className={c.change[0]==='-'?'negative':'positive'}>{c.change}</span></div><strong className="price">${c.price}</strong><div className="stat"><span>MARKET EMOTION <b>{c.emotion}</b></span><span>FUNDAMENTALS <b>{c.fundamentals}</b></span></div><div className="exposure"><span>DC EXPOSURE</span><div><i style={{width:`${c.exposure}%`,background:c.color}}/></div><b>{c.exposure}</b></div><div className="gap"><span>EXPECTATIONS GAP</span><b>{c.gap} ↗</b></div></button>)}</section>
+    <section className="bottom"><article className="thesis"><PanelTitle label="SELECTED SETUP" title={`${active.ticker} / ${period} view`} extra="● 86% DATA CONFIDENCE"/><div className="thesis-content"><Ring value={active.fundamentals} label="FUNDAMENTALS"/><div><h4>Potential positive dislocation</h4><p>Direct AI capacity exposure remains high while market emotion has reset. The key dependency is verified power delivery against planned capacity.</p><button className="text">Inspect {active.ticker} evidence →</button></div></div><div className="signals"><span>PHYSICAL SIGNAL <b>Improving</b></span><span>MARKET SIGNAL <b className="negative">Cautious</b></span><span>VALUATION <b>55th percentile</b></span></div></article><article className="ledger"><div className="panel-title"><div><p className="eyebrow">EVIDENCE LEDGER</p><h3>Raw signals, not sentiment</h3></div><select value={filter} onChange={e=>setFilter(e.target.value)}><option>All evidence</option><option>POWER</option><option>PERMIT</option><option>CONSTRAINT</option><option>CAPEX</option></select></div><div>{filtered.map(e=><div className="event" key={e.title}><span className={`impact ${e.impact==='+'?'up':'down'}`}>{e.impact}</span><div><p><b>{e.type}</b> · {e.time}</p><h4>{e.title}</h4><small>{e.detail} · {e.source}</small></div><span className="quality">PRIMARY</span></div>)}</div></article></section>
+    <footer><span>DATA IS POINT-IN-TIME · SCORES ARE DETERMINISTIC · NOT INVESTMENT ADVICE</span><span>Sources: PJM · EIA · FERC · SEC EDGAR · Company IR</span></footer>
+  </main>;
 }
-
+function Section({label,title,action}) { return <section className="section"><div><p className="eyebrow">{label}</p><h3>{title}</h3></div><button className="text">{action}</button></section>; }
+function PanelTitle({label,title,extra}) { return <div className="panel-title"><div><p className="eyebrow">{label}</p><h3>{title}</h3></div><span className="confidence">{extra}</span></div>; }
 export default App;
