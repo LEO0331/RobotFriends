@@ -1,0 +1,14 @@
+/* Replaces the legacy schematic map with the approved data-center pipeline visual. */
+.usa-map {
+  height: auto !important;
+  aspect-ratio: 1100 / 404;
+  margin: 18px 0 0;
+  border: 0 !important;
+  background: #071522 url('./images/us-data-center-pipeline.webp') center / contain no-repeat !important;
+}
+
+.usa-map::before,
+.usa-map > .map-dot,
+.usa-map > b {
+  display: none !important;
+}
