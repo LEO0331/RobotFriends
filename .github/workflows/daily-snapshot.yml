@@ -8,6 +8,9 @@ on:
 
 permissions:
   contents: write
+  # Snapshot commits are created with GITHUB_TOKEN. Those pushes intentionally do
+  # not trigger other workflows, so this workflow explicitly dispatches Pages.
+  actions: write
 
 concurrency:
   group: daily-snapshot-refresh
@@ -37,9 +40,23 @@ jobs:
       - name: Validate public-demo snapshot invariants
         run: npm run demo:check
       - name: Commit refreshed static snapshot when changed
+        id: publish-snapshot
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
           git add public/data/dashboard-snapshot.json
-          git diff --cached --quiet || git commit -m "Refresh post-close dashboard snapshot"
-          git push origin HEAD:main
+          if git diff --cached --quiet; then
+            echo "changed=false" >> "$GITHUB_OUTPUT"
+            echo "Snapshot is unchanged; no Pages deployment is required."
+          else
+            git commit -m "Refresh post-close dashboard snapshot"
+            git push origin HEAD:main
+            echo "changed=true" >> "$GITHUB_OUTPUT"
+          fi
+      - name: Dispatch Pages deployment for refreshed snapshot
+        if: steps.publish-snapshot.outputs.changed == 'true'
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          gh workflow run deploy-pages.yml --ref main
+          echo "Dispatched Deploy to GitHub Pages for the refreshed snapshot commit."

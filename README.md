@@ -74,7 +74,8 @@ Provider configuration is documented in [.env.example](.env.example) and the [in
 
 GitHub Pages profile:
 provider refresh → schema-v4 snapshot → demo readiness gate
-                → commit to main → Pages build/deploy → Lighthouse CI
+                → commit to main → explicit Pages dispatch
+                → Pages build/deploy → Lighthouse CI
 ```
 
 Key modules:
@@ -166,7 +167,7 @@ npm run verify:demo
 
 `Refresh daily dashboard snapshot` runs at **22:00 UTC on weekdays** and supports manual dispatch. It retries sources, preserves last-known-good data for degraded providers, generates schemaVersion 4 history (`scores`, `companyHistory`, `backtestCoverage`, `demoReadiness`), and then runs `npm run demo:check`.
 
-Only a snapshot that passes the demo-critical gate is committed to `main`. That push triggers the separate `Deploy to GitHub Pages` workflow, which performs a Node 22 lockfile install, production build, Pages deployment and Lighthouse CI.
+Only a snapshot that passes the demo-critical gate is committed to `main`. The refresh workflow then explicitly dispatches `Deploy to GitHub Pages`, which performs a Node 22 lockfile install, production build, Pages deployment and Lighthouse CI. This explicit dispatch is necessary because a push made by a workflow using the repository `GITHUB_TOKEN` does not itself start another push-triggered workflow.
 
 The gate requires, among other things, usable recent price history for all four tracked tickers and at least one labelled historical reconstruction. Optional degraded providers remain visible as warnings rather than being silently hidden.
 
