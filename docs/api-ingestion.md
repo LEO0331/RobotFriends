@@ -1,28 +1,59 @@
 # Ingestion API
 
-Run the API in a separate terminal with `npm run api`. It listens on `http://localhost:8787` by default. Copy `.env.example` to a local environment file or export its values before running production ingestion.
+Run the API with `npm run api`, or run the API and React UI together with `npm run dev`. The API listens on `http://localhost:8787` by default. Copy `.env.example` to a local environment file or export its values before running provider ingestion.
 
-The API binds to `127.0.0.1` by default. If it is deliberately exposed on a network, set `HOST`, restrict `ALLOWED_ORIGINS`, and configure a long random `API_WRITE_TOKEN`. All POST endpoints require `Authorization: Bearer <token>` outside loopback and are rate limited. Do not place this token in the static React build. Public observation and score queries are paginated and bounded.
+The API binds to `127.0.0.1` by default. If it is deliberately exposed on a network, set `HOST`, restrict `ALLOWED_ORIGINS`, and configure a long random `API_WRITE_TOKEN`. All state-changing POST endpoints require `Authorization: Bearer <token>` outside loopback and are rate limited. Do not place this token in the static React build. Public observation and score queries are paginated and bounded.
 
 | Endpoint | Purpose |
 |---|---|
 | `GET /api/health` | Per-source status, latest success and degradation reason. |
-| `GET /api/observations?ticker=ORCL&type=close` | Normalized silver observations. |
-| `POST /api/ingest?source=sec` | Refresh one adapter. Sources: `sec`, `eia`, `pjm`, `ferc`, `company-ir`, `prices`. |
+| `GET /api/observations?ticker=ORCL&type=close` | Normalized historical observations. |
+| `GET /api/provenance?observationId=...` | Provenance for one normalized observation. |
+| `GET /api/scores?ticker=NBIS` | Versioned score snapshots. |
+| `POST /api/ingest?source=prices` | Refresh one adapter. Sources: `sec`, `eia`, `pjm`, `ferc`, `company-ir`, `prices`. |
 | `POST /api/ingest/all` | Refresh all adapters independently; unavailable credentials degrade only that source. |
+| `POST /api/scenario` | Run/persist one scenario analysis. |
+| `POST /api/backtest` | Run/persist one point-in-time backtest. |
 
-The service writes immutable raw responses to `data/bronze`, normalized source-replaceable records to `data/silver`, and source health records to `data/gold`. `data/` is intentionally ignored by Git.
+## Storage model
+
+Gridline keeps two deployment profiles:
+
+- **API / production-style profile:** raw responses are archived under `data/bronze`; normalized observations, source health, versioned score snapshots, scenario runs and backtest runs are persisted in SQLite/WAL. Observation identity is deterministic, so ingesting the same source row again is idempotent and does not erase prior history.
+- **GitHub Pages demo profile:** the scheduled exporter writes `public/data/dashboard-snapshot.json`. Successful sources replace their prior static-source records; degraded sources retain last-known-good observations.
+
+`data/` is intentionally ignored by Git. The committed static snapshot is a portable public-demo artifact, not the API database.
 
 ## Provider requirements
 
-- **SEC EDGAR:** public API, server-side only. `SEC_USER_AGENT` is mandatory and must identify the caller. The app respects the SEC's 10 request/second guidance by using a small sequential issuer loop.
+- **SEC EDGAR:** public API, server-side only. `SEC_USER_AGENT` is mandatory and must identify the caller. Filing availability time must be preserved separately from the filing period.
 - **EIA:** API key required. The starter connector reads PJM hourly RTO regional data.
 - **PJM Data Miner 2:** a PJM account/API subscription key is required. The starter connector reads `gen_by_fuel`; comply with PJM terms before redistribution.
-- **Data.FERC.gov:** API key required. The starter connector validates and snapshots the dataset catalog; choose and configure a specific FERC dataset before using it as a production indicator.
-- **Company IR:** set only official RSS/Atom feeds in `COMPANY_IR_FEEDS`. The raw document remains preserved for a future parser/versioned extraction pass.
-- **Prices:** the default Stooq CSV adapter is convenient for local development but should be replaced by a licensed market-data provider for production use.
+- **Data.FERC.gov:** API key required. The starter connector validates/snapshots the dataset catalog; choose and configure a specific production dataset before treating FERC as a live indicator.
+- **Company IR:** configure only official RSS/Atom URLs in `COMPANY_IR_FEEDS`. Raw source material is retained for later parser/version upgrades.
+- **Prices:** Stooq is attempted first for the public demo. If the response is empty, stale, undersized or otherwise unusable, Gridline falls back per ticker to the Yahoo Finance chart endpoint. Each configured ticker must have at least 60 usable daily rows and a recent market observation before the `prices` source can be healthy. For a finance-company production deployment, replace demo feeds with an approved/licensed market-data provider.
 
-No missing response is converted to zero. A failed adapter is reported as `degraded` while cached records remain available.
+The actual provider and origin URL used for each price observation are carried in provenance metadata.
+
+## Fail-closed ingestion
+
+An HTTP `200` does not imply a healthy data refresh. After adapter execution, normalized observations must contain usable records. Empty results are marked `degraded` and are **not** saved as a successful empty refresh.
+
+For the static snapshot, a degraded source retains last-known-good data. For the SQLite profile, immutable historical observations remain present. This is particularly important for price history because 30D/90D lookbacks and point-in-time backtests depend on continuity.
+
+No missing response is converted to zero.
+
+## Demo acceptance
+
+After generating a static snapshot, run:
+
+```bash
+npm run demo:check
+```
+
+The gate checks schema-v4 metadata, complete/recent market-price coverage for all tracked tickers, non-zero semantics for healthy sources, and labelled point-in-time reconstruction coverage. The scheduled snapshot workflow runs this gate automatically before committing an updated public snapshot.
+
+Use `#health` / **Research Lab → Data health** to inspect the same committed snapshot from the UI.
 
 ## EIA attribution and integrity
 
@@ -30,8 +61,8 @@ When an EIA-derived observation is displayed, identify the U.S. Energy Informati
 
 EIA data is scoped to Gridline’s research and decision-support use only. Do not send it to unrelated products or services, and do not remove its attribution or time context when presenting it.
 
-## Post-close schedule
+## Scheduling
 
-With `SCHEDULE_ENABLED=true` (the default), the local API checks once per minute and triggers one refresh at or after **4:15 PM America/New_York**, Monday through Friday. It runs once per trading weekday; holidays are harmless because providers simply retain the latest valid observation. The source list is configurable with `SCHEDULE_SOURCES`.
+With `SCHEDULE_ENABLED=true`, the local API scheduler checks once per minute and may trigger one refresh at or after **4:15 PM America/New_York**, Monday through Friday. The GitHub Pages snapshot workflow separately runs at `22:00 UTC` on weekdays and also supports manual dispatch. Market holidays are handled by the historical-price validation/tolerance rules rather than by inventing a price for a closed session.
 
-For a demo, this is deliberately a low-frequency, low-connection model: one compact request sequence after close rather than continuous polling. SEC is free/public with a declared User-Agent; EIA, PJM and FERC offer free keys/accounts; official IR feeds are configured explicitly; Stooq is a free convenience price feed. Replace the price adapter with a licensed provider before commercial use.
+For a demo, this is deliberately a low-frequency model rather than continuous polling. Production provider licensing, SLAs, historical-vintage availability and redistribution rights remain deployment responsibilities outside this repository's demo configuration.

@@ -2,6 +2,7 @@ import React, { useEffect, useState } from 'react';
 import RegimeExperience from './RegimeExperience';
 import ScenarioLab from './ScenarioLab';
 import BacktestLab from './BacktestLab';
+import DataHealth from './DataHealth';
 import InfrastructureRegionFocusPortal from './InfrastructureRegionFocusPortal';
 import { researchLabCopy } from './researchLabI18n';
 import './ResearchExperience.css';
@@ -20,6 +21,7 @@ export default function ResearchExperience() {
   const [language, setLanguage] = useState(readLanguage);
   const route = routeFromHash(locationHash);
   const copy = researchLabCopy(language);
+  const healthButton = language === 'zh-TW' ? '資料健康 →' : 'Data health →';
 
   const setResearchLanguage = next => {
     const normalized = next === 'zh-TW' ? 'zh-TW' : 'en';
@@ -54,10 +56,11 @@ export default function ResearchExperience() {
 
   if (route === 'scenario') return <ScenarioLab language={language} onLanguageChange={setResearchLanguage} onBack={() => go('regime')} />;
   if (route === 'backtest') return <BacktestLab language={language} onLanguageChange={setResearchLanguage} onBack={() => go('regime')} />;
+  if (route === 'health') return <DataHealth language={language} onLanguageChange={setResearchLanguage} onBack={() => go('regime')} />;
 
   return <>
     <RegimeExperience />
     <InfrastructureRegionFocusPortal locationHash={locationHash} />
-    <div className="research-dock"><span>{copy.dockLabel}</span><button onClick={() => go('scenario')}>{copy.scenarioButton}</button><button onClick={() => go('backtest')}>{copy.backtestButton}</button></div>
+    <div className="research-dock"><span>{copy.dockLabel}</span><button onClick={() => go('scenario')}>{copy.scenarioButton}</button><button onClick={() => go('backtest')}>{copy.backtestButton}</button><button className="ops" onClick={() => go('health')}>{healthButton}</button></div>
   </>;
 }

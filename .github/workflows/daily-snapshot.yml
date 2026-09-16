@@ -34,6 +34,8 @@ jobs:
           PJM_API_KEY: ${{ secrets.PJM_API_KEY }}
           FERC_API_KEY: ${{ secrets.FERC_API_KEY }}
           COMPANY_IR_FEEDS: ${{ secrets.COMPANY_IR_FEEDS }}
+      - name: Validate public-demo snapshot invariants
+        run: npm run demo:check
       - name: Commit refreshed static snapshot when changed
         run: |
           git config user.name "github-actions[bot]"

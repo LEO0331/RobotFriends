@@ -3,7 +3,8 @@ const path = require('path');
 const config = require('./config');
 const { createService } = require('./service');
 const { mergeCompanyHistory } = require('./company-history');
-const { mergeSnapshotObservations } = require('./snapshot-merge');
+const { mergeSnapshotObservations, mergeSnapshotHealth } = require('./snapshot-merge');
+const { evaluateDemoReadiness } = require('./demo-readiness');
 const {
   reconstructCompanyHistory,
   mergeReconstructedHistory,
@@ -27,9 +28,11 @@ async function refreshWithRetry(service, source, attempts = 3) {
 async function main() {
   const service = createService(config); const previous = await readPrevious(); const outcomes = [];
   for (const source of config.scheduleSources) outcomes.push(await refreshWithRetry(service, source));
-  const fresh = await service.observations(); const health = await service.health();
+  const fresh = await service.observations();
+  const currentHealth = await service.health();
   const successful = new Set(outcomes.filter(item => item.status === 'ok').map(item => item.source));
   const observations = mergeSnapshotObservations(previous.observations || [], fresh, outcomes);
+  const health = mergeSnapshotHealth(previous.sourceHealth || {}, currentHealth, observations);
   const generatedAt = new Date().toISOString();
   const scores = scoreCompanies(companies, observations, generatedAt);
   const scoreSnapshots = scores.map(score => ({
@@ -86,11 +89,20 @@ async function main() {
     methodologies: { companyScore: companyScoreVersion },
     companyHistory,
     backtestCoverage,
-    note: 'Static dashboard snapshot. Successful sources replace their prior static data; degraded sources retain last-known-good observations. Recorded scores are native point-in-time observations. Demo historical reconstructions are clearly labeled and enforce historical observation cutoffs; they remain partial because methodology-v1 fundamental and structural-exposure inputs do not yet have historical vintages. Not investment advice.',
+    note: 'Static dashboard snapshot. Successful sources replace their prior static data; degraded sources retain last-known-good observations and last-success metadata. Recorded scores are native point-in-time observations. Demo historical reconstructions are clearly labeled and enforce historical observation cutoffs; they remain partial because methodology-v1 fundamental and structural-exposure inputs do not yet have historical vintages. Not investment advice.',
+  };
+  const readiness = evaluateDemoReadiness(snapshot, { tickers: config.tickers, now: generatedAt });
+  snapshot.demoReadiness = {
+    status: readiness.status,
+    ready: readiness.ready,
+    blockerCount: readiness.blockerCount,
+    warningCount: readiness.warningCount,
+    priceCoverage: readiness.priceCoverage,
   };
   await fs.mkdir(path.dirname(output), { recursive: true }); await fs.writeFile(output, `${JSON.stringify(snapshot, null, 2)}\n`);
   console.log(JSON.stringify({
     freshness: snapshot.freshness,
+    demoReadiness: snapshot.demoReadiness,
     companyHistoryRecords: companyHistory.length,
     reconstructedRecords: backtestCoverage.reconstructed,
     backtestCoverage,

@@ -15,12 +15,15 @@
   },
   "scripts": {
     "start": "react-scripts start",
+    "dev": "node scripts/dev.js",
     "api": "node server/index.js",
     "ingest": "node server/cli.js ingest",
     "snapshot": "node server/export-static-snapshot.js",
+    "demo:check": "node scripts/verify-demo-snapshot.js",
     "test:api": "node --test server/*.test.js server/**/*.test.js",
     "test:unit": "react-scripts test --watchAll=false --runInBand",
     "verify": "npm run test:api && npm run test:unit && npm run build",
+    "verify:demo": "npm run verify && npm run demo:check",
     "build": "react-scripts build",
     "test": "react-scripts test",
     "eject": "react-scripts eject"

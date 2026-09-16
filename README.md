@@ -1,115 +1,146 @@
 # Gridline — Data Center Infrastructure Intelligence
 
-Account setup (Supabase Free): [English](docs/accounts.en.md) · [繁體中文](docs/accounts.zh-TW.md).
+Gridline is a bilingual decision-support and research-validation dashboard that connects physical AI/data-center buildout, power constraints, regulatory events and market expectations. It is a **production-style research-platform demo**: not an automated trading system, not a production market-data terminal, and not investment advice.
 
-The optional Node research API is local-only by default. Network deployments must configure the write token and origin allowlist described in [the API guide](docs/api-ingestion.md).
+Public demo: `https://leo0331.github.io/RobotFriends/`
 
-Gridline is a decision-support and research-validation dashboard that connects physical AI/data-center buildout, power constraints, regulatory events and market expectations. It is not an automated trading system or investment advice.
+Demo readiness: [English](docs/demo-readiness.en.md) · [繁體中文](docs/demo-readiness.zh-TW.md)  
+Account setup (optional Supabase): [English](docs/accounts.en.md) · [繁體中文](docs/accounts.zh-TW.md)
 
-The public GitHub Pages build is a static demonstration. The same repository also includes a Node.js API profile with persistent historical storage, versioned scores, scenario-run persistence and point-in-time backtesting.
+## What the demo demonstrates
 
-## Production-readiness capabilities
+- **Infrastructure intelligence** — national and selected-region data-center buildout views for Arizona, Texas, Ohio/PJM and Northern Virginia.
+- **Period-aware company exposure** — 30D / 90D / 1Y market lookbacks with explicit insufficient-history states rather than fabricated values.
+- **Auditable provenance** — deterministic observation IDs, provider/source metadata, `observedAt` vs `retrievedAt`, confidence, origin URLs and lineage.
+- **Versioned scoring** — explainable company scores with methodology version, component contributions and a point-in-time cutoff.
+- **Persistent history** — the Node API profile stores immutable observations, source health, score snapshots, scenario runs and backtest runs in SQLite/WAL.
+- **Scenario Lab** — deterministic sensitivity analysis for power delivery, available power, demand, CAPEX and regulatory assumptions.
+- **Point-in-time Validation** — Recorded vs Reconstructed signals, 30D / 90D forward outcomes, pending windows and no-look-ahead controls.
+- **Data Health** — `#health` exposes the exact public snapshot's freshness, provider degradation, price coverage, methodology and reconstruction coverage.
+- **Fail-closed ingestion** — empty/invalid provider responses are degraded, not successful; last-known-good history is retained.
+- **Bilingual research UX** — core Research Lab workflows support English and Traditional Chinese.
+- **Optional accounts** — Supabase signup/signin/recovery/preferences are implemented in the React project but do not block the public research demo.
+- **Engineering quality gates** — PR tests/build/audit, static-snapshot acceptance checks, GitHub Pages deployment and Lighthouse CI.
 
-- **Auditable data provenance** — normalized observations carry deterministic IDs, provider metadata, observed/retrieved timestamps, confidence, original-source URLs when available and lineage.
-- **Versioned scoring** — company scores are calculated by a domain service with methodology version, component contribution breakdown and point-in-time cutoff.
-- **Persistent history** — the API stores observations, source health, score snapshots, scenario runs and backtest runs in SQLite/WAL. Historical observations are retained instead of overwritten.
-- **Scenario Lab** — `#scenario` stress-tests power delivery, available power, demand, CAPEX and regulatory assumptions and explains their contribution to regime/company sensitivity.
-- **Point-in-time backtesting** — `#backtest` evaluates only signals that were actually recorded, rejects future-dated lineage and leaves incomplete outcomes pending.
-- **PR quality gate** — every pull request to `main` runs server/domain tests, frontend unit tests and a production build. A dependency audit is reported separately.
-
-Detailed design notes: [data provenance](docs/data-provenance.md) · [scoring](docs/scoring-methodology.md) · [persistent storage](docs/persistent-storage.md) · [scenario analysis](docs/scenario-analysis.md) · [backtesting](docs/backtesting.md) · [PR CI](docs/pr-ci.md).
+Detailed design notes: [provenance](docs/data-provenance.md) · [scoring](docs/scoring-methodology.md) · [storage](docs/persistent-storage.md) · [scenario analysis](docs/scenario-analysis.md) · [backtesting](docs/backtesting.md) · [CI](docs/pr-ci.md).
 
 ## Requirements
 
-- Node.js **22+** for the API/storage profile (`node:sqlite`)
-- npm with the committed lock file
+- Node.js **22+** (`node:sqlite` is used by the API/storage profile)
+- npm using the committed `package-lock.json`
 
-## Run locally
+## Quick start
 
 ```bash
 npm ci
-npm start
+npm run dev
 ```
 
-Open `http://localhost:3000/RobotFriends`.
+`npm run dev` starts both:
 
-## Run the ingestion/API profile
+- React UI: `http://localhost:3000/RobotFriends`
+- Research API: `http://localhost:8787`
 
-The React app and API intentionally run as separate processes during local development:
+Use `Ctrl+C` to stop both processes. For UI-only development, use `npm start`. For API-only development, use `npm run api`.
 
-```bash
-# Terminal 1
-npm run api
+Provider configuration is documented in [.env.example](.env.example) and the [ingestion guide](docs/api-ingestion.md).
 
-# Terminal 2: configure provider settings, then refresh a source
-set SEC_USER_AGENT=Gridline/0.1 research@example.com
-npm run ingest -- sec
+## Architecture
+
+```text
+ SEC / EIA / PJM / FERC / official IR / market prices
+                         │
+                         ▼
+                  source adapters
+                         │
+            validate + fail closed
+                         │
+                         ▼
+          normalized observations + provenance
+                         │
+             ┌───────────┴───────────┐
+             ▼                       ▼
+       SQLite/WAL history       versioned scoring
+             │                       │
+             └───────────┬───────────┘
+                         ▼
+                    research API
+              ┌──────────┼──────────┐
+              ▼          ▼          ▼
+        Scenario Lab  Backtest   audit queries
+                         │
+                         ▼
+                     React UI
+
+GitHub Pages profile:
+provider refresh → schema-v4 snapshot → demo readiness gate
+                → commit to main → Pages build/deploy → Lighthouse CI
 ```
 
-The API is served at `http://localhost:8787`; Create React App proxies `/api` requests there in development. See [API ingestion documentation](docs/api-ingestion.md) and [.env.example](.env.example) for provider-specific configuration.
+Key modules:
 
-Research endpoints include:
+- `server/sources.js` — SEC, EIA, PJM, FERC, official company IR and market-price adapters.
+- `server/price-history.js` — validated Stooq history plus Yahoo Finance demo fallback.
+- `server/service.js` — cache/source health and zero-row fail-closed behavior.
+- `server/provenance.js` — deterministic observation identity and audit metadata.
+- `server/database.js` / `server/store.js` — SQLite schema and persistent research history.
+- `server/scoring/` — versioned/explainable company scoring.
+- `server/scenario-engine.js` — deterministic infrastructure sensitivity model.
+- `server/backtest.js` / `src/backtestModel.js` — point-in-time validation.
+- `server/historical-reconstruction.js` — explicitly labelled demo reconstruction with historical cutoffs.
+- `server/demo-readiness.js` — public-snapshot acceptance criteria.
+- `src/DataHealth.js` — operational/demo-readiness workspace.
+- `src/ScenarioLab.js` / `src/BacktestLab.js` — research workflows.
+
+The storage interface is deliberately narrow so SQLite can be replaced by Postgres in a production deployment without rewriting the scoring/scenario/backtest domain logic.
+
+## Research API
+
+The API is local-only by default (`127.0.0.1`). If deliberately exposed on a network, configure `HOST`, `ALLOWED_ORIGINS` and a long random `API_WRITE_TOKEN`; state-changing requests outside loopback require the bearer token. Never put that token in the static React build.
+
+Selected endpoints:
 
 ```text
 GET  /api/health
 GET  /api/observations
 GET  /api/provenance?observationId=...
 GET  /api/scores?ticker=NBIS
+POST /api/ingest?source=prices
 POST /api/scenario
 GET  /api/scenario/runs
 POST /api/backtest
 GET  /api/backtest/runs
 ```
 
-## Architecture
+See [docs/api-ingestion.md](docs/api-ingestion.md).
 
-```text
-SEC / EIA / PJM / FERC / company IR / prices
-                    │
-                    ▼
-             source adapters
-                    │
-                    ▼
-       normalized observations + provenance
-                    │
-        ┌───────────┴───────────┐
-        ▼                       ▼
- SQLite historical store    versioned scoring
-        │                       │
-        └───────────┬───────────┘
-                    ▼
-             research API
-        ┌───────────┴───────────┐
-        ▼                       ▼
- Scenario engine          point-in-time backtest
-        │                       │
-        └───────────┬───────────┘
-                    ▼
-                React UI
-```
+## Market-price ingestion
 
-Key modules:
+The public demo attempts Stooq first. If a ticker's history is empty, stale, undersized or unusable, it falls back to the Yahoo Finance chart endpoint. A healthy `prices` refresh requires every configured ticker to have at least 60 usable recent daily observations.
 
-- `server/sources.js` — source adapters for SEC, EIA, PJM, Data.FERC.gov, official company IR feeds and daily price history.
-- `server/provenance.js` — deterministic observation identity and audit metadata.
-- `server/database.js` / `server/store.js` — SQLite schema, immutable historical observations and persisted research runs. `data/` is ignored by Git.
-- `server/scoring/` — versioned, explainable company scoring.
-- `server/scenario-engine.js` — deterministic infrastructure sensitivity analysis.
-- `server/backtest.js` — point-in-time signal validation and look-ahead checks.
-- `server/service.js` — caching, source health and isolated provider failures.
-- `server/index.js` — HTTP API.
-- `src/Containers/App.js` — core dashboard/evidence views.
-- `src/ScenarioLab.js` and `src/BacktestLab.js` — research workflows.
+An HTTP `200` with zero usable rows is **degraded**, not `ok`. Degraded refreshes do not erase existing history. Provider identity and origin URL are preserved in provenance. Free demo feeds should be replaced by an approved/licensed market-data provider for commercial finance use.
 
-The storage interface is deliberately narrow so a production deployment can replace SQLite with Postgres without changing scoring, scenario or backtest domain logic.
+## Point-in-time validation
+
+The public demo distinguishes:
+
+- **Recorded** — score snapshots created on their original date.
+- **Reconstructed** — later point-in-time reconstructions that enforce a historical `asOf` cutoff.
+- **Partial reconstruction quality** — methodology-v1 fundamentals and structural exposure do not yet have complete historical-vintage source inputs.
+
+30D and 90D are **calendar-day** horizons. If the target lands on a weekend or market holiday, Gridline uses the first available subsequent close within the documented tolerance; it never interpolates a nonexistent market price. As daily snapshots advance, old signals remain fixed while pending outcomes can mature into completed outcomes.
+
+See [docs/backtesting.md](docs/backtesting.md).
 
 ## Verification
+
+Code quality gate:
 
 ```bash
 npm run verify
 ```
 
-Equivalent checks:
+Equivalent commands:
 
 ```bash
 npm run test:api
@@ -117,20 +148,51 @@ npm run test:unit
 npm run build
 ```
 
-Provider credentials are never committed. A missing key, rate-limit response or provider failure is exposed as a `degraded` source-health state and is never represented as zero data.
+After generating a current static snapshot, validate the public-demo data state:
 
-## Static daily snapshot deployment
+```bash
+npm run demo:check
+```
 
-For the GitHub Pages demo, [.github/workflows/daily-snapshot.yml](.github/workflows/daily-snapshot.yml) runs at 22:00 UTC on weekdays (after the regular US market close in EST and EDT). It refreshes configured sources, calculates versioned score snapshots and writes `public/data/dashboard-snapshot.json`. GitHub Pages can therefore demonstrate the research UI without a continuously running public API.
+Or run both code verification and snapshot acceptance:
 
-Each source is tried up to three times with 1s and 2s backoff. A failure retains the last known-good records from the previously committed snapshot and records a degraded source-health state. Add provider secrets in the repository’s Actions secrets before enabling real ingestion.
+```bash
+npm run verify:demo
+```
 
-The static snapshot and the API database serve different purposes: the JSON file is a portable public-demo artifact; SQLite is the persistent production-profile history used by provenance queries, scenario audit and point-in-time backtests.
+`verify:demo` is intentionally stricter than PR CI and can fail when the committed snapshot is old/incomplete. PR CI validates code independently of live provider availability.
 
-## EIA data use and attribution
+## Static daily snapshot and Pages deployment
 
-Where EIA observations appear, the dashboard identifies the **U.S. Energy Information Administration (EIA)** as the source and links to EIA Open Data. Gridline may transform or aggregate EIA observations for display, while source records retain their observation and retrieval timestamps. Gridline scores are not produced, endorsed or approved by EIA; no EIA logo is used. See the [EIA Open Data API](https://www.eia.gov/opendata/) and [Privacy and Security Policy](https://www.eia.gov/about/privacy_security_policy.php).
+`Refresh daily dashboard snapshot` runs at **22:00 UTC on weekdays** and supports manual dispatch. It retries sources, preserves last-known-good data for degraded providers, generates schemaVersion 4 history (`scores`, `companyHistory`, `backtestCoverage`, `demoReadiness`), and then runs `npm run demo:check`.
 
-EIA API data in this project is limited to Gridline’s own research and decision-support dashboard. It is not forwarded to unrelated products, users or services. Keep EIA-derived observations, attribution and source timestamps with any displayed research result.
+Only a snapshot that passes the demo-critical gate is committed to `main`. That push triggers the separate `Deploy to GitHub Pages` workflow, which performs a Node 22 lockfile install, production build, Pages deployment and Lighthouse CI.
 
-Traditional Chinese documentation: [README.zh-TW.md](README.zh-TW.md). Deployment runbook: [English](docs/static-snapshot-deployment.en.md) · [繁體中文](docs/static-snapshot-deployment.zh-TW.md).
+The gate requires, among other things, usable recent price history for all four tracked tickers and at least one labelled historical reconstruction. Optional degraded providers remain visible as warnings rather than being silently hidden.
+
+Deployment runbook: [English](docs/static-snapshot-deployment.en.md) · [繁體中文](docs/static-snapshot-deployment.zh-TW.md).
+
+## Data Health
+
+Open **Research Lab → Data health** or navigate to `#health` to inspect the same committed snapshot used by the public dashboard. It reports:
+
+- generation time / age;
+- source health and degradation reasons;
+- per-ticker price row count, range and provider;
+- schema/methodology version;
+- Recorded vs Reconstructed point-in-time coverage;
+- `DEMO READY`, `READY WITH WARNINGS`, or `ATTENTION REQUIRED`.
+
+This is an operational transparency surface, not a claim that every optional provider is currently live.
+
+## Optional Supabase accounts
+
+The React project contains signup, email confirmation/resend, sign-in, session restoration, password recovery/change, preference load/save and sign-out. The public research demo remains usable without Supabase configuration.
+
+To demonstrate live accounts, configure the project, redirects, RLS SQL and browser-safe publishable variables as described in [docs/accounts.en.md](docs/accounts.en.md). No service-role/secret key belongs in the frontend.
+
+## EIA attribution
+
+Where EIA observations appear, Gridline identifies the **U.S. Energy Information Administration (EIA)** as the source and retains observation/retrieval timestamps. Gridline scores are not produced, endorsed or approved by EIA. Keep EIA attribution and time context with any displayed derived research result.
+
+Traditional Chinese README: [README.zh-TW.md](README.zh-TW.md).
