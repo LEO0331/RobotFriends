@@ -8,11 +8,9 @@ on:
 
 permissions:
   contents: write
-  pages: write
-  id-token: write
 
 concurrency:
-  group: daily-dashboard-snapshot
+  group: daily-snapshot-refresh
   cancel-in-progress: false
 
 jobs:
@@ -20,8 +18,10 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 15
     steps:
-      - uses: actions/checkout@v6
-      - uses: actions/setup-node@v6
+      - uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6
+        with:
+          ref: main
+      - uses: actions/setup-node@249970729cb0ef3589644e2896645e5dc5ba9c38 # v6
         with:
           node-version: 22
           cache: npm
@@ -40,17 +40,4 @@ jobs:
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
           git add public/data/dashboard-snapshot.json
           git diff --cached --quiet || git commit -m "Refresh post-close dashboard snapshot"
-          git push
-      - name: Build dashboard
-        run: npm run build
-        env:
-          REACT_APP_SUPABASE_URL: ${{ vars.REACT_APP_SUPABASE_URL }}
-          REACT_APP_SUPABASE_PUBLISHABLE_KEY: ${{ vars.REACT_APP_SUPABASE_PUBLISHABLE_KEY }}
-      - name: Configure GitHub Pages
-        uses: actions/configure-pages@v5
-      - name: Upload static site
-        uses: actions/upload-pages-artifact@v4
-        with:
-          path: build
-      - name: Deploy GitHub Pages
-        uses: actions/deploy-pages@v4
+          git push origin HEAD:main

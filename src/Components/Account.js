@@ -4,6 +4,15 @@ import './Account.css';
 
 const WATCHLIST_SYMBOLS = ['NBIS', 'CRWV', 'ORCL', 'AVGO'];
 
+function authMessage(error, mode, t) {
+  const message = String(error?.message || '').toLowerCase();
+  if (message.includes('rate limit') || message.includes('too many')) return t('Too many attempts. Please wait before trying again.', '嘗試次數過多，請稍候再試。');
+  if (mode === 'signin') return t('Unable to sign in with those credentials.', '無法使用這組認證資料登入。');
+  if (mode === 'signup') return t('Unable to create the account. Check the information and try again.', '無法建立帳戶，請檢查資料後重試。');
+  if (mode === 'reset') return t('Unable to request a reset email right now. Please try later.', '目前無法要求重設郵件，請稍後再試。');
+  return t('The authentication request could not be completed. Please retry.', '無法完成帳戶操作，請重試。');
+}
+
 export default function Account({ language, weight, onPreferences }) {
   const zh = language === 'zh-TW';
   const t = (en, tw) => zh ? tw : en;
@@ -169,7 +178,7 @@ export default function Account({ language, weight, onPreferences }) {
         dialog.current?.close();
       }
     } catch (error) {
-      setMessage(error?.message || t('Request failed. Please retry.', '操作失敗，請重試。'));
+      setMessage(authMessage(error, mode, t));
     } finally {
       setBusy(false);
     }
@@ -188,7 +197,7 @@ export default function Account({ language, weight, onPreferences }) {
       if (error) throw error;
       setMessage(t('Confirmation email requested. Check your inbox.', '已重新要求寄送確認信，請檢查收件匣。'));
     } catch (error) {
-      setMessage(error?.message || t('Unable to resend confirmation email.', '無法重新寄送確認信。'));
+      setMessage(authMessage(error, 'signup', t));
     } finally {
       setBusy(false);
     }

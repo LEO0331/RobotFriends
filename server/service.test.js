@@ -34,3 +34,15 @@ test('post-close scheduler excludes weekends and runs after 4:15pm ET', () => {
   assert.equal(dueAfterClose(new Date('2026-09-14T20:15:00Z')).due, true);
   assert.equal(dueAfterClose(new Date('2026-09-13T20:16:00Z')).due, false);
 });
+test('observation queries apply bounded pagination', async () => {
+  const directory = await fs.mkdtemp(path.join(os.tmpdir(), 'gridline-page-test-')); const store = createStore(directory);
+  await store.saveObservations('prices', [
+    { id: 'p1', source: 'prices', value: 1, observedAt: '2026-01-01T00:00:00Z' },
+    { id: 'p2', source: 'prices', value: 2, observedAt: '2026-01-02T00:00:00Z' },
+    { id: 'p3', source: 'prices', value: 3, observedAt: '2026-01-03T00:00:00Z' },
+  ]);
+  const rows = await store.observations({ limit: 1, offset: 1 });
+  assert.deepEqual(rows.map(item => item.value), [2]);
+  store.close();
+  await fs.rm(directory, { recursive: true, force: true });
+});

@@ -17,6 +17,9 @@ const parseJson = (value, fallback) => {
 
 module.exports = {
   port: Number(process.env.PORT || 8787),
+  host: process.env.HOST || '127.0.0.1',
+  apiWriteToken: process.env.API_WRITE_TOKEN || '',
+  allowedOrigins: (process.env.ALLOWED_ORIGINS || 'http://localhost:3000,https://leo0331.github.io').split(',').map(value => value.trim()).filter(Boolean),
   dataDir: process.env.DATA_DIR || path.join(root, 'data'),
   tickers: (process.env.TICKERS || 'NBIS,CRWV,ORCL,AVGO').split(',').map(value => value.trim().toUpperCase()).filter(Boolean),
   secUserAgent: process.env.SEC_USER_AGENT || '',

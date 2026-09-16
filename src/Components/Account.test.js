@@ -64,7 +64,7 @@ async function openSignIn() {
   fireEvent.click(await screen.findByRole('button', { name: 'Sign in' }));
 }
 
-test('failed login displays provider error without closing the dialog', async () => {
+test('failed login displays a generic error without closing the dialog', async () => {
   supabase.auth.signInWithPassword.mockResolvedValue({ error: { message: 'Invalid login credentials' } });
   render(<Account language="en" weight={100} onPreferences={() => {}} />);
 
@@ -73,7 +73,7 @@ test('failed login displays provider error without closing the dialog', async ()
   fireEvent.change(screen.getByLabelText('Password'), { target: { value: 'wrongpass' } });
   fireEvent.submit(screen.getByLabelText('Email').closest('form'));
 
-  await waitFor(() => expect(screen.getByRole('status')).toHaveTextContent('Invalid login credentials'));
+  await waitFor(() => expect(screen.getByRole('status')).toHaveTextContent('Unable to sign in'));
   expect(screen.getByRole('dialog')).toBeVisible();
 });
 

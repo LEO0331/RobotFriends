@@ -94,7 +94,9 @@ function createStore(dataDir) {
       }
       if (filters.since) { where.push('observed_at >= ?'); args.push(filters.since); }
       if (filters.until) { where.push('observed_at <= ?'); args.push(filters.until); }
-      const sql = `SELECT record_json FROM observations${where.length ? ` WHERE ${where.join(' AND ')}` : ''} ORDER BY observed_at ASC, id ASC`;
+      const pagination = Number.isInteger(filters.limit) ? ' LIMIT ? OFFSET ?' : '';
+      if (pagination) { args.push(filters.limit, filters.offset || 0); }
+      const sql = `SELECT record_json FROM observations${where.length ? ` WHERE ${where.join(' AND ')}` : ''} ORDER BY observed_at ASC, id ASC${pagination}`;
       return db.prepare(sql).all(...args).map(row => parse(row.record_json)).filter(Boolean);
     },
     async observationById(id) {
@@ -124,7 +126,9 @@ function createStore(dataDir) {
       if (filters.ticker) { where.push('ticker = ?'); args.push(filters.ticker); }
       if (filters.since) { where.push('as_of >= ?'); args.push(filters.since); }
       if (filters.until) { where.push('as_of <= ?'); args.push(filters.until); }
-      const sql = `SELECT payload_json FROM score_snapshots${where.length ? ` WHERE ${where.join(' AND ')}` : ''} ORDER BY as_of ASC`;
+      const pagination = Number.isInteger(filters.limit) ? ' LIMIT ? OFFSET ?' : '';
+      if (pagination) { args.push(filters.limit, filters.offset || 0); }
+      const sql = `SELECT payload_json FROM score_snapshots${where.length ? ` WHERE ${where.join(' AND ')}` : ''} ORDER BY as_of ASC${pagination}`;
       return db.prepare(sql).all(...args).map(row => parse(row.payload_json)).filter(Boolean);
     },
     async saveScenarioRun(input, output, methodologyVersion) {
@@ -134,7 +138,8 @@ function createStore(dataDir) {
       return { id, createdAt };
     },
     async scenarioRuns(limit = 20) {
-      return db.prepare('SELECT id, created_at, methodology_version, input_json, output_json FROM scenario_runs ORDER BY created_at DESC LIMIT ?').all(Number(limit)).map(row => ({ id: row.id, createdAt: row.created_at, methodologyVersion: row.methodology_version, input: parse(row.input_json), output: parse(row.output_json) }));
+      const safeLimit = Math.max(1, Math.min(100, Number(limit) || 20));
+      return db.prepare('SELECT id, created_at, methodology_version, input_json, output_json FROM scenario_runs ORDER BY created_at DESC LIMIT ?').all(safeLimit).map(row => ({ id: row.id, createdAt: row.created_at, methodologyVersion: row.methodology_version, input: parse(row.input_json), output: parse(row.output_json) }));
     },
     async saveBacktestRun(input, output, methodologyVersion) {
       const id = runId('backtest');
@@ -143,7 +148,8 @@ function createStore(dataDir) {
       return { id, createdAt };
     },
     async backtestRuns(limit = 20) {
-      return db.prepare('SELECT id, created_at, methodology_version, input_json, output_json FROM backtest_runs ORDER BY created_at DESC LIMIT ?').all(Number(limit)).map(row => ({ id: row.id, createdAt: row.created_at, methodologyVersion: row.methodology_version, input: parse(row.input_json), output: parse(row.output_json) }));
+      const safeLimit = Math.max(1, Math.min(100, Number(limit) || 20));
+      return db.prepare('SELECT id, created_at, methodology_version, input_json, output_json FROM backtest_runs ORDER BY created_at DESC LIMIT ?').all(safeLimit).map(row => ({ id: row.id, createdAt: row.created_at, methodologyVersion: row.methodology_version, input: parse(row.input_json), output: parse(row.output_json) }));
     },
     close() { db.close(); },
   };

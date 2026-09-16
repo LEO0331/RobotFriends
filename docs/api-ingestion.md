@@ -2,6 +2,8 @@
 
 Run the API in a separate terminal with `npm run api`. It listens on `http://localhost:8787` by default. Copy `.env.example` to a local environment file or export its values before running production ingestion.
 
+The API binds to `127.0.0.1` by default. If it is deliberately exposed on a network, set `HOST`, restrict `ALLOWED_ORIGINS`, and configure a long random `API_WRITE_TOKEN`. All POST endpoints require `Authorization: Bearer <token>` outside loopback and are rate limited. Do not place this token in the static React build. Public observation and score queries are paginated and bounded.
+
 | Endpoint | Purpose |
 |---|---|
 | `GET /api/health` | Per-source status, latest success and degradation reason. |

@@ -2,6 +2,8 @@
 
 Supabase 免費帳戶設定：[繁體中文](docs/accounts.zh-TW.md) · [English](docs/accounts.en.md)。
 
+選用的 Node 研究 API 預設僅限本機。若部署至網路，必須依照 [API 指南](docs/api-ingestion.zh-TW.md)設定寫入 token 與來源白名單。
+
 Gridline 是決策輔助儀表板，將 AI／資料中心實體建設、供電限制、法規事件與市場預期連結起來；它不是自動交易系統，也不是投資建議。
 
 ## 本機啟動

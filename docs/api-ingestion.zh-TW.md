@@ -2,6 +2,8 @@
 
 以 `npm run api` 在本機啟動 API，預設網址為 `http://localhost:8787`。請將 `.env.example` 複製為本機環境設定，或在執行前匯出相應環境變數。
 
+API 預設只綁定 `127.0.0.1`。若刻意對外開放，請設定 `HOST`、限制 `ALLOWED_ORIGINS`，並建立長且隨機的 `API_WRITE_TOKEN`。所有非本機 POST 請求都必須使用 `Authorization: Bearer <token>`，且會套用速率限制。不得將此 token 放入靜態 React 建置。公開觀察值與分數查詢均有分頁及筆數上限。
+
 | Endpoint | 用途 |
 |---|---|
 | `GET /api/health` | 各來源狀態、最近成功時間與降級原因。 |

@@ -41,12 +41,12 @@ async function ingestPjm(config) {
 async function ingestFerc(config) {
   if (!config.fercKey) throw new Error('FERC_API_KEY is not configured.');
   const payload = await getJson('https://api.data.ferc.gov/v1/dataset/0/details/', { 'X-Api-Key': config.fercKey });
-  return { payload, observations: [observation('ferc', 'datasetCatalog', payload, { confidence: 1 })], message: 'FERC dataset catalog ingested; configure a selected dataset connector next.' };
+  return { payload, observations: [observation('ferc', 'datasetCatalog', { retrieved: true }, { confidence: 1 })], message: 'FERC dataset catalog ingested; configure a selected dataset connector next.' };
 }
 async function ingestIr(config) {
   const feeds = Object.entries(config.companyIrFeeds); if (!feeds.length) throw new Error('COMPANY_IR_FEEDS has no configured official feed URLs.');
   const payload = []; const observations = [];
-  for (const [ticker, url] of feeds) { const text = await getText(url, { 'User-Agent': config.secUserAgent || 'Gridline research client' }); payload.push({ ticker, url, text }); observations.push(observation('company-ir', 'officialFeed', { url, text }, { ticker, confidence: 0.85 })); }
+  for (const [ticker, url] of feeds) { const text = await getText(url, { 'User-Agent': config.secUserAgent || 'Gridline research client' }); payload.push({ ticker, url, text }); observations.push(observation('company-ir', 'officialFeed', { url }, { ticker, confidence: 0.85 })); }
   return { payload, observations, message: `${feeds.length} official IR feeds ingested` };
 }
 async function ingestPrices(config) {
