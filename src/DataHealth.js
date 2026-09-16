@@ -4,7 +4,18 @@ import './DataHealth.css';
 
 const emptySnapshot = { observations: [], sourceHealth: {}, outcomes: [] };
 const dateOnly = value => value ? String(value).slice(0, 10) : '—';
-const sourceLabel = source => ({ prices: 'Market prices', sec: 'SEC', eia: 'EIA', pjm: 'PJM', ferc: 'FERC', 'company-ir': 'Company IR' }[source] || source);
+const sourceLabel = (source, language) => {
+  const zh = language === 'zh-TW';
+  const labels = {
+    prices: zh ? '市場價格' : 'Market prices',
+    sec: 'SEC',
+    eia: 'EIA',
+    pjm: 'PJM',
+    ferc: 'FERC',
+    'company-ir': zh ? '公司投資人關係' : 'Company IR',
+  };
+  return labels[source] || source;
+};
 
 function copyFor(language) {
   const zh = language === 'zh-TW';
@@ -35,7 +46,6 @@ function copyFor(language) {
     },
     generated: t('Snapshot generated', '快照產生時間'),
     age: t('Snapshot age', '快照年齡'),
-    schema: t('Schema', '資料結構版本'),
     priceCoverage: t('Price coverage', '價格涵蓋'),
     reconstructions: t('Reconstructions', '歷史重建'),
     hours: t('hours', '小時'),
@@ -45,6 +55,13 @@ function copyFor(language) {
     records: t('Records', '資料筆數'),
     lastSuccess: t('Last success', '最近成功'),
     detail: t('Detail', '說明'),
+    statusLabels: {
+      ok: t('OK', '正常'),
+      degraded: t('Degraded', '降級'),
+      retained: t('Retained', '保留舊資料'),
+      unavailable: t('Unavailable', '無資料'),
+      cached: t('Cached', '快取'),
+    },
     priceHistory: t('MARKET PRICE COVERAGE', '市場價格涵蓋'),
     ticker: t('Ticker', '標的'),
     rows: t('Daily rows', '日資料筆數'),
@@ -110,7 +127,7 @@ export default function DataHealth({ onBack, language = 'en', onLanguageChange =
       </section>
 
       <section className="health-grid">
-        <article className="health-panel source-panel"><h2>{copy.sourceHealth}</h2><div className="health-table source-table"><div className="head"><span>{copy.source}</span><span>{copy.status}</span><span>{copy.records}</span><span>{copy.lastSuccess}</span><span>{copy.detail}</span></div>{health.sources.map(item => <div key={item.source}><b>{sourceLabel(item.source)}</b><span className={`status-pill ${item.status}`}>{item.status}</span><span>{item.recordCount}</span><span>{dateOnly(item.lastSuccessAt || item.checkedAt)}</span><span title={item.message || ''}>{item.message || '—'}</span></div>)}</div></article>
+        <article className="health-panel source-panel"><h2>{copy.sourceHealth}</h2><div className="health-table source-table"><div className="head"><span>{copy.source}</span><span>{copy.status}</span><span>{copy.records}</span><span>{copy.lastSuccess}</span><span>{copy.detail}</span></div>{health.sources.map(item => <div key={item.source}><b>{sourceLabel(item.source, language)}</b><span className={`status-pill ${item.status}`}>{copy.statusLabels[item.status] || item.status}</span><span>{item.recordCount}</span><span>{dateOnly(item.lastSuccessAt || item.checkedAt)}</span><span title={item.message || ''}>{item.message || '—'}</span></div>)}</div></article>
 
         <article className="health-panel"><h2>{copy.priceHistory}</h2><div className="health-table price-table"><div className="head"><span>{copy.ticker}</span><span>{copy.rows}</span><span>{copy.range}</span><span>{copy.provider}</span><span>{copy.readiness}</span></div>{health.priceCoverage.map(item => <div key={item.ticker}><b>{item.ticker}</b><span>{item.count}</span><span>{dateOnly(item.firstAt)} → {dateOnly(item.lastAt)}</span><span>{item.provider || '—'}</span><span className={`coverage-state ${item.ready ? 'ready' : 'missing'}`}>{item.ready ? copy.complete : copy.incomplete}</span></div>)}</div></article>
       </section>
