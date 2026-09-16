@@ -44,6 +44,7 @@ beforeEach(() => {
   jest.clearAllMocks();
   authListener = null;
 
+  supabase.from.mockReturnValue(__query);
   __query.select.mockReturnValue(__query);
   __query.eq.mockReturnValue(__query);
   __query.maybeSingle.mockResolvedValue({ data: null, error: null });
@@ -174,6 +175,7 @@ test('restored sessions load preferences and allow explicit save and sign out', 
     { onConflict: 'user_id' }
   ));
 
+  await waitFor(() => expect(screen.getByRole('button', { name: 'Sign out' })).toBeEnabled());
   fireEvent.click(screen.getByRole('button', { name: 'Sign out' }));
   await waitFor(() => expect(supabase.auth.signOut).toHaveBeenCalledWith({ scope: 'local' }));
 });
