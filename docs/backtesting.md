@@ -9,8 +9,15 @@ Current backtest methodology: `gridline-point-in-time-backtest-v1.1.0`.
 - `Positive` expectations-gap snapshots are treated as constructive signals.
 - `Elevated` expectations-gap snapshots are treated as caution signals.
 - `Balanced` snapshots are not treated as directional signals.
-- Supported forward horizons are 30 and 90 calendar days.
-- Entry and exit prices use the first available market observation after the target timestamp within a small trading-day tolerance.
+- Supported forward horizons are **30 and 90 calendar days**, not 30/90 trading sessions.
+- Entry uses the first available market observation at or after the signal timestamp within 5 calendar days.
+- Exit uses the first available market observation at or after the 30D/90D target within 7 calendar days.
+
+### Weekends and public holidays
+
+A target date can land on a weekend or US market holiday. Gridline does not invent a price for that date and does not require an exact calendar-date match. It deterministically selects the first available close after the target, within the exit tolerance. For example, if a 30D target lands on Sunday, Monday's close is normally used. If no usable close appears within the tolerance, the outcome stays pending/unavailable rather than being interpolated.
+
+This convention is intentionally documented because changing to **30/90 trading sessions** would be a different methodology and would require a new backtest version.
 
 ## Native recorded vs reconstructed history
 
@@ -27,6 +34,20 @@ Reconstructed rows are currently labeled `pointInTimeQuality: partial`. External
 
 Once a reconstructed ticker/date is written, the static history keeps the existing row instead of silently replacing it on later refreshes. The SQLite export also inserts reconstruction rows only when that score key does not already exist.
 
+## How daily snapshots change the displayed analysis
+
+The weekday snapshot refresh moves the information cutoff forward. Existing historical signals are retained, while new recorded signals can be added and previously pending outcomes can mature once enough future prices exist. Consequently the following UI values may change over time:
+
+- completed signal count;
+- pending outcome count;
+- directional hit rate;
+- average directional return;
+- coverage end date.
+
+An old recorded/reconstructed signal is not rewritten merely because the current date advanced. The normal state transition is **pending → complete** when the required future price window becomes available.
+
+The schema-v4 static snapshot carries `companyHistory` and `backtestCoverage`. Each successful post-close refresh recalculates coverage from the retained history and currently available market prices.
+
 ## Point-in-time guardrails
 
 1. Native rows come from score snapshots captured on their original date.
@@ -42,14 +63,14 @@ Once a reconstructed ticker/date is written, the static history keeps the existi
 
 The UI reports:
 
-- signal coverage start/end date
-- recorded vs reconstructed signal count
-- reconstruction quality status
-- completed signal count
-- pending outcome count
-- directional hit rate
-- average directional return
-- per-signal origin in the ledger
+- signal coverage start/end date;
+- recorded vs reconstructed signal count;
+- reconstruction quality status;
+- completed signal count;
+- pending outcome count;
+- directional hit rate;
+- average directional return;
+- per-signal origin in the ledger.
 
 The server backtest additionally reports invalid-lineage count and average forward return by Positive/Elevated signal type.
 
