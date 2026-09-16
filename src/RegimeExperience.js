@@ -3,7 +3,12 @@ import App from './Containers/App';
 import ExposurePeriodPortal from './ExposurePeriodMonitor';
 import './RegimeExperience.css';
 
+const LANGUAGE_KEY = 'gridline-language';
 const getRoute = () => (window.location.hash.replace(/^#/, '').split('?')[0] || 'overview').toLowerCase();
+const readStoredLanguage = () => {
+  try { return window.localStorage.getItem(LANGUAGE_KEY) === 'zh-TW' ? 'zh-TW' : 'en'; }
+  catch { return 'en'; }
+};
 
 const drivers = [
   { tone: 'amber', label: 'CAPACITY MOMENTUM', value: '+1.2 GW', detail: 'New power capacity secured', weight: '35% expansion weight' },
@@ -34,7 +39,12 @@ function pushHash(hash, setRoute) {
 
 function RegimeExperience() {
   const [route, setRoute] = useState(getRoute);
-  const [language, setLanguage] = useState('en');
+  const [language, setLanguage] = useState(readStoredLanguage);
+  const setPersistentLanguage = next => {
+    const normalized = next === 'zh-TW' ? 'zh-TW' : 'en';
+    setLanguage(normalized);
+    try { window.localStorage.setItem(LANGUAGE_KEY, normalized); } catch {}
+  };
 
   useEffect(() => {
     const onPopState = () => {
@@ -46,7 +56,7 @@ function RegimeExperience() {
       const button = target ? target.closest('.regime-buttons .primary') : null;
       if (!button) return;
       const currentLanguage = document.querySelector('main.shell')?.getAttribute('lang');
-      if (currentLanguage) setLanguage(currentLanguage);
+      if (currentLanguage) setPersistentLanguage(currentLanguage);
       event.preventDefault();
       pushHash('regime', setRoute);
     };
@@ -63,7 +73,7 @@ function RegimeExperience() {
     return (
       <RegimeDetail
         language={language}
-        setLanguage={setLanguage}
+        setLanguage={setPersistentLanguage}
         navigate={hash => pushHash(hash, setRoute)}
       />
     );
