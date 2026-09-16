@@ -54,22 +54,25 @@ async function main() {
   const companyHistory = mergeCompanyHistory(historyWithReconstruction, scoreSnapshots, generatedAt);
   const backtestCoverage = reconstructionSummary(companyHistory);
 
-  // Persist both native score snapshots and immutable reconstruction rows. The
-  // store's unique score key makes subsequent snapshot jobs idempotent.
   await service.store.saveScoreSnapshots(scores);
   if (reconstructed.length) {
-    await service.store.saveScoreSnapshots(reconstructed.map(item => ({
-      ...item,
-      calculatedAt: item.reconstructedAt,
-      provenance: {
-        methodologyVersion: item.methodologyVersion,
-        lineage: item.lineage,
-        pointInTimeCutoff: item.asOf,
-        origin: item.origin,
-        pointInTimeQuality: item.pointInTimeQuality,
-        qualityNotes: item.qualityNotes,
-      },
-    })));
+    const existingScores = await service.store.scoreSnapshots({});
+    const existingKeys = new Set(existingScores.map(item => `${item.ticker}:${item.asOf}:${item.methodologyVersion}`));
+    const newReconstructed = reconstructed.filter(item => !existingKeys.has(`${item.ticker}:${item.asOf}:${item.methodologyVersion}`));
+    if (newReconstructed.length) {
+      await service.store.saveScoreSnapshots(newReconstructed.map(item => ({
+        ...item,
+        calculatedAt: item.reconstructedAt,
+        provenance: {
+          methodologyVersion: item.methodologyVersion,
+          lineage: item.lineage,
+          pointInTimeCutoff: item.asOf,
+          origin: item.origin,
+          pointInTimeQuality: item.pointInTimeQuality,
+          qualityNotes: item.qualityNotes,
+        },
+      })));
+    }
   }
 
   const snapshot = {
