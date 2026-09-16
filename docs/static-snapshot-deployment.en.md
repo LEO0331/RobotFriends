@@ -11,7 +11,10 @@ Gridline separates **data refresh** from **site deployment**.
 5. The generator writes a **schemaVersion 4** `public/data/dashboard-snapshot.json` containing source health, outcomes, observations, versioned scores, `companyHistory`, `backtestCoverage`, and a compact `demoReadiness` summary.
 6. `npm run demo:check` validates demo-critical invariants before anything is committed. If a blocker is present, the refresh workflow fails and the existing public snapshot remains unchanged.
 7. When the snapshot changes and passes the gate, the workflow commits it to `main`.
-8. That push triggers the separate `Deploy to GitHub Pages` workflow. It installs from the lockfile, builds the React app, deploys the Pages artifact, then runs Lighthouse CI against the deployed site.
+8. The refresh workflow then explicitly dispatches `Deploy to GitHub Pages` with `workflow_dispatch`. This explicit dispatch is required because GitHub suppresses ordinary workflow chaining for pushes created with the repository `GITHUB_TOKEN`.
+9. The Pages workflow installs from the lockfile, builds the React app from the refreshed `main`, deploys the Pages artifact, then runs Lighthouse CI against the deployed site.
+
+A snapshot commit by itself is **not** proof that GitHub Pages has been updated. Confirm the subsequent `Deploy to GitHub Pages` run, or compare the deployed `#health` generation time with the committed snapshot.
 
 ## Demo-readiness gate
 
@@ -66,6 +69,7 @@ Gridline fails closed at the data boundary:
 - failed/degraded sources do not erase last-known-good static history;
 - if retained history still meets the demo-critical gate, the snapshot may publish with visible warnings;
 - if market history, schema-v4 point-in-time data, or another critical invariant is missing, `demo:check` fails before the snapshot is committed;
-- a total snapshot-script failure also fails the workflow and leaves the existing public artifact untouched.
+- a total snapshot-script failure also fails the workflow and leaves the existing public artifact untouched;
+- if snapshot commit succeeds but the explicit Pages dispatch fails, the repository contains the new data but the deployed site remains on the prior build. Re-run `Deploy to GitHub Pages` manually and investigate the dispatch step.
 
-Use the in-app **Research Lab → Data health** workspace (`#health`) to inspect the same committed snapshot that the public dashboard is using.
+Use the in-app **Research Lab → Data health** workspace (`#health`) to inspect the same snapshot that the deployed public dashboard is serving.
