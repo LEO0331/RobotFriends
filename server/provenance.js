@@ -6,7 +6,7 @@ const PROVIDERS = {
   pjm: { name: 'PJM Interconnection', url: 'https://www.pjm.com/', dataClass: 'primary' },
   ferc: { name: 'Federal Energy Regulatory Commission', url: 'https://data.ferc.gov/', dataClass: 'primary' },
   'company-ir': { name: 'Company investor relations', url: null, dataClass: 'primary' },
-  prices: { name: 'Configured market-data provider', url: null, dataClass: 'market' },
+  prices: { name: 'Stooq market data', url: 'https://stooq.com/', dataClass: 'market' },
 };
 
 function canonical(value) {
