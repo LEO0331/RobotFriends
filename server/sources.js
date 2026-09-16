@@ -1,4 +1,5 @@
-const { getJson, getText, parseCsv } = require('./http');
+const { getJson, getText } = require('./http');
+const { fetchTickerHistory } = require('./price-history');
 
 const SEC_TICKERS = 'https://www.sec.gov/files/company_tickers.json';
 const SEC_SUBMISSIONS = cik => `https://data.sec.gov/submissions/CIK${String(cik).padStart(10, '0')}.json`;
@@ -50,8 +51,41 @@ async function ingestIr(config) {
   return { payload, observations, message: `${feeds.length} official IR feeds ingested` };
 }
 async function ingestPrices(config) {
-  const payload = []; const observations = [];
-  for (const ticker of config.tickers) { const text = await getText(`${config.priceBaseUrl}?s=${ticker.toLowerCase()}.us&i=d`); const rows = parseCsv(text).filter(row => row.Date && Number.isFinite(Number(row.Close))); payload.push({ ticker, rows }); rows.slice(-260).forEach(row => observations.push(observation('prices', 'close', Number(row.Close), { ticker, currency: 'USD', observedAt: `${row.Date}T00:00:00.000Z`, confidence: 0.7 }))); }
-  return { payload, observations, message: `${observations.length} daily price observations ingested` };
+  const payload = [];
+  const observations = [];
+  const providerCounts = new Map();
+  const tickers = config.tickers || [];
+  if (!tickers.length) throw new Error('No tracked tickers are configured for price ingestion.');
+
+  for (const ticker of tickers) {
+    const history = await fetchTickerHistory({
+      ticker,
+      priceBaseUrl: config.priceBaseUrl,
+      priceFallbackBaseUrl: config.priceFallbackBaseUrl,
+      getText,
+      getJson,
+    });
+    const rows = history.rows.slice(-260);
+    payload.push({ ticker, provider: history.provider, providerUrl: history.providerUrl, rows });
+    providerCounts.set(history.provider, (providerCounts.get(history.provider) || 0) + 1);
+    rows.forEach(row => observations.push(observation('prices', 'close', row.close, {
+      ticker,
+      currency: 'USD',
+      observedAt: `${row.date}T00:00:00.000Z`,
+      confidence: history.provider === 'Stooq' ? 0.7 : 0.68,
+      providerName: history.provider,
+      sourceUrl: history.providerUrl,
+    })));
+  }
+
+  const coveredTickers = new Set(observations.map(item => item.ticker));
+  const missing = tickers.filter(ticker => !coveredTickers.has(ticker));
+  if (missing.length) throw new Error(`Incomplete price coverage; missing usable history for ${missing.join(', ')}.`);
+  const providers = [...providerCounts.entries()].map(([provider, count]) => `${provider}:${count}`).join(', ');
+  return {
+    payload,
+    observations,
+    message: `${observations.length} daily price observations ingested across ${coveredTickers.size}/${tickers.length} tickers (${providers})`,
+  };
 }
 module.exports = { sec: ingestSec, eia: ingestEia, pjm: ingestPjm, ferc: ingestFerc, 'company-ir': ingestIr, prices: ingestPrices };
