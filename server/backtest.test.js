@@ -15,6 +15,7 @@ test('point-in-time backtest evaluates completed constructive and caution signal
   const result = runBacktest({ ticker: 'NBIS', horizonDays: 30 }, scores, observations);
   assert.equal(result.metrics.sampleSize, 2);
   assert.equal(result.metrics.directionalHitRate, 1);
+  assert.equal(result.metrics.recordedSignals, 2);
   assert.equal(result.status, 'complete');
 });
 
@@ -24,4 +25,21 @@ test('future-dated lineage invalidates a signal', () => {
   const result = runBacktest({ ticker: 'NBIS', horizonDays: 30 }, scores, observations);
   assert.equal(result.metrics.invalidSignals, 1);
   assert.equal(result.rows[0].status, 'invalid');
+});
+
+test('server backtest preserves reconstructed origin and partial-quality label', () => {
+  const observations = [price('p1','2026-06-02',100), price('p2','2026-07-02',110)];
+  const scores = [{
+    ticker: 'NBIS',
+    asOf: '2026-06-01T22:00:00.000Z',
+    gap: 'Positive',
+    methodologyVersion: 'v1',
+    origin: 'historical-reconstruction',
+    pointInTimeQuality: 'partial',
+  }];
+  const result = runBacktest({ ticker: 'NBIS', horizonDays: 30 }, scores, observations);
+  assert.equal(result.metrics.reconstructedSignals, 1);
+  assert.equal(result.rows[0].origin, 'historical-reconstruction');
+  assert.equal(result.rows[0].pointInTimeQuality, 'partial');
+  assert.equal(result.rows[0].forwardReturn, 0.1);
 });
