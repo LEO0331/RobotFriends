@@ -1,19 +1,54 @@
 # Accounts on Supabase Free
 
-The public dashboard needs no login. Accounts save a watchlist, language and capacity weight. Click Save preferences in the account panel after changing dashboard settings. Preferences load on sign-in and session restoration; saves are explicit to prevent unintended overwrites.
+The public dashboard needs no login. Accounts are optional and currently save a watchlist, language and capacity weight. The React side now covers sign-up, email confirmation/resend, sign-in, session restoration, password reset, password change, preference load/save, and sign-out. Supabase project configuration is still required before those flows can contact a real backend.
 
-1. Create a **Free** project at https://supabase.com/dashboard. Do not enable paid add-ons.
-2. Run `supabase/user-preferences.sql` in the project's SQL Editor once. It enables Row Level Security: users can read/write only their own row. No preference access is granted to anonymous users.
-3. Enable Email authentication and keep email confirmation enabled. Use a minimum password length of 8.
-4. Under Authentication → URL Configuration, set Site URL to `https://leo0331.github.io/RobotFriends/`. Allow that exact redirect, `https://leo0331.github.io/RobotFriends`, and your local development URL `http://localhost:3000/RobotFriends`. PKCE email links should be opened in the same browser that requested them. The SDK handles callback query parameters; application navigation uses hashes.
-5. Copy the project URL and **publishable** key (`sb_publishable_...`) from the project's Connect/API Keys screen. Never put secret/service-role keys in React.
-6. Local: put `REACT_APP_SUPABASE_URL` and `REACT_APP_SUPABASE_PUBLISHABLE_KEY` in `.env.local`, then restart npm start.
-7. GitHub: Settings → Secrets and variables → Actions → **Variables** → create repository variables with those same names. Both deployment workflows inject them during build. Rebuild and deploy; the values are intentionally public browser configuration.
+## Supabase setup you still need to do
 
-Without configuration, account entry points explain that accounts are not enabled; public research remains usable. The SDK persists and refreshes sessions. Sign out removes the local session. Language, weight and ticker watchlist are stored in Supabase; raw market/EIA data is not uploaded to Supabase. Passwords go directly to Supabase Auth.
+1. Create a **Free** project at https://supabase.com/dashboard. Do not enable paid add-ons unless you intentionally need them.
+2. Run `supabase/user-preferences.sql` in the project's SQL Editor. The script is safe to rerun: it creates the preference table when missing, enables Row Level Security, recreates the own-row policy, blocks anonymous preference access, and grants authenticated CRUD access.
+3. Enable Email authentication, keep email confirmation enabled, and set the minimum password length to at least 8.
+4. Under Authentication → URL Configuration:
+   - Site URL: `https://leo0331.github.io/RobotFriends/`
+   - Allow both `https://leo0331.github.io/RobotFriends/` and `https://leo0331.github.io/RobotFriends`
+   - For local development, allow the URL you actually use, normally `http://localhost:3000/` (or a suitable localhost wildcard while developing).
+   - PKCE confirmation/recovery links must be opened in the same browser that started the flow.
+5. Copy the project URL and **publishable** key (`sb_publishable_...`) from the project's Connect/API Keys screen. Never put a secret/service-role key in React.
+6. Local development: put these in `.env.local`, then restart `npm start`:
+   - `REACT_APP_SUPABASE_URL`
+   - `REACT_APP_SUPABASE_PUBLISHABLE_KEY`
+7. GitHub Pages: Settings → Secrets and variables → Actions → **Variables** → create the same two repository variables. The deployment workflows inject them at build time. These are browser configuration values, not secrets.
+8. The repository CSP already permits HTTPS/WebSocket traffic to `*.supabase.co`. If you later use a custom Supabase domain, add that host to `connect-src` in `public/index.html`.
 
-Supabase's default email sender is limited and may restrict delivery to project-team addresses. For general public signups and recovery, configure supported custom SMTP and verify its delivery/rate limits. Free projects can pause after inactivity. Review https://supabase.com/pricing and https://supabase.com/docs/guides/auth/auth-smtp before launch.
+## Implemented application behavior
 
-## Acceptance checks after setup
+- **No Supabase config:** Sign in / Create account remain visible, but the dialog clearly says accounts are not enabled; the public dashboard continues working.
+- **Sign up:** email + password + password confirmation; uses PKCE and an explicit redirect URL.
+- **Email confirmation:** when confirmation is required, the dialog stays open and provides a resend-confirmation action.
+- **Sign in:** restores the session on reload and avoids flashing a signed-out state while local session restoration is in progress.
+- **Forgot password:** sends a reset link and always shows a generic response so the UI does not reveal whether an account exists.
+- **Password recovery:** the `PASSWORD_RECOVERY` auth event opens a new-password form and calls `updateUser`.
+- **Change password while signed in:** asks for the current password and a confirmed new password.
+- **Preferences:** loads only the signed-in user's `user_preferences` row under RLS; save is explicit and uses an upsert on `user_id`. A failed preference load can be retried without logging out.
+- **Sign out:** removes the local browser session.
+- **Security boundary:** the browser accepts only an `sb_publishable_...` key. Secret/service-role credentials are never supported by the frontend.
 
-Register → receive email → confirm in same browser → sign in. Select watchlist symbols and save dashboard language/weight; reload to confirm restoration. Test wrong password, recovery email and new password, sign out, and a second account. Verify account B cannot read or write account A's preferences through the Data API. Until the SQL and project variables are configured, live auth and database policies cannot be validated from this repository alone.
+Supabase stores only account/session data plus the preference row. Market, EIA, SEC, PJM and other research-source payloads are not uploaded to Supabase by this feature.
+
+## Email delivery before public launch
+
+Supabase's built-in email sender is intended for testing and has delivery/rate limitations. Before inviting general users, configure and verify custom SMTP, then test signup confirmation and password recovery end to end.
+
+## Acceptance checks after Supabase setup
+
+1. Register with a new email → receive confirmation → confirm in the same browser → sign in.
+2. Try a mismatched signup password confirmation and verify the browser blocks the request.
+3. Resend the signup confirmation email.
+4. Reload while signed in and verify the session is restored.
+5. Change language / capacity weight / watchlist, save, reload, and verify restoration.
+6. Enter a wrong password and verify the dialog remains open with the provider error.
+7. Request password recovery, follow the email link, set a new password, then sign in with it.
+8. Change the password while already signed in.
+9. Sign out and verify the authenticated controls disappear.
+10. Use a second account and verify it cannot read or write the first account's preference row through the Data API.
+
+Until the Supabase project, redirect URLs, SQL and repository variables are configured, live authentication and RLS cannot be validated from the repository alone.

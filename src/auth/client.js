@@ -1,9 +1,24 @@
 import { createClient } from '@supabase/supabase-js';
 
-const url = process.env.REACT_APP_SUPABASE_URL;
-const key = process.env.REACT_APP_SUPABASE_PUBLISHABLE_KEY;
-// Only the browser-safe publishable key is accepted here.
-export const supabase = url?.startsWith('https://') && key?.startsWith('sb_publishable_')
-  ? createClient(url, key, { auth: { flowType: 'pkce', persistSession: true, autoRefreshToken: true, detectSessionInUrl: true } })
+const url = String(process.env.REACT_APP_SUPABASE_URL || '').trim();
+const key = String(process.env.REACT_APP_SUPABASE_PUBLISHABLE_KEY || '').trim();
+
+export const supabaseConfigured = url.startsWith('https://') && key.startsWith('sb_publishable_');
+
+// Browser auth must use a publishable key. Never accept sb_secret_ / service-role
+// credentials here because the compiled React bundle is public.
+export const supabase = supabaseConfigured
+  ? createClient(url, key, {
+      auth: {
+        flowType: 'pkce',
+        persistSession: true,
+        autoRefreshToken: true,
+        detectSessionInUrl: true
+      }
+    })
   : null;
-export const redirectUrl = () => `${window.location.origin}${window.location.pathname}`;
+
+export const redirectUrl = () => {
+  if (typeof window === 'undefined') return '';
+  return `${window.location.origin}${window.location.pathname}`;
+};
