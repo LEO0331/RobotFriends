@@ -12,6 +12,7 @@ concurrency:
   group: pr-ci-${{ github.event.pull_request.number || github.ref }}
   cancel-in-progress: true
 
+# Keep this Node major aligned with package-lock.json regeneration.
 jobs:
   verify:
     name: Tests and production build
