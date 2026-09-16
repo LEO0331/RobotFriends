@@ -11,7 +11,10 @@ Gridline 將**資料更新**與**網站部署**分開處理。
 5. 產生器寫入 **schemaVersion 4** 的 `public/data/dashboard-snapshot.json`，內容包含來源健康狀態、更新結果、觀察值、版本化分數、`companyHistory`、`backtestCoverage`，以及精簡的 `demoReadiness` 摘要。
 6. 在提交檔案前，workflow 會執行 `npm run demo:check` 驗證示範關鍵條件。若存在 blocker，更新 workflow 會失敗，現有公開快照維持不變。
 7. 快照有變更且通過 gate 後，workflow 才提交到 `main`。
-8. 這次 push 會觸發另一個 `Deploy to GitHub Pages` workflow：依 lockfile 安裝、建置 React、部署 Pages artifact，最後以 Lighthouse CI 檢查已部署網站。
+8. 接著由 refresh workflow **明確 dispatch** `Deploy to GitHub Pages` 的 `workflow_dispatch`。這一步是必要的，因為使用 repository `GITHUB_TOKEN` 產生的 push 不會自動觸發另一個 push-based workflow。
+9. Pages workflow 會從更新後的 `main` 依 lockfile 安裝、建置 React、部署 Pages artifact，最後以 Lighthouse CI 檢查已部署網站。
+
+因此「snapshot commit 已成功」**不等於** GitHub Pages 已更新。請確認後續的 `Deploy to GitHub Pages` workflow 也有執行成功，或比對部署網站 `#health` 的產生時間是否已更新。
 
 ## 示範準備度 Gate
 
@@ -66,6 +69,7 @@ Gridline 在資料邊界採 fail-closed：
 - 來源失敗／降級不會刪除上次成功的靜態歷史；
 - 若保留資料仍符合示範關鍵 gate，可帶著明確警示發布；
 - 若缺少市場歷史、schema-v4 時點資料或其他關鍵條件，`demo:check` 會在提交快照前失敗；
-- 若整個 snapshot script 失敗，workflow 也會失敗，現有公開 artifact 維持不變。
+- 若整個 snapshot script 失敗，workflow 也會失敗，現有公開 artifact 維持不變；
+- 若 snapshot commit 成功但 Pages dispatch 失敗，repository 已有新資料，但公開網站仍維持舊 build。此時手動重跑 `Deploy to GitHub Pages`，並檢查 dispatch step。
 
-可在應用程式的 **研究實驗室 → 資料健康**（`#health`）檢查公開儀表板正在使用的同一份 committed snapshot。
+可在應用程式的 **研究實驗室 → 資料健康**（`#health`）檢查部署網站實際正在使用的 snapshot。
