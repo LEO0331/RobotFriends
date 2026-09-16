@@ -1,5 +1,7 @@
 # Gridline — 資料中心基礎設施情報
 
+Supabase 免費帳戶設定：[繁體中文](docs/accounts.zh-TW.md) · [English](docs/accounts.en.md)。
+
 Gridline 是決策輔助儀表板，將 AI／資料中心實體建設、供電限制、法規事件與市場預期連結起來；它不是自動交易系統，也不是投資建議。
 
 ## 本機啟動

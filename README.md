@@ -1,5 +1,7 @@
 # Gridline — Data Center Infrastructure Intelligence
 
+Account setup (Supabase Free): [English](docs/accounts.en.md) · [繁體中文](docs/accounts.zh-TW.md).
+
 Gridline is a decision-support and research-validation dashboard that connects physical AI/data-center buildout, power constraints, regulatory events and market expectations. It is not an automated trading system or investment advice.
 
 The public GitHub Pages build is a static demonstration. The same repository also includes a Node.js API profile with persistent historical storage, versioned scores, scenario-run persistence and point-in-time backtesting.
