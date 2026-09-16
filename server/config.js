@@ -28,6 +28,7 @@ module.exports = {
   fercKey: process.env.FERC_API_KEY || '',
   companyIrFeeds: parseJson(process.env.COMPANY_IR_FEEDS, {}),
   priceBaseUrl: process.env.PRICE_BASE_URL || 'https://stooq.com/q/d/l/',
+  priceFallbackBaseUrl: process.env.PRICE_FALLBACK_BASE_URL || 'https://query1.finance.yahoo.com/v8/finance/chart',
   cacheMinutes: Number(process.env.CACHE_MINUTES || 60),
   scheduleEnabled: process.env.SCHEDULE_ENABLED !== 'false',
   scheduleSources: (process.env.SCHEDULE_SOURCES || 'sec,prices,company-ir,eia,pjm,ferc').split(',').map(value => value.trim()).filter(Boolean),
