@@ -74,7 +74,8 @@ Provider 設定請參考 [.env.example](.env.example) 與 [資料擷取 API 說�
 
 GitHub Pages profile：
 provider refresh → schema-v4 snapshot → demo readiness gate
-                → commit main → Pages build/deploy → Lighthouse CI
+                → commit main → 明確 dispatch Pages workflow
+                → Pages build/deploy → Lighthouse CI
 ```
 
 主要模組：
@@ -166,7 +167,7 @@ npm run verify:demo
 
 `Refresh daily dashboard snapshot` 於工作日 **22:00 UTC** 執行，也支援手動 dispatch。它會重試各來源、對 degraded provider 保留 last-known-good 資料、產生 schemaVersion 4 歷史資料（`scores`、`companyHistory`、`backtestCoverage`、`demoReadiness`），然後執行 `npm run demo:check`。
 
-只有通過示範關鍵 gate 的 snapshot 才會提交到 `main`。這次 push 會觸發另一個 `Deploy to GitHub Pages` workflow，執行 Node 22 lockfile install、production build、Pages deploy 與 Lighthouse CI。
+只有通過示範關鍵 gate 的 snapshot 才會提交到 `main`。接著 refresh workflow 會明確 dispatch `Deploy to GitHub Pages`，再執行 Node 22 lockfile install、production build、Pages deploy 與 Lighthouse CI。這個明確 dispatch 是必要的，因為使用 repository `GITHUB_TOKEN` 產生的 push 不會再觸發另一個以 `push` 為條件的 workflow。
 
 Gate 的關鍵條件包含：四個追蹤 ticker 都有近期可用價格歷史，且至少有一筆清楚標示的 historical reconstruction。選用 provider degraded 會以警示顯示，不會被靜默隱藏。
 
