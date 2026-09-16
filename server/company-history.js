@@ -5,11 +5,19 @@ function normalizeSnapshot(company, observedAt) {
   return {
     ticker: company.ticker,
     observedAt,
+    asOf: company.asOf || observedAt,
     emotion: Number(company.emotion),
     fundamentals: Number(company.fundamentals),
     exposure: Number(company.exposure),
     gap: company.gap,
     confidence: Number(company.confidence || 0),
+    methodologyVersion: company.methodologyVersion || 'recorded-snapshot',
+    lineage: company.lineage || [],
+    origin: company.origin || 'recorded',
+    pointInTimeQuality: company.pointInTimeQuality || 'recorded',
+    qualityNotes: company.qualityNotes || [],
+    reconstructedAt: company.reconstructedAt || null,
+    reconstructionVersion: company.reconstructionVersion || null,
   };
 }
 
@@ -33,4 +41,4 @@ function mergeCompanyHistory(previous, companies, observedAt = new Date().toISOS
   });
 }
 
-module.exports = { mergeCompanyHistory, MAX_HISTORY_DAYS };
+module.exports = { mergeCompanyHistory, normalizeSnapshot, MAX_HISTORY_DAYS };
