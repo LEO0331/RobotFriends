@@ -3,6 +3,7 @@ const path = require('path');
 const config = require('./config');
 const { createService } = require('./service');
 const { mergeCompanyHistory } = require('./company-history');
+const { mergeSnapshotObservations } = require('./snapshot-merge');
 const {
   reconstructCompanyHistory,
   mergeReconstructedHistory,
@@ -28,8 +29,7 @@ async function main() {
   for (const source of config.scheduleSources) outcomes.push(await refreshWithRetry(service, source));
   const fresh = await service.observations(); const health = await service.health();
   const successful = new Set(outcomes.filter(item => item.status === 'ok').map(item => item.source));
-  const retained = (previous.observations || []).filter(item => !successful.has(item.source));
-  const observations = [...retained, ...fresh];
+  const observations = mergeSnapshotObservations(previous.observations || [], fresh, outcomes);
   const generatedAt = new Date().toISOString();
   const scores = scoreCompanies(companies, observations, generatedAt);
   const scoreSnapshots = scores.map(score => ({
@@ -86,7 +86,7 @@ async function main() {
     methodologies: { companyScore: companyScoreVersion },
     companyHistory,
     backtestCoverage,
-    note: 'Static dashboard snapshot. Recorded scores are native point-in-time observations. Demo historical reconstructions are clearly labeled and enforce historical observation cutoffs; they remain partial because methodology-v1 fundamental and structural-exposure inputs do not yet have historical vintages. Not investment advice.',
+    note: 'Static dashboard snapshot. Successful sources replace their prior static data; degraded sources retain last-known-good observations. Recorded scores are native point-in-time observations. Demo historical reconstructions are clearly labeled and enforce historical observation cutoffs; they remain partial because methodology-v1 fundamental and structural-exposure inputs do not yet have historical vintages. Not investment advice.',
   };
   await fs.mkdir(path.dirname(output), { recursive: true }); await fs.writeFile(output, `${JSON.stringify(snapshot, null, 2)}\n`);
   console.log(JSON.stringify({
@@ -95,7 +95,7 @@ async function main() {
     reconstructedRecords: backtestCoverage.reconstructed,
     backtestCoverage,
     methodology: companyScoreVersion,
-    sources: outcomes.map(item => ({ source: item.source, status: item.status, attempts: item.attempts })),
+    sources: outcomes.map(item => ({ source: item.source, status: item.status, attempts: item.attempts, recordCount: item.recordCount ?? null, message: item.message })),
   }, null, 2));
 }
 main().catch(error => { console.error(error); process.exit(1); });
