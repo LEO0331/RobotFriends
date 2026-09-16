@@ -6,7 +6,7 @@ const PROVIDERS = {
   pjm: { name: 'PJM Interconnection', url: 'https://www.pjm.com/', dataClass: 'primary' },
   ferc: { name: 'Federal Energy Regulatory Commission', url: 'https://data.ferc.gov/', dataClass: 'primary' },
   'company-ir': { name: 'Company investor relations', url: null, dataClass: 'primary' },
-  prices: { name: 'Stooq market data', url: 'https://stooq.com/', dataClass: 'market' },
+  prices: { name: 'Configured market-data provider', url: null, dataClass: 'market' },
 };
 
 function canonical(value) {
@@ -53,8 +53,8 @@ function attachProvenance(item, defaults = {}) {
     provenance: {
       observationId: id,
       source,
-      provider: provider.name,
-      dataClass: provider.dataClass,
+      provider: normalized.providerName || provider.name,
+      dataClass: normalized.providerDataClass || provider.dataClass,
       originUrl,
       observedAt,
       retrievedAt,
