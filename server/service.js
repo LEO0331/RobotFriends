@@ -11,6 +11,9 @@ function createService(config) {
       const result = await adapters[source](config);
       await store.saveRaw(source, result.payload);
       const observations = normalizeObservations(source, result.observations);
+      if (!observations.length) {
+        throw new Error(`${source} returned zero usable observations; last-known-good data retained.`);
+      }
       await store.saveObservations(source, observations);
       await store.recordHealth(source, { status: 'ok', lastSuccessAt: new Date().toISOString(), cacheMinutes: config.cacheMinutes, recordCount: observations.length, message: result.message });
       return { source, status: 'ok', recordCount: observations.length, message: result.message };
