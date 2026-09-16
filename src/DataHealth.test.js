@@ -41,7 +41,7 @@ test('data health renders demo readiness and source/price coverage in English', 
   await waitFor(() => expect(screen.getByText('READY WITH WARNINGS')).toBeInTheDocument());
   expect(screen.getByText('MARKET PRICE COVERAGE')).toBeInTheDocument();
   expect(screen.getByText('POINT-IN-TIME COVERAGE')).toBeInTheDocument();
-  expect(screen.getByText('Fixture provider', { exact: false })).toBeInTheDocument();
+  expect(screen.getAllByText('Fixture provider')).toHaveLength(4);
 });
 
 test('data health renders Traditional Chinese labels', async () => {
@@ -49,5 +49,6 @@ test('data health renders Traditional Chinese labels', async () => {
   await waitFor(() => expect(screen.getByText('可展示，但有警示')).toBeInTheDocument());
   expect(screen.getByText('市場價格涵蓋')).toBeInTheDocument();
   expect(screen.getByText('時點驗證涵蓋')).toBeInTheDocument();
+  expect(screen.getByText('市場價格')).toBeInTheDocument();
   expect(screen.getByRole('button', { name: 'EN' })).toBeInTheDocument();
 });
