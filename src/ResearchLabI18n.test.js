@@ -33,11 +33,14 @@ test('scenario lab renders Traditional Chinese copy and localized regions', () =
   expect(screen.getByRole('button', { name: 'EN' })).toBeInTheDocument();
 });
 
-test('point-in-time backtest renders Traditional Chinese research language', async () => {
+test('point-in-time backtest explains reconstructed demo history in Traditional Chinese', () => {
   render(<BacktestLab language="zh-TW" onBack={() => {}} />);
   expect(screen.getByText('時點驗證')).toBeInTheDocument();
   expect(screen.getByText('模型驗證 / 禁止前視偏誤')).toBeInTheDocument();
+  expect(screen.getByText('這個驗證如何運作')).toBeInTheDocument();
+  expect(screen.getByText('資料涵蓋範圍')).toBeInTheDocument();
+  expect(screen.getByText('歷史重建')).toBeInTheDocument();
   expect(screen.getByText('時點資料防護規則')).toBeInTheDocument();
-  expect(screen.getByText('回測統計屬於描述性的研究診斷，不代表已證明具有預測能力，也不是投資建議。')).toBeInTheDocument();
+  expect(screen.getByText(/歷史重建資料會與原生實際記錄清楚區分/)).toBeInTheDocument();
   expect(screen.getByRole('button', { name: 'EN' })).toBeInTheDocument();
 });

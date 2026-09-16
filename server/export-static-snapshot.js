@@ -3,6 +3,11 @@ const path = require('path');
 const config = require('./config');
 const { createService } = require('./service');
 const { mergeCompanyHistory } = require('./company-history');
+const {
+  reconstructCompanyHistory,
+  mergeReconstructedHistory,
+  reconstructionSummary,
+} = require('./historical-reconstruction');
 const { scoreCompanies, VERSION: companyScoreVersion } = require('./scoring/engine');
 const companies = require('../src/data/companyExposure.json');
 
@@ -29,16 +34,49 @@ async function main() {
   const scores = scoreCompanies(companies, observations, generatedAt);
   const scoreSnapshots = scores.map(score => ({
     ticker: score.ticker,
+    asOf: score.asOf,
     emotion: score.emotion,
     fundamentals: score.fundamentals,
     exposure: score.exposure,
     gap: score.gap,
     confidence: score.confidence,
+    methodologyVersion: score.methodologyVersion,
+    lineage: score.lineage || [],
+    origin: 'recorded',
+    pointInTimeQuality: 'recorded',
   }));
-  const companyHistory = mergeCompanyHistory(previous.companyHistory || [], scoreSnapshots, generatedAt);
+
+  const reconstructionEnabled = process.env.BACKTEST_DEMO_RECONSTRUCTION !== 'false';
+  const reconstructed = reconstructionEnabled
+    ? reconstructCompanyHistory({ companies, observations, generatedAt })
+    : [];
+  const historyWithReconstruction = mergeReconstructedHistory(previous.companyHistory || [], reconstructed);
+  const companyHistory = mergeCompanyHistory(historyWithReconstruction, scoreSnapshots, generatedAt);
+  const backtestCoverage = reconstructionSummary(companyHistory);
+
   await service.store.saveScoreSnapshots(scores);
+  if (reconstructed.length) {
+    const existingScores = await service.store.scoreSnapshots({});
+    const existingKeys = new Set(existingScores.map(item => `${item.ticker}:${item.asOf}:${item.methodologyVersion}`));
+    const newReconstructed = reconstructed.filter(item => !existingKeys.has(`${item.ticker}:${item.asOf}:${item.methodologyVersion}`));
+    if (newReconstructed.length) {
+      await service.store.saveScoreSnapshots(newReconstructed.map(item => ({
+        ...item,
+        calculatedAt: item.reconstructedAt,
+        provenance: {
+          methodologyVersion: item.methodologyVersion,
+          lineage: item.lineage,
+          pointInTimeCutoff: item.asOf,
+          origin: item.origin,
+          pointInTimeQuality: item.pointInTimeQuality,
+          qualityNotes: item.qualityNotes,
+        },
+      })));
+    }
+  }
+
   const snapshot = {
-    schemaVersion: 3,
+    schemaVersion: 4,
     generatedAt,
     freshness: outcomes.every(item => item.status === 'ok') ? 'fresh' : successful.size ? 'partial' : 'stale',
     sourceHealth: health,
@@ -47,9 +85,17 @@ async function main() {
     scores,
     methodologies: { companyScore: companyScoreVersion },
     companyHistory,
-    note: 'Static dashboard snapshot. External observations carry provenance, derived scores carry methodology versions and lineage, and historical scores are stored point-in-time to avoid look-ahead bias. Not investment advice.',
+    backtestCoverage,
+    note: 'Static dashboard snapshot. Recorded scores are native point-in-time observations. Demo historical reconstructions are clearly labeled and enforce historical observation cutoffs; they remain partial because methodology-v1 fundamental and structural-exposure inputs do not yet have historical vintages. Not investment advice.',
   };
   await fs.mkdir(path.dirname(output), { recursive: true }); await fs.writeFile(output, `${JSON.stringify(snapshot, null, 2)}\n`);
-  console.log(JSON.stringify({ freshness: snapshot.freshness, companyHistoryRecords: companyHistory.length, methodology: companyScoreVersion, sources: outcomes.map(item => ({ source: item.source, status: item.status, attempts: item.attempts })) }, null, 2));
+  console.log(JSON.stringify({
+    freshness: snapshot.freshness,
+    companyHistoryRecords: companyHistory.length,
+    reconstructedRecords: backtestCoverage.reconstructed,
+    backtestCoverage,
+    methodology: companyScoreVersion,
+    sources: outcomes.map(item => ({ source: item.source, status: item.status, attempts: item.attempts })),
+  }, null, 2));
 }
 main().catch(error => { console.error(error); process.exit(1); });

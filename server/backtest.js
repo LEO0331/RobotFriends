@@ -1,4 +1,4 @@
-const BACKTEST_VERSION = 'gridline-point-in-time-backtest-v1.0.0';
+const BACKTEST_VERSION = 'gridline-point-in-time-backtest-v1.1.0';
 const DAY_MS = 24 * 60 * 60 * 1000;
 
 function sortedPrices(observations, ticker) {
@@ -12,10 +12,11 @@ function firstAtOrAfter(rows, timestamp, toleranceDays = 5) {
 }
 function scoreTime(score) { return Date.parse(score.asOf || score.observedAt || score.calculatedAt); }
 function scoreGap(score) { return score.gap || score.scores?.expectationsGap?.label || 'Balanced'; }
+function scoreOrigin(score) { return score.origin === 'historical-reconstruction' || score.provenance?.origin === 'historical-reconstruction' ? 'historical-reconstruction' : 'recorded'; }
 function lineageValid(score, observationById) {
   const cutoff = scoreTime(score);
   const lineage = score.lineage || score.provenance?.lineage || [];
-  if (!lineage.length) return { valid: true, mode: 'recorded-snapshot' };
+  if (!lineage.length) return { valid: true, mode: scoreOrigin(score) === 'historical-reconstruction' ? 'reconstruction-no-lineage' : 'recorded-snapshot' };
   for (const id of lineage) {
     const observation = observationById.get(id);
     if (observation && Date.parse(observation.observedAt) > cutoff) return { valid: false, mode: 'lineage-violation', observationId: id };
@@ -40,28 +41,33 @@ function runBacktest(input, scoreSnapshots = [], observations = []) {
     const signalAt = scoreTime(score);
     if (!Number.isFinite(signalAt)) continue;
     const audit = lineageValid(score, observationById);
-    if (!audit.valid) { invalidSignals += 1; rows.push({ signalAt: new Date(signalAt).toISOString(), gap, status: 'invalid', audit }); continue; }
+    const origin = scoreOrigin(score);
+    const pointInTimeQuality = score.pointInTimeQuality || score.provenance?.pointInTimeQuality || (origin === 'recorded' ? 'recorded' : 'partial');
+    if (!audit.valid) { invalidSignals += 1; rows.push({ signalAt: new Date(signalAt).toISOString(), gap, status: 'invalid', audit, origin, pointInTimeQuality }); continue; }
     const entry = firstAtOrAfter(prices, signalAt, 5);
     const exitTarget = signalAt + horizonDays * DAY_MS;
     const exit = firstAtOrAfter(prices, exitTarget, 7);
-    if (!entry) { rows.push({ signalAt: new Date(signalAt).toISOString(), gap, status: 'no-entry-price', audit }); continue; }
-    if (!exit) { rows.push({ signalAt: new Date(signalAt).toISOString(), gap, status: 'pending', entryPrice: Number(entry.value), audit }); continue; }
+    if (!entry) { rows.push({ signalAt: new Date(signalAt).toISOString(), gap, status: 'no-entry-price', audit, origin, pointInTimeQuality }); continue; }
+    if (!exit) { rows.push({ signalAt: new Date(signalAt).toISOString(), gap, status: 'pending', entryPrice: Number(entry.value), audit, origin, pointInTimeQuality }); continue; }
     const forwardReturn = Number(exit.value) / Number(entry.value) - 1;
     const direction = gap === 'Positive' ? 1 : -1;
     rows.push({
       signalAt: new Date(signalAt).toISOString(), gap, status: 'complete',
       entryAt: entry.observedAt, entryPrice: Number(entry.value), exitAt: exit.observedAt, exitPrice: Number(exit.value),
       forwardReturn: round4(forwardReturn), directionalReturn: round4(forwardReturn * direction), success: forwardReturn * direction > 0, audit,
-      methodologyVersion: score.methodologyVersion || 'recorded-snapshot',
+      methodologyVersion: score.methodologyVersion || 'recorded-snapshot', origin, pointInTimeQuality,
     });
   }
   const complete = rows.filter(row => row.status === 'complete');
   const positive = complete.filter(row => row.gap === 'Positive').map(row => row.forwardReturn);
   const elevated = complete.filter(row => row.gap === 'Elevated').map(row => row.forwardReturn);
+  const reconstructedSignals = rows.filter(row => row.origin === 'historical-reconstruction').length;
   const metrics = {
     sampleSize: complete.length,
     pendingSignals: rows.filter(row => row.status === 'pending').length,
     invalidSignals,
+    recordedSignals: rows.length - reconstructedSignals,
+    reconstructedSignals,
     directionalHitRate: complete.length ? round4(complete.filter(row => row.success).length / complete.length) : null,
     averageDirectionalReturn: round4(average(complete.map(row => row.directionalReturn))),
     averageForwardReturnPositive: round4(average(positive)),
@@ -76,9 +82,11 @@ function runBacktest(input, scoreSnapshots = [], observations = []) {
     metrics,
     rows,
     guardrails: [
-      'Uses only score snapshots recorded at or before each signal timestamp.',
+      'Recorded rows use native score snapshots captured on their original date.',
+      'Historical reconstructions enforce an as-of cutoff for external observations and are labeled as reconstructed.',
+      'Reconstructed rows are partial-quality while methodology-v1 fundamental and structural-exposure inputs lack historical-vintage metadata.',
       'Lineage observations dated after a score cutoff invalidate that signal.',
-      'No historical proprietary score is reconstructed using current information.',
+      'Future prices are used only to evaluate a signal after it existed, never to create that signal.',
       'Results are descriptive validation, not evidence of future performance.',
     ],
   };

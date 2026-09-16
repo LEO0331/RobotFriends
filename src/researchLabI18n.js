@@ -61,29 +61,49 @@ export const researchLabCopy = language => {
       titleLead: t('Backtest what Gridline', '回測 Gridline'),
       titleEmphasis: t('actually knew.', '當時真正知道的資訊。'),
       intro: t(
-        'Signals are evaluated only after they were recorded. Gridline does not reconstruct historical proprietary scores using information learned later.',
-        '訊號只會在實際被記錄之後接受評估。Gridline 不會使用事後才得知的資訊，回頭重建歷史專有分數。'
+        'Native signals use recorded snapshots. Demo history may also include clearly labeled point-in-time reconstructions that enforce historical observation cutoffs; reconstructed rows remain partial-quality until all methodology inputs have historical vintages.',
+        '原生訊號使用當日實際記錄的快照。示範歷史也可包含清楚標示的時點重建資料，並強制套用歷史資料截止時間；在所有方法論輸入都具備歷史版本前，重建資料會標示為「部分品質」。'
       ),
+      howTitle: t('HOW THIS VALIDATION WORKS', '這個驗證如何運作'),
+      howItems: days => [
+        t('Gridline uses a signal that existed on historical day T.', 'Gridline 使用歷史日期 T 當時已存在的訊號。'),
+        t('Only observations available by day T may contribute to a reconstructed signal.', '重建訊號只能使用日期 T 當下已可取得的觀測資料。'),
+        t('The market price near day T becomes the entry price.', '接近日期 T 的市場價格作為進場價格。'),
+        t(`The signal is evaluated against the price about ${days} days later.`, `訊號會以約 ${days} 天後的價格進行評估。`),
+        t('Positive tests subsequent upside; Elevated tests subsequent downside.', '「正向」測試後續上漲；「偏高」測試後續下跌。'),
+      ],
+      coverageTitle: t('DATA COVERAGE', '資料涵蓋範圍'),
+      coverageRange: t('Signal range', '訊號期間'),
+      pointInTimeSignals: t('Point-in-time signals', '時點訊號'),
+      recordedSignals: t('Recorded', '實際記錄'),
+      reconstructedSignals: t('Reconstructed', '歷史重建'),
+      dataQuality: t('Reconstruction quality', '重建資料品質'),
+      recordedQuality: t('Recorded only', '僅實際記錄'),
+      partialQuality: t('Partial — see guardrails', '部分 — 請查看防護規則'),
       completedSignals: t('Completed signals', '已完成訊號'),
       pendingOutcomes: t('Pending outcomes', '待完成結果'),
       hitRate: t('Directional hit rate', '方向命中率'),
       avgReturn: t('Avg directional return', '平均方向報酬'),
       buildingTitle: t('Point-in-time history is still building.', '時點歷史資料仍在累積中。'),
       building: days => t(
-        `This is intentional. Completed backtest results appear only after a recorded signal has a full future ${days}-day price window. No synthetic score history is inserted to make the chart look complete.`,
-        `這是刻意的設計。只有在已記錄訊號取得完整未來 ${days} 天價格區間後，才會產生已完成的回測結果；系統不會插入合成分數歷史來填滿圖表。`
+        `Completed results appear only after a signal has a full future ${days}-day price window. Recent signals remain pending; Gridline does not fabricate future outcomes.`,
+        `只有在訊號取得完整未來 ${days} 天價格區間後，才會產生已完成結果。近期訊號會維持待完成；Gridline 不會虛構未來結果。`
       ),
       signalLedger: t('Signal ledger', '訊號帳本'),
       signalDate: t('Signal date', '訊號日期'),
       gap: t('Gap', '預期落差'),
+      origin: t('Origin', '來源'),
+      recorded: t('Recorded', '實際記錄'),
+      reconstructed: t('Reconstructed', '歷史重建'),
       status: t('Status', '狀態'),
       forwardReturn: t('Forward return', '後續報酬'),
-      noSignals: t('No recorded Positive/Elevated signals yet for this ticker.', '此標的尚無已記錄的正向／偏高預期落差訊號。'),
+      noSignals: t('No Positive/Elevated point-in-time signals yet for this ticker.', '此標的尚無正向／偏高的時點訊號。'),
       guardrails: t('Point-in-time guardrails', '時點資料防護規則'),
       guardrailItems: [
-        t('Scores are consumed from daily recorded snapshots or versioned score snapshots.', '分數僅取自每日已記錄快照或版本化分數快照。'),
-        t('Server validation rejects a signal when source lineage contains observations dated after the score cutoff.', '若來源血緣包含分數截止時間之後的觀測資料，伺服器驗證會拒絕該訊號。'),
-        t('Future prices are used only to evaluate a signal after it existed, never to create that signal.', '未來價格只用於事後評估已存在的訊號，絕不拿來產生該訊號。'),
+        t('Recorded rows come from native score snapshots captured on their original date.', '實際記錄資料來自原日期當天產生的原生分數快照。'),
+        t('Reconstructed rows enforce an as-of cutoff: future observations cannot enter the signal.', '歷史重建資料強制套用時點截止限制：未來觀測資料不得進入該訊號。'),
+        t('Reconstructed rows are explicitly marked Partial while fundamental and structural-exposure inputs do not yet have historical-vintage metadata.', '在基本面與結構性曝險輸入尚未具備歷史版本中繼資料前，歷史重建資料會明確標示為「部分品質」。'),
+        t('Future prices are used only to evaluate an existing signal, never to create that signal.', '未來價格只用於評估已存在的訊號，絕不拿來產生該訊號。'),
         t('Small samples and pending outcomes remain visible instead of being filled with synthetic history.', '小樣本與未完成結果會維持可見，而不是用合成歷史資料填補。'),
       ],
       runPersist: t('Run & persist on API', '執行並保存至 API'),
@@ -92,13 +112,15 @@ export const researchLabCopy = language => {
       running: t('Running…', '執行中…'),
       retained: t('Production API runs are retained for audit.', '正式 API 的執行紀錄會保留以供稽核。'),
       note: t(
-        'Backtest statistics are descriptive research diagnostics. They do not establish predictive power and are not investment advice.',
-        '回測統計屬於描述性的研究診斷，不代表已證明具有預測能力，也不是投資建議。'
+        'Backtest statistics are descriptive research diagnostics. Reconstructed rows are clearly separated from native recorded history; neither establishes predictive power or investment advice.',
+        '回測統計屬於描述性的研究診斷。歷史重建資料會與原生實際記錄清楚區分；兩者都不代表已證明具有預測能力，也不是投資建議。'
       ),
       statuses: {
         complete: t('complete', '已完成'),
         pending: t('pending', '待完成'),
         rejected: t('rejected', '已拒絕'),
+        invalid: t('invalid', '無效'),
+        'no-entry-price': t('no entry price', '無進場價格'),
       },
       gaps: {
         Positive: t('Positive', '正向'),
