@@ -3,15 +3,29 @@ import RegimeExperience from './RegimeExperience';
 import ScenarioLab from './ScenarioLab';
 import BacktestLab from './BacktestLab';
 import InfrastructureRegionFocusPortal from './InfrastructureRegionFocusPortal';
+import { researchLabCopy } from './researchLabI18n';
 import './ResearchExperience.css';
 
+const LANGUAGE_KEY = 'gridline-language';
 const currentHash = () => window.location.hash || '#overview';
 const routeFromHash = hash => (String(hash).replace(/^#/, '').split('?')[0] || 'overview').toLowerCase();
 const go = route => { window.location.hash = route; window.scrollTo(0, 0); };
+const readLanguage = () => {
+  try { return window.localStorage.getItem(LANGUAGE_KEY) === 'zh-TW' ? 'zh-TW' : 'en'; }
+  catch { return 'en'; }
+};
 
 export default function ResearchExperience() {
   const [locationHash, setLocationHash] = useState(currentHash);
+  const [language, setLanguage] = useState(readLanguage);
   const route = routeFromHash(locationHash);
+  const copy = researchLabCopy(language);
+
+  const setResearchLanguage = next => {
+    const normalized = next === 'zh-TW' ? 'zh-TW' : 'en';
+    setLanguage(normalized);
+    try { window.localStorage.setItem(LANGUAGE_KEY, normalized); } catch {}
+  };
 
   useEffect(() => {
     const sync = () => setLocationHash(currentHash());
@@ -26,12 +40,24 @@ export default function ResearchExperience() {
     };
   }, []);
 
-  if (route === 'scenario') return <ScenarioLab onBack={() => go('regime')} />;
-  if (route === 'backtest') return <BacktestLab onBack={() => go('regime')} />;
+  useEffect(() => {
+    const syncLanguageFromDashboard = () => {
+      const visibleApp = document.querySelector('main.shell[lang], main.regime-detail-shell[lang]');
+      const next = visibleApp?.getAttribute('lang');
+      if (next === 'en' || next === 'zh-TW') setResearchLanguage(next);
+    };
+    syncLanguageFromDashboard();
+    const observer = new MutationObserver(syncLanguageFromDashboard);
+    observer.observe(document.body, { subtree: true, childList: true, attributes: true, attributeFilter: ['lang'] });
+    return () => observer.disconnect();
+  }, []);
+
+  if (route === 'scenario') return <ScenarioLab language={language} onLanguageChange={setResearchLanguage} onBack={() => go('regime')} />;
+  if (route === 'backtest') return <BacktestLab language={language} onLanguageChange={setResearchLanguage} onBack={() => go('regime')} />;
 
   return <>
     <RegimeExperience />
     <InfrastructureRegionFocusPortal locationHash={locationHash} />
-    <div className="research-dock"><span>RESEARCH LAB</span><button onClick={() => go('scenario')}>Scenario analysis →</button><button onClick={() => go('backtest')}>Point-in-time backtest →</button></div>
+    <div className="research-dock"><span>{copy.dockLabel}</span><button onClick={() => go('scenario')}>{copy.scenarioButton}</button><button onClick={() => go('backtest')}>{copy.backtestButton}</button></div>
   </>;
 }
