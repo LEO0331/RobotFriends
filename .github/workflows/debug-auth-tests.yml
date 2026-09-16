@@ -1,0 +1,37 @@
+name: Capture auth test output
+
+on:
+  push:
+    branches:
+      - debug/auth-ci-output
+
+permissions:
+  contents: write
+
+jobs:
+  capture:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v6
+        with:
+          fetch-depth: 0
+      - uses: actions/setup-node@v6
+        with:
+          node-version: 22
+          cache: npm
+      - run: npm ci
+      - name: Run account tests and capture output
+        run: |
+          set +e
+          npm run test:unit -- --runTestsByPath src/Components/Account.test.js > auth-test.log 2>&1
+          echo "exit_code=$?" >> auth-test.log
+          set -e
+      - name: Commit output and disable debug workflow
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          rm .github/workflows/debug-auth-tests.yml
+          git add auth-test.log .github/workflows/debug-auth-tests.yml
+          git commit -m "chore: capture auth test result"
+          git push origin HEAD:refs/heads/debug/auth-ci-output
