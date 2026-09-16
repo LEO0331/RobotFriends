@@ -15,7 +15,7 @@ export default function ScenarioLab({ onBack, language = 'en', onLanguageChange 
   const copy = researchLabCopy(language);
   const s = copy.scenario;
   const update = (key, value) => setInputs(current => ({ ...current, [key]: value }));
-  const regionLabel = value => value === 'All regions' ? s.allRegions : value === 'Northern Virginia' ? s.northernVirginia : value;
+  const regionLabel = value => s.regionLabels[value] || value;
   const driverLabel = key => ({ powerDelay: s.powerDelay, availablePower: s.availablePower, demand: s.demand, capex: s.capex, regulation: s.regulation })[key];
   const save = async () => {
     setSaveState('saving');
@@ -48,8 +48,8 @@ export default function ScenarioLab({ onBack, language = 'en', onLanguageChange 
         </article>
         <article className="scenario-results">
           <div className="scenario-score-grid">
-            <Score title={s.expansion} baseline={result.baseline.expansion} value={result.result.expansion} delta={result.result.expansionDelta} baselineLabel={s.baseline} />
-            <Score title={s.pushback} baseline={result.baseline.pushback} value={result.result.pushback} delta={result.result.pushbackDelta} baselineLabel={s.baseline} />
+            <Score title={s.expansion} baseline={result.baseline.expansion} value={result.result.expansion} delta={result.result.expansionDelta} baselineLabel={s.baseline} pointsSuffix={s.pointsSuffix} />
+            <Score title={s.pushback} baseline={result.baseline.pushback} value={result.result.pushback} delta={result.result.pushbackDelta} baselineLabel={s.baseline} pointsSuffix={s.pointsSuffix} />
           </div>
           <h2>{s.driverContribution}</h2>
           <div className="scenario-contributions">{driverKeys.map(key => <div key={key}><span>{driverLabel(key)}</span><b>{s.expansionWord} {signed(result.contributions.expansion[key])}</b><b>{s.pushbackWord} {signed(result.contributions.pushback[key])}</b></div>)}</div>
@@ -67,6 +67,6 @@ function Slider({ label, value, min, max, suffix, signed: useSign, onChange }) {
   const display = `${useSign && value > 0 ? '+' : ''}${value}${suffix}`;
   return <div className="scenario-control"><label><span>{label}</span><b>{display}</b></label><input type="range" min={min} max={max} value={value} onChange={e => onChange(Number(e.target.value))}/><small>{min}{suffix} <i/> {max > 0 ? '+' : ''}{max}{suffix}</small></div>;
 }
-function Score({ title, baseline, value, delta, baselineLabel }) {
-  return <div className="scenario-score"><span>{title}</span><strong>{value}</strong><small>{baselineLabel} {baseline} · {signed(delta)} pts</small><div><i style={{ width: `${value}%` }}/></div></div>;
+function Score({ title, baseline, value, delta, baselineLabel, pointsSuffix }) {
+  return <div className="scenario-score"><span>{title}</span><strong>{value}</strong><small>{baselineLabel} {baseline} · {signed(delta)}{pointsSuffix}</small><div><i style={{ width: `${value}%` }}/></div></div>;
 }
