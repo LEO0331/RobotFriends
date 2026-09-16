@@ -4,6 +4,7 @@ const config = require('./config');
 const { createService } = require('./service');
 const { mergeCompanyHistory } = require('./company-history');
 const { mergeSnapshotObservations } = require('./snapshot-merge');
+const { evaluateDemoReadiness } = require('./demo-readiness');
 const {
   reconstructCompanyHistory,
   mergeReconstructedHistory,
@@ -88,9 +89,18 @@ async function main() {
     backtestCoverage,
     note: 'Static dashboard snapshot. Successful sources replace their prior static data; degraded sources retain last-known-good observations. Recorded scores are native point-in-time observations. Demo historical reconstructions are clearly labeled and enforce historical observation cutoffs; they remain partial because methodology-v1 fundamental and structural-exposure inputs do not yet have historical vintages. Not investment advice.',
   };
+  const readiness = evaluateDemoReadiness(snapshot, { tickers: config.tickers, now: generatedAt });
+  snapshot.demoReadiness = {
+    status: readiness.status,
+    ready: readiness.ready,
+    blockerCount: readiness.blockerCount,
+    warningCount: readiness.warningCount,
+    priceCoverage: readiness.priceCoverage,
+  };
   await fs.mkdir(path.dirname(output), { recursive: true }); await fs.writeFile(output, `${JSON.stringify(snapshot, null, 2)}\n`);
   console.log(JSON.stringify({
     freshness: snapshot.freshness,
+    demoReadiness: snapshot.demoReadiness,
     companyHistoryRecords: companyHistory.length,
     reconstructedRecords: backtestCoverage.reconstructed,
     backtestCoverage,
