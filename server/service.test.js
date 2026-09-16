@@ -5,6 +5,7 @@ const os = require('os');
 const path = require('path');
 const { createStore } = require('./store');
 const { createService } = require('./service');
+const adapters = require('./sources');
 const { dueAfterClose } = require('./scheduler');
 const { parseCsv } = require('./http');
 
@@ -28,6 +29,25 @@ test('service reports supported adapters without configuration', async () => {
   assert.deepEqual(service.sources(), ['sec', 'eia', 'pjm', 'ferc', 'company-ir', 'prices']);
   service.store.close();
   await fs.rm(directory, { recursive: true, force: true });
+});
+test('zero-observation provider response is degraded and existing price history remains', async () => {
+  const directory = await fs.mkdtemp(path.join(os.tmpdir(), 'gridline-empty-source-'));
+  const original = adapters.prices;
+  adapters.prices = async () => ({ payload: { provider: 'test' }, observations: [], message: '0 rows' });
+  const service = createService({ dataDir: directory, cacheMinutes: 1 });
+  try {
+    await service.store.saveObservations('prices', [{ id: 'old-price', source: 'prices', type: 'close', ticker: 'NBIS', value: 100, observedAt: '2026-09-15T00:00:00Z' }]);
+    const result = await service.ingest('prices', true);
+    const rows = await service.observations({ source: 'prices' });
+    assert.equal(result.status, 'degraded');
+    assert.match(result.message, /zero usable observations/);
+    assert.equal(rows.length, 1);
+    assert.equal(rows[0].id, 'old-price');
+  } finally {
+    adapters.prices = original;
+    service.store.close();
+    await fs.rm(directory, { recursive: true, force: true });
+  }
 });
 test('post-close scheduler excludes weekends and runs after 4:15pm ET', () => {
   assert.equal(dueAfterClose(new Date('2026-09-14T20:14:00Z')).due, false);

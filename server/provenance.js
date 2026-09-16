@@ -53,8 +53,8 @@ function attachProvenance(item, defaults = {}) {
     provenance: {
       observationId: id,
       source,
-      provider: provider.name,
-      dataClass: provider.dataClass,
+      provider: normalized.providerName || provider.name,
+      dataClass: normalized.providerDataClass || provider.dataClass,
       originUrl,
       observedAt,
       retrievedAt,

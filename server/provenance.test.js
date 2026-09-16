@@ -19,3 +19,18 @@ test('provenance ids distinguish historical observations', () => {
   assert.notEqual(rows[0].id, rows[1].id);
   assert.equal(provenanceSummary(rows).originUrlCoverage, 1);
 });
+
+test('market observations retain the provider actually used by fallback ingestion', () => {
+  const row = attachProvenance({
+    source: 'prices',
+    type: 'close',
+    ticker: 'AVGO',
+    value: 350,
+    observedAt: '2026-09-15T00:00:00.000Z',
+    providerName: 'Yahoo Finance',
+    sourceUrl: 'https://query1.finance.yahoo.com/v8/finance/chart/AVGO?range=2y&interval=1d',
+  });
+  assert.equal(row.provenance.provider, 'Yahoo Finance');
+  assert.match(row.provenance.originUrl, /query1\.finance\.yahoo\.com/);
+  assert.equal(row.provenance.dataClass, 'market');
+});
