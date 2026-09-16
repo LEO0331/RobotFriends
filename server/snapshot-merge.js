@@ -20,4 +20,22 @@ function mergeSnapshotObservations(previous = [], fresh = [], outcomes = []) {
   });
 }
 
-module.exports = { mergeSnapshotObservations, observationKey };
+function mergeSnapshotHealth(previous = {}, current = {}, observations = []) {
+  const sources = new Set([...Object.keys(previous || {}), ...Object.keys(current || {})]);
+  const merged = {};
+  for (const source of sources) {
+    const prior = previous?.[source] || {};
+    const next = current?.[source] || {};
+    const retainedCount = (observations || []).filter(item => item.source === source).length;
+    const degraded = next.status === 'degraded';
+    merged[source] = {
+      ...prior,
+      ...next,
+      ...(degraded && !next.lastSuccessAt && prior.lastSuccessAt ? { lastSuccessAt: prior.lastSuccessAt } : {}),
+      ...(degraded ? { retainedRecordCount: retainedCount } : {}),
+    };
+  }
+  return merged;
+}
+
+module.exports = { mergeSnapshotObservations, mergeSnapshotHealth, observationKey };
