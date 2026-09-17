@@ -48,8 +48,8 @@ The static page now uses a restrictive CSP with an exact Supabase project origin
 
 ## Verification evidence
 
-- Server tests: 23 passed
-- Frontend tests: 16 passed
+- Server tests: 44 passed
+- Frontend tests: 26 passed
 - Production build: compiled successfully
 - Dependency audit: zero known vulnerabilities after remediation
 - Git diff whitespace check: passed

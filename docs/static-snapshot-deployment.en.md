@@ -16,6 +16,14 @@ Gridline separates **data refresh** from **site deployment**.
 
 A snapshot commit by itself is **not** proof that GitHub Pages has been updated. Confirm the subsequent `Deploy to GitHub Pages` run, or compare the deployed `#health` generation time with the committed snapshot.
 
+## What a successful refresh updates
+
+The Action writes a new `generatedAt` timestamp and provider outcome/health metadata. Successful providers replace their portion of the static observations; degraded providers retain prior usable observations and receive a new checked/error status. The generator then recalculates company scores, appends the daily company-history point, updates point-in-time/backtest coverage, and evaluates demo readiness. Market-price history and EIA observations therefore move when those providers succeed.
+
+The dashboard's snapshot labels read `generatedAt` directly from the deployed JSON and display it in the viewer's local time zone. The Data Health page exposes the exact UTC timestamp. `generatedAt` represents when the file was generated; an observation's own `observedAt` remains the date of the underlying market or operating data.
+
+The headline Expansion/Pushback regime values, curated driver cards, regional project assumptions, and seeded evidence descriptions are currently editorial MVP inputs. They do not change merely because the Action ran. A later methodology version can calculate those values from normalized observations once sufficient primary-source coverage exists.
+
 ## Demo-readiness gate
 
 The public snapshot must satisfy these critical checks before the daily workflow may publish it:

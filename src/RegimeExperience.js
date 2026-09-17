@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import App from './Containers/App';
 import ExposurePeriodPortal from './ExposurePeriodMonitor';
+import { emptySnapshot, loadDashboardSnapshot, summarizeSnapshot } from './snapshotMeta';
 import './RegimeExperience.css';
 
 const LANGUAGE_KEY = 'gridline-language';
@@ -40,6 +41,7 @@ function pushHash(hash, setRoute) {
 function RegimeExperience() {
   const [route, setRoute] = useState(getRoute);
   const [language, setLanguage] = useState(readStoredLanguage);
+  const [snapshot, setSnapshot] = useState(emptySnapshot);
   const setPersistentLanguage = next => {
     const normalized = next === 'zh-TW' ? 'zh-TW' : 'en';
     setLanguage(normalized);
@@ -69,22 +71,30 @@ function RegimeExperience() {
     };
   }, []);
 
+  useEffect(() => {
+    let active = true;
+    loadDashboardSnapshot().then(data => { if (active) setSnapshot(data); }).catch(() => {});
+    return () => { active = false; };
+  }, []);
+
   if (route === 'regime') {
     return (
       <RegimeDetail
         language={language}
         setLanguage={setPersistentLanguage}
         navigate={hash => pushHash(hash, setRoute)}
+        snapshot={snapshot}
       />
     );
   }
 
-  return <><App /><ExposurePeriodPortal /></>;
+  return <><App snapshot={snapshot} /><ExposurePeriodPortal /></>;
 }
 
-function RegimeDetail({ language, setLanguage, navigate }) {
+function RegimeDetail({ language, setLanguage, navigate, snapshot }) {
   const zh = language === 'zh-TW';
   const t = (en, tw) => (zh ? tw : en);
+  const snapshotMeta = summarizeSnapshot(snapshot, language);
 
   return (
     <main className="regime-detail-shell" lang={language}>
@@ -106,9 +116,9 @@ function RegimeDetail({ language, setLanguage, navigate }) {
           <p>{t('Demand remains durable while power delivery, interconnection timing and local constraints are becoming the limiting variables.', '需求仍具韌性，但供電交付、併網時程與地方限制正逐漸成為主要瓶頸。')}</p>
         </div>
         <div className="regime-status-card">
-          <span>{t('SNAPSHOT', '快照')}</span>
-          <b>SEP 15, 2026</b>
-          <small>{t('Curated MVP / decision support', '精選 MVP / 決策輔助')}</small>
+          <span>{t('SNAPSHOT · LOCAL TIME', '快照 · 本地時間')}</span>
+          <b>{snapshotMeta.generatedLabel}</b>
+          <small>{snapshotMeta.totalSources ? t(`${snapshotMeta.healthySources}/${snapshotMeta.totalSources} sources refreshed · ${snapshotMeta.freshness}`, `${snapshotMeta.healthySources}/${snapshotMeta.totalSources} 個來源已更新 · ${snapshotMeta.freshness}`) : t('Loading provider status', '正在載入來源狀態')}</small>
         </div>
       </section>
 
