@@ -22,7 +22,9 @@ The Action writes a new `generatedAt` timestamp and provider outcome/health meta
 
 The dashboard's snapshot labels read `generatedAt` directly from the deployed JSON and display it in the viewer's local time zone. The Data Health page exposes the exact UTC timestamp. `generatedAt` represents when the file was generated; an observation's own `observedAt` remains the date of the underlying market or operating data.
 
-The headline Expansion/Pushback regime values, curated driver cards, regional project assumptions, and seeded evidence descriptions are currently editorial MVP inputs. They do not change merely because the Action ran. A later methodology version can calculate those values from normalized observations once sufficient primary-source coverage exists.
+The headline Expansion/Pushback regime values, curated driver cards, and regional project assumptions are currently editorial MVP inputs. They do not change merely because the Action ran. A later methodology version can calculate those values from normalized observations once sufficient primary-source coverage exists.
+
+The Events page and regime evidence timeline show SEC filings from the snapshot, without claiming what a filing says about capacity, permits, or grid delivery. A filing appears under Current for 30 days from its filing date, then under Archive while it remains in the snapshot. The SEC adapter retains the latest 12 eligible filings per tracked issuer; older filings eventually roll out of the public snapshot rather than moving into a permanent archive folder. SQLite and raw bronze payloads have separate persistence. Links are constructed from the issuer CIK, accession number, and primary document returned by SEC submissions. A record missing those identifiers is omitted rather than linked to a generic or potentially unrelated page. The app cannot guarantee that SEC will permit every visitor's browser request.
 
 ## Demo-readiness gate
 

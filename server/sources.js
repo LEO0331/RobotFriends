@@ -20,6 +20,7 @@ async function ingestSec(config) {
     const [submissions, facts] = await Promise.all([getJson(SEC_SUBMISSIONS(company.cik_str, headers), headers), getJson(SEC_FACTS(company.cik_str), headers)]);
     payload.push({ ticker: company.ticker, submissions, facts });
     const filings = submissions.filings?.recent || {}; const forms = (filings.form || []).map((form, index) => ({ form, filed: filings.filingDate[index], accession: filings.accessionNumber[index], primaryDocument: filings.primaryDocument[index] })).filter(item => ['10-K', '10-Q', '8-K'].includes(item.form)).slice(0, 12);
+    forms.forEach(item => { item.cik = String(company.cik_str); });
     observations.push(observation('sec', 'filings', forms, { ticker: company.ticker, confidence: 1 }));
     for (const [factName, label] of [['Revenues', 'revenue'], ['PaymentsToAcquirePropertyPlantAndEquipment', 'capex'], ['LongTermDebtCurrent', 'currentDebt'], ['LongTermDebtNoncurrent', 'longTermDebt']]) {
       const fact = latestFact(facts, factName); if (fact) observations.push(observation('sec', label, Number(fact.val), { ticker: company.ticker, unit: fact.unit, periodEnd: fact.end, filedAt: fact.filed, form: fact.form, confidence: 1 }));

@@ -2,6 +2,7 @@ import React, { useEffect, useState } from 'react';
 import App from './Containers/App';
 import ExposurePeriodPortal from './ExposurePeriodMonitor';
 import { emptySnapshot, loadDashboardSnapshot, summarizeSnapshot } from './snapshotMeta';
+import { filingEvents } from './eventModel';
 import './RegimeExperience.css';
 
 const LANGUAGE_KEY = 'gridline-language';
@@ -13,17 +14,11 @@ const readStoredLanguage = () => {
 
 const drivers = [
   { tone: 'amber', label: 'CAPACITY MOMENTUM', value: '+1.2 GW', detail: 'New power capacity secured', weight: '35% expansion weight' },
-  { tone: 'blue', label: 'PROJECT VELOCITY', value: '+310 MW', detail: 'Approved this week', weight: '20% expansion weight' },
+  { tone: 'blue', label: 'PROJECT VELOCITY', value: '+310 MW', detail: 'Illustrative approval', weight: '20% expansion weight' },
   { tone: 'coral', label: 'GRID FRICTION', value: '−800 MW', detail: 'Delivery delayed', weight: '25% pushback weight' },
   { tone: 'purple', label: 'REGULATORY PRESSURE', value: '2', detail: 'New restrictions proposed', weight: '20% pushback weight' },
 ];
 
-const evidenceTimeline = [
-  { age: '2d ago', type: 'CAPEX', title: 'OCI capacity investment guidance increased', region: 'All regions', filter: 'CAPEX', impact: '+' },
-  { age: '1d ago', type: 'CONSTRAINT', title: '800 MW delivery schedule moves beyond 2028', region: 'Texas', filter: 'CONSTRAINT', impact: '−' },
-  { age: '6h ago', type: 'PERMIT', title: '310 MW campus receives zoning approval in Virginia', region: 'Northern Virginia', filter: 'PERMIT', impact: '+' },
-  { age: '2h ago', type: 'POWER', title: 'PJM load forecast revised higher through 2030', region: 'Northern Virginia', filter: 'POWER', impact: '+' },
-];
 
 const regionalPressure = [
   { name: 'Texas', grid: 'ERCOT', friction: 71, planned: '3.2 GW', note: 'Delivery timing revised' },
@@ -93,6 +88,7 @@ function RegimeExperience() {
 
 function RegimeDetail({ language, setLanguage, navigate, snapshot }) {
   const zh = language === 'zh-TW';
+  const evidenceTimeline = filingEvents(snapshot).filter(item => !item.archived).slice(0, 4);
   const t = (en, tw) => (zh ? tw : en);
   const snapshotMeta = summarizeSnapshot(snapshot, language);
 
@@ -159,21 +155,21 @@ function RegimeDetail({ language, setLanguage, navigate, snapshot }) {
       </section>
 
       <section className="regime-section-head">
-        <div><p className="regime-kicker">{t('EVIDENCE TIMELINE', '證據時間軸')}</p><h2>{t('What changed the picture', '哪些事件改變了情勢')}</h2></div>
+        <div><p className="regime-kicker">{t('EVIDENCE TIMELINE', '證據時間軸')}</p><h2>{t('Recent SEC filings', '近期 SEC 申報')}</h2></div>
         <button onClick={() => navigate('events?region=All%20regions&filter=All%20evidence')}>{t('Open all evidence →', '開啟所有證據 →')}</button>
       </section>
       <section className="regime-timeline">
-        {evidenceTimeline.map(item => (
+        {evidenceTimeline.length ? evidenceTimeline.map(item => (
           <button
-            key={`${item.age}-${item.type}`}
+            key={item.id}
             className="regime-timeline-item"
-            onClick={() => navigate(`events?region=${encodeURIComponent(item.region)}&filter=${encodeURIComponent(item.filter)}`)}
+            onClick={() => navigate('events?region=All%20regions&filter=FILING')}
           >
-            <span className={`regime-impact ${item.impact === '+' ? 'positive' : 'negative'}`}>{item.impact}</span>
-            <div><small>{item.age} · {item.type}</small><b>{item.title}</b><em>{item.region}</em></div>
+            <span className="regime-impact">↗</span>
+            <div><small>{item.filed} · {item.type}</small><b>{item.title}</b><em>{item.source}</em></div>
             <span className="regime-arrow">→</span>
           </button>
-        ))}
+        )) : <p className="event-empty">{t('No SEC filings in the past 30 days.', '過去 30 天沒有 SEC 申報。')}</p>}
       </section>
 
       <section className="regime-section-head">

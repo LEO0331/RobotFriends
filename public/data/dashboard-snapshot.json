@@ -29845,73 +29845,85 @@
           "form": "10-Q",
           "filed": "2026-09-10",
           "accession": "0001730168-26-000080",
-          "primaryDocument": "avgo-20260802.htm"
+          "primaryDocument": "avgo-20260802.htm",
+          "cik": "1730168"
         },
         {
           "form": "8-K",
           "filed": "2026-09-02",
           "accession": "0001730168-26-000076",
-          "primaryDocument": "avgo-20260902.htm"
+          "primaryDocument": "avgo-20260902.htm",
+          "cik": "1730168"
         },
         {
           "form": "8-K",
           "filed": "2026-07-06",
           "accession": "0001193125-26-295589",
-          "primaryDocument": "d84378d8k.htm"
+          "primaryDocument": "d84378d8k.htm",
+          "cik": "1730168"
         },
         {
           "form": "8-K",
           "filed": "2026-06-18",
           "accession": "0001193125-26-275077",
-          "primaryDocument": "d149683d8k.htm"
+          "primaryDocument": "d149683d8k.htm",
+          "cik": "1730168"
         },
         {
           "form": "8-K",
           "filed": "2026-06-11",
           "accession": "0001193125-26-266777",
-          "primaryDocument": "d152717d8k.htm"
+          "primaryDocument": "d152717d8k.htm",
+          "cik": "1730168"
         },
         {
           "form": "10-Q",
           "filed": "2026-06-09",
           "accession": "0001730168-26-000054",
-          "primaryDocument": "avgo-20260503.htm"
+          "primaryDocument": "avgo-20260503.htm",
+          "cik": "1730168"
         },
         {
           "form": "8-K",
           "filed": "2026-06-03",
           "accession": "0001730168-26-000051",
-          "primaryDocument": "avgo-20260603.htm"
+          "primaryDocument": "avgo-20260603.htm",
+          "cik": "1730168"
         },
         {
           "form": "8-K",
           "filed": "2026-04-21",
           "accession": "0001730168-26-000039",
-          "primaryDocument": "avgo-20260420.htm"
+          "primaryDocument": "avgo-20260420.htm",
+          "cik": "1730168"
         },
         {
           "form": "8-K",
           "filed": "2026-04-06",
           "accession": "0001193125-26-144028",
-          "primaryDocument": "d87999d8k.htm"
+          "primaryDocument": "d87999d8k.htm",
+          "cik": "1730168"
         },
         {
           "form": "8-K",
           "filed": "2026-04-02",
           "accession": "0001193125-26-140574",
-          "primaryDocument": "d109450d8k.htm"
+          "primaryDocument": "d109450d8k.htm",
+          "cik": "1730168"
         },
         {
           "form": "10-Q",
           "filed": "2026-03-11",
           "accession": "0001730168-26-000016",
-          "primaryDocument": "avgo-20260201.htm"
+          "primaryDocument": "avgo-20260201.htm",
+          "cik": "1730168"
         },
         {
           "form": "8-K",
           "filed": "2026-03-04",
           "accession": "0001730168-26-000011",
-          "primaryDocument": "avgo-20260304.htm"
+          "primaryDocument": "avgo-20260304.htm",
+          "cik": "1730168"
         }
       ],
       "observedAt": "2026-09-16T23:59:16.927Z",
@@ -30083,73 +30095,85 @@
           "form": "8-K",
           "filed": "2026-09-14",
           "accession": "0001193125-26-389753",
-          "primaryDocument": "d20034d8k.htm"
+          "primaryDocument": "d20034d8k.htm",
+          "cik": "1341439"
         },
         {
           "form": "10-Q",
           "filed": "2026-09-11",
           "accession": "0001193125-26-389274",
-          "primaryDocument": "orcl-20260831.htm"
+          "primaryDocument": "orcl-20260831.htm",
+          "cik": "1341439"
         },
         {
           "form": "8-K",
           "filed": "2026-09-10",
           "accession": "0001193125-26-387905",
-          "primaryDocument": "orcl-20260910.htm"
+          "primaryDocument": "orcl-20260910.htm",
+          "cik": "1341439"
         },
         {
           "form": "10-K",
           "filed": "2026-06-22",
           "accession": "0001193125-26-277521",
-          "primaryDocument": "orcl-20260531.htm"
+          "primaryDocument": "orcl-20260531.htm",
+          "cik": "1341439"
         },
         {
           "form": "8-K",
           "filed": "2026-06-10",
           "accession": "0001193125-26-265848",
-          "primaryDocument": "orcl-20260610.htm"
+          "primaryDocument": "orcl-20260610.htm",
+          "cik": "1341439"
         },
         {
           "form": "8-K",
           "filed": "2026-05-12",
           "accession": "0001193125-26-219708",
-          "primaryDocument": "d76569d8k.htm"
+          "primaryDocument": "d76569d8k.htm",
+          "cik": "1341439"
         },
         {
           "form": "8-K",
           "filed": "2026-04-06",
           "accession": "0001193125-26-142939",
-          "primaryDocument": "d132760d8k.htm"
+          "primaryDocument": "d132760d8k.htm",
+          "cik": "1341439"
         },
         {
           "form": "10-Q",
           "filed": "2026-03-11",
           "accession": "0001193125-26-101045",
-          "primaryDocument": "orcl-20260228.htm"
+          "primaryDocument": "orcl-20260228.htm",
+          "cik": "1341439"
         },
         {
           "form": "8-K",
           "filed": "2026-03-10",
           "accession": "0001193125-26-100148",
-          "primaryDocument": "orcl-20260310.htm"
+          "primaryDocument": "orcl-20260310.htm",
+          "cik": "1341439"
         },
         {
           "form": "8-K",
           "filed": "2026-02-05",
           "accession": "0001193125-26-039344",
-          "primaryDocument": "d63638d8k.htm"
+          "primaryDocument": "d63638d8k.htm",
+          "cik": "1341439"
         },
         {
           "form": "8-K",
           "filed": "2026-02-04",
           "accession": "0001193125-26-037840",
-          "primaryDocument": "d23732d8k.htm"
+          "primaryDocument": "d23732d8k.htm",
+          "cik": "1341439"
         },
         {
           "form": "8-K",
           "filed": "2026-01-09",
           "accession": "0001193125-26-009002",
-          "primaryDocument": "d34442d8k.htm"
+          "primaryDocument": "d34442d8k.htm",
+          "cik": "1341439"
         }
       ],
       "observedAt": "2026-09-16T23:59:16.995Z",
@@ -30234,73 +30258,85 @@
           "form": "10-Q",
           "filed": "2026-08-12",
           "accession": "0001769628-26-000366",
-          "primaryDocument": "crwv-20260630.htm"
+          "primaryDocument": "crwv-20260630.htm",
+          "cik": "1769628"
         },
         {
           "form": "8-K",
           "filed": "2026-08-11",
           "accession": "0001769628-26-000362",
-          "primaryDocument": "crwv-20260811.htm"
+          "primaryDocument": "crwv-20260811.htm",
+          "cik": "1769628"
         },
         {
           "form": "8-K",
           "filed": "2026-08-10",
           "accession": "0001769628-26-000357",
-          "primaryDocument": "crwv-20260807.htm"
+          "primaryDocument": "crwv-20260807.htm",
+          "cik": "1769628"
         },
         {
           "form": "8-K",
           "filed": "2026-06-18",
           "accession": "0001769628-26-000291",
-          "primaryDocument": "crwv-20260618.htm"
+          "primaryDocument": "crwv-20260618.htm",
+          "cik": "1769628"
         },
         {
           "form": "8-K",
           "filed": "2026-06-11",
           "accession": "0001769628-26-000278",
-          "primaryDocument": "crwv-20260611.htm"
+          "primaryDocument": "crwv-20260611.htm",
+          "cik": "1769628"
         },
         {
           "form": "8-K",
           "filed": "2026-06-10",
           "accession": "0001769628-26-000270",
-          "primaryDocument": "crwv-20260608.htm"
+          "primaryDocument": "crwv-20260608.htm",
+          "cik": "1769628"
         },
         {
           "form": "8-K",
           "filed": "2026-05-18",
           "accession": "0001769628-26-000236",
-          "primaryDocument": "crwv-20260515.htm"
+          "primaryDocument": "crwv-20260515.htm",
+          "cik": "1769628"
         },
         {
           "form": "10-Q",
           "filed": "2026-05-08",
           "accession": "0001769628-26-000222",
-          "primaryDocument": "crwv-20260331.htm"
+          "primaryDocument": "crwv-20260331.htm",
+          "cik": "1769628"
         },
         {
           "form": "8-K",
           "filed": "2026-05-07",
           "accession": "0001769628-26-000220",
-          "primaryDocument": "crwv-20260507.htm"
+          "primaryDocument": "crwv-20260507.htm",
+          "cik": "1769628"
         },
         {
           "form": "8-K",
           "filed": "2026-04-21",
           "accession": "0001769628-26-000183",
-          "primaryDocument": "crwv-20260416.htm"
+          "primaryDocument": "crwv-20260416.htm",
+          "cik": "1769628"
         },
         {
           "form": "8-K",
           "filed": "2026-04-15",
           "accession": "0001769628-26-000167",
-          "primaryDocument": "crwv-20260415.htm"
+          "primaryDocument": "crwv-20260415.htm",
+          "cik": "1769628"
         },
         {
           "form": "8-K",
           "filed": "2026-04-14",
           "accession": "0001769628-26-000164",
-          "primaryDocument": "crwv-20260409.htm"
+          "primaryDocument": "crwv-20260409.htm",
+          "cik": "1769628"
         }
       ],
       "observedAt": "2026-09-16T23:59:17.441Z",
