@@ -1,7 +1,7 @@
 import React, { useEffect, useMemo, useState } from 'react';
 import ReactDOM from 'react-dom';
 import companies from './data/companyExposure.json';
-import { buildCompanyPeriodView, formatDelta, formatPercent, setupCopy } from './exposureHistory';
+import { buildCompanyPeriodView, formatPercent, setupCopy } from './exposureHistory';
 import './ExposurePeriodMonitor.css';
 
 const emptySnapshot = { observations: [], companyHistory: [], generatedAt: null };
@@ -86,13 +86,12 @@ function ExposureMonitor({ snapshot, language }) {
   const zh = language === 'zh-TW';
   const t = (english, chinese) => zh ? chinese : english;
   const views = useMemo(
-    () => companies.map(company => buildCompanyPeriodView(company, snapshot.observations, snapshot.companyHistory, period, snapshot.generatedAt)),
+    () => companies.map(company => buildCompanyPeriodView(company, snapshot.observations, period)),
     [period, snapshot]
   );
   const active = views.find(company => company.ticker === ticker) || views[0];
   const copy = setupCopy(active, period, t);
   const priceCoverage = views.filter(company => company.priceHistoryAvailable).length;
-  const scoreCoverage = views.filter(company => company.scoreHistoryAvailable).length;
   const coverageText = priceCoverage === views.length
     ? t(`${period} price returns use observed market history.`, `${period} 報酬使用已觀察的市場價格歷史。`)
     : t(`${priceCoverage}/${views.length} companies currently have enough ${period} price history.`, `目前 ${views.length} 家公司中有 ${priceCoverage} 家具備足夠的 ${period} 價格歷史。`);
@@ -101,9 +100,9 @@ function ExposureMonitor({ snapshot, language }) {
     <div className="period-aware-monitor">
       <section className="section company-title period-company-title">
         <div>
-          <p className="eyebrow">{t('EXPOSURE MONITOR', '曝險監測')}</p>
-          <h3>{t('Where the regime matters', '週期影響所在')}</h3>
-          <p className="period-coverage">{coverageText} {scoreCoverage < views.length ? t('Score deltas will appear as daily snapshots accumulate.', '分數變化會隨每日快照累積後自動顯示。') : t('Score history is available for this window.', '此期間已有分數歷史。')}</p>
+          <p className="eyebrow">{t('PRICE MONITOR', '價格監測')}</p>
+          <h3>{t('Observed market prices', '已觀察的市場價格')}</h3>
+          <p className="period-coverage">{coverageText} {t('MA5/MA10 uses the latest 10 dated closes when available.', 'MA5/MA10 在資料足夠時使用最近 10 筆有日期的收盤價。')}</p>
         </div>
         <div className="segmented" aria-label={t('Exposure lookback period', '曝險回溯期間')}>
           {['30D', '90D', '1Y'].map(value => <button key={value} onClick={() => setPeriod(value)} className={period === value ? 'selected' : ''}>{value}</button>)}
@@ -113,21 +112,17 @@ function ExposureMonitor({ snapshot, language }) {
       <section className="companies period-companies">
         {views.map(company => {
           const change = formatPercent(company.periodReturn);
-          const emotionDelta = formatDelta(company.emotionDelta);
-          const fundamentalDelta = formatDelta(company.fundamentalsDelta);
           return (
             <button className={`company ${ticker === company.ticker ? 'selected-card' : ''}`} onClick={() => setTicker(company.ticker)} key={company.ticker}>
               <div className="company-top">
                 <div><b>{company.ticker}</b><small>{company.name}</small></div>
                 <span className={!company.priceHistoryAvailable ? 'period-unavailable' : company.periodReturn < 0 ? 'negative' : 'positive'}>{change}<small>{period}</small></span>
               </div>
-              <strong className="price">${company.currentPrice.toFixed(2)}</strong>
+              <strong className="price" title={company.priceToDate || undefined}>{company.currentPrice === null ? t('Unavailable', '無資料') : `$${company.currentPrice.toFixed(2)}`}</strong>
               <div className="stat">
-                <span>{t('MARKET EMOTION', '市場情緒')} <b>{company.emotion}</b>{emotionDelta && <small className="period-delta">{emotionDelta} vs {period}</small>}</span>
-                <span>{t('FUNDAMENTALS', '基本面')} <b>{company.fundamentals}</b>{fundamentalDelta && <small className="period-delta">{fundamentalDelta} vs {period}</small>}</span>
+                <span>{t('CLOSE DATE', '收盤日期')} <b>{company.priceToDate ? company.priceToDate.slice(0, 10) : '—'}</b></span>
+                <span>{t('PRICE TREND', '價格趨勢')} <b>{company.marketSignal || '—'}</b></span>
               </div>
-              <div className="exposure"><span>{t('DC EXPOSURE', '資料中心曝險')}</span><div><i style={{ width: `${company.exposure}%`, background: company.color }} /></div><b>{company.exposure}</b></div>
-              <div className="gap"><span>{t('EXPECTATIONS GAP', '預期落差')}</span><b>{t(company.gap, { Positive: '正向', Elevated: '偏高', Balanced: '均衡' }[company.gap])} ↗</b></div>
             </button>
           );
         })}
@@ -136,25 +131,22 @@ function ExposureMonitor({ snapshot, language }) {
       <section className="period-selected-setup">
         <article className="thesis period-thesis">
           <div className="panel-title">
-            <div><p className="eyebrow">{t('SELECTED SETUP', '所選標的')}</p><h3>{active.ticker} / {period} {t('view', '檢視')}</h3></div>
-            <span className="confidence">● {active.confidence}% {t('DATA CONFIDENCE', '資料可信度')}</span>
+            <div><p className="eyebrow">{t('OBSERVED PRICE', '已觀察價格')}</p><h3>{active.ticker} / {period} {t('view', '檢視')}</h3></div>
           </div>
           <div className="thesis-content">
-            <div className="ring" style={{ '--score': `${active.fundamentals * 3.6}deg` }}><div><strong>{active.fundamentals}</strong><span>/100</span><small>{t('FUNDAMENTALS', '基本面')}</small></div></div>
             <div>
               <h4>{copy.title}</h4>
               <p>{copy.body}</p>
               <div className="period-window-meta">
                 <span>{t('PERIOD RETURN', '期間報酬')} <b className={active.periodReturn < 0 ? 'negative' : 'positive'}>{formatPercent(active.periodReturn)}</b></span>
                 <span>{t('PRICE WINDOW', '價格期間')} <b>{active.priceHistoryAvailable ? `${active.priceCoverageDays}d` : '—'}</b></span>
-                <span>{t('SCORE HISTORY', '分數歷史')} <b>{active.scoreHistoryAvailable ? t('Available', '可用') : t('Building', '累積中')}</b></span>
+                <span>{t('LATEST CLOSE', '最近收盤價')} <b>{active.currentPrice === null ? '—' : `$${active.currentPrice.toFixed(2)}`}</b></span>
+                <span>{t('PRICE SOURCE', '價格來源')} <b>{active.priceSourceUrl ? <a href={active.priceSourceUrl} target="_blank" rel="noopener noreferrer">{active.priceProvider || t('Open source', '開啟來源')} ↗</a> : t('Unavailable', '無資料')}</b></span>
               </div>
             </div>
           </div>
           <div className="signals">
-            <span>{t('PHYSICAL SIGNAL', '實體訊號')} <b>{t('Current snapshot', '目前快照')}</b></span>
-            <span>{t('MARKET SIGNAL', '市場訊號')} <b className={active.periodReturn < 0 ? 'negative' : ''}>{copy.marketSignal}</b></span>
-            <span>{t('VALUATION', '估值')} <b>{t('55th percentile · current', '第 55 百分位 · 目前')}</b></span>
+            <span>{t('MA5 / MA10', '五日 / 十日均價')} <b>{copy.marketSignal}</b></span>
           </div>
         </article>
       </section>

@@ -124,6 +124,7 @@ function createStore(dataDir) {
       const where = [];
       const args = [];
       if (filters.ticker) { where.push('ticker = ?'); args.push(filters.ticker); }
+      if (filters.methodologyVersion) { where.push('methodology_version = ?'); args.push(filters.methodologyVersion); }
       if (filters.since) { where.push('as_of >= ?'); args.push(filters.since); }
       if (filters.until) { where.push('as_of <= ?'); args.push(filters.until); }
       const pagination = Number.isInteger(filters.limit) ? ' LIMIT ? OFFSET ?' : '';
@@ -137,9 +138,11 @@ function createStore(dataDir) {
       db.prepare('INSERT INTO scenario_runs(id, created_at, methodology_version, input_json, output_json) VALUES (?, ?, ?, ?, ?)').run(id, createdAt, methodologyVersion, JSON.stringify(input), JSON.stringify(output));
       return { id, createdAt };
     },
-    async scenarioRuns(limit = 20) {
+    async scenarioRuns(limit = 20, methodologyVersion = null) {
       const safeLimit = Math.max(1, Math.min(100, Number(limit) || 20));
-      return db.prepare('SELECT id, created_at, methodology_version, input_json, output_json FROM scenario_runs ORDER BY created_at DESC LIMIT ?').all(safeLimit).map(row => ({ id: row.id, createdAt: row.created_at, methodologyVersion: row.methodology_version, input: parse(row.input_json), output: parse(row.output_json) }));
+      const query = `SELECT id, created_at, methodology_version, input_json, output_json FROM scenario_runs${methodologyVersion ? ' WHERE methodology_version = ?' : ''} ORDER BY created_at DESC LIMIT ?`;
+      const args = methodologyVersion ? [methodologyVersion, safeLimit] : [safeLimit];
+      return db.prepare(query).all(...args).map(row => ({ id: row.id, createdAt: row.created_at, methodologyVersion: row.methodology_version, input: parse(row.input_json), output: parse(row.output_json) }));
     },
     async saveBacktestRun(input, output, methodologyVersion) {
       const id = runId('backtest');
@@ -147,9 +150,11 @@ function createStore(dataDir) {
       db.prepare('INSERT INTO backtest_runs(id, created_at, methodology_version, input_json, output_json) VALUES (?, ?, ?, ?, ?)').run(id, createdAt, methodologyVersion, JSON.stringify(input), JSON.stringify(output));
       return { id, createdAt };
     },
-    async backtestRuns(limit = 20) {
+    async backtestRuns(limit = 20, methodologyVersion = null) {
       const safeLimit = Math.max(1, Math.min(100, Number(limit) || 20));
-      return db.prepare('SELECT id, created_at, methodology_version, input_json, output_json FROM backtest_runs ORDER BY created_at DESC LIMIT ?').all(safeLimit).map(row => ({ id: row.id, createdAt: row.created_at, methodologyVersion: row.methodology_version, input: parse(row.input_json), output: parse(row.output_json) }));
+      const query = `SELECT id, created_at, methodology_version, input_json, output_json FROM backtest_runs${methodologyVersion ? ' WHERE methodology_version = ?' : ''} ORDER BY created_at DESC LIMIT ?`;
+      const args = methodologyVersion ? [methodologyVersion, safeLimit] : [safeLimit];
+      return db.prepare(query).all(...args).map(row => ({ id: row.id, createdAt: row.created_at, methodologyVersion: row.methodology_version, input: parse(row.input_json), output: parse(row.output_json) }));
     },
     close() { db.close(); },
   };

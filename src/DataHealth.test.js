@@ -19,8 +19,8 @@ const fixture = {
   freshness: 'partial',
   observations: ['NBIS','CRWV','ORCL','AVGO'].flatMap(priceRows),
   companyHistory: [],
-  methodologies: { companyScore: 'gridline-company-v1.0.0' },
-  backtestCoverage: { start: '2026-06-01', end: '2026-09-15', recorded: 4, reconstructed: 40, reconstructionQuality: 'partial' },
+  methodologies: { companyScore: 'gridline-price-signal-v2.0.0' },
+  backtestCoverage: { start: null, end: null, recorded: 0, reconstructed: 0, reconstructionQuality: 'recorded-only' },
   sourceHealth: {
     prices: { status: 'ok', recordCount: 280, lastSuccessAt: new Date().toISOString() },
     pjm: { status: 'degraded', message: 'PJM_API_KEY is not configured.' },
@@ -40,7 +40,7 @@ test('data health renders demo readiness and source/price coverage in English', 
   render(<DataHealth language="en" onBack={() => {}} />);
   await waitFor(() => expect(screen.getByText('READY WITH WARNINGS')).toBeInTheDocument());
   expect(screen.getByText('MARKET PRICE COVERAGE')).toBeInTheDocument();
-  expect(screen.getByText('POINT-IN-TIME COVERAGE')).toBeInTheDocument();
+  expect(screen.getByText('Reviewed event records')).toBeInTheDocument();
   expect(screen.getAllByText('Fixture provider')).toHaveLength(4);
 });
 
@@ -48,7 +48,7 @@ test('data health renders Traditional Chinese labels', async () => {
   render(<DataHealth language="zh-TW" onBack={() => {}} />);
   await waitFor(() => expect(screen.getByText('可展示，但有警示')).toBeInTheDocument());
   expect(screen.getByText('市場價格涵蓋')).toBeInTheDocument();
-  expect(screen.getByText('時點驗證涵蓋')).toBeInTheDocument();
+  expect(screen.getByText('已審查事件紀錄')).toBeInTheDocument();
   expect(screen.getByText('市場價格')).toBeInTheDocument();
   expect(screen.getByRole('button', { name: 'EN' })).toBeInTheDocument();
 });

@@ -1,17 +1,23 @@
 const DAY_MS = 24 * 60 * 60 * 1000;
 const MAX_HISTORY_DAYS = 400;
+const { VERSION } = require('./scoring/engine');
+
+function isCurrentSignal(item) {
+  return item?.methodologyVersion === VERSION && item?.origin !== 'historical-reconstruction' && item?.marketSignal?.available === true;
+}
 
 function normalizeSnapshot(company, observedAt) {
   return {
     ticker: company.ticker,
     observedAt,
     asOf: company.asOf || observedAt,
-    emotion: Number(company.emotion),
-    fundamentals: Number(company.fundamentals),
-    exposure: Number(company.exposure),
-    gap: company.gap,
-    confidence: Number(company.confidence || 0),
-    methodologyVersion: company.methodologyVersion || 'recorded-snapshot',
+    emotion: null,
+    fundamentals: null,
+    exposure: null,
+    gap: null,
+    confidence: null,
+    marketSignal: company.marketSignal,
+    methodologyVersion: company.methodologyVersion,
     lineage: company.lineage || [],
     origin: company.origin || 'recorded',
     pointInTimeQuality: company.pointInTimeQuality || 'recorded',
@@ -28,10 +34,11 @@ function mergeCompanyHistory(previous, companies, observedAt = new Date().toISOS
   const byKey = new Map();
   for (const item of previous || []) {
     const time = Date.parse(item.observedAt);
-    if (!item?.ticker || !Number.isFinite(time) || time < cutoff) continue;
+    if (!item?.ticker || !Number.isFinite(time) || time < cutoff || !isCurrentSignal(item)) continue;
     byKey.set(`${item.ticker}:${String(item.observedAt).slice(0, 10)}`, item);
   }
   for (const company of companies || []) {
+    if (!isCurrentSignal(company)) continue;
     const item = normalizeSnapshot(company, observedAt);
     byKey.set(`${item.ticker}:${observedAt.slice(0, 10)}`, item);
   }
@@ -41,4 +48,4 @@ function mergeCompanyHistory(previous, companies, observedAt = new Date().toISOS
   });
 }
 
-module.exports = { mergeCompanyHistory, normalizeSnapshot, MAX_HISTORY_DAYS };
+module.exports = { mergeCompanyHistory, normalizeSnapshot, isCurrentSignal, MAX_HISTORY_DAYS };

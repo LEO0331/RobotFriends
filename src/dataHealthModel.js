@@ -1,5 +1,5 @@
 const TRACKED_TICKERS = ['NBIS', 'CRWV', 'ORCL', 'AVGO'];
-const SOURCE_ORDER = ['prices', 'sec', 'eia', 'pjm', 'ferc', 'company-ir'];
+const SOURCE_ORDER = ['prices', 'events', 'sec', 'eia', 'pjm', 'ferc', 'company-ir'];
 const DAY_MS = 24 * 60 * 60 * 1000;
 
 const validDate = value => Number.isFinite(Date.parse(value));
@@ -52,10 +52,9 @@ export function buildDataHealth(snapshot = {}, now = new Date()) {
   if (!snapshot.backtestCoverage) blockers.push('backtestCoverage');
   if (!snapshot.methodologies?.companyScore) blockers.push('methodology');
   if (priceCoverage.some(item => !item.ready)) blockers.push('prices');
-  if (reconstructed <= 0) blockers.push('reconstruction');
 
   return {
-    state: blockers.length ? 'attention' : sources.some(item => item.status === 'degraded') ? 'ready-with-warnings' : 'ready',
+    state: blockers.length ? 'attention' : sources.some(item => ['degraded', 'partial'].includes(item.status)) ? 'ready-with-warnings' : 'ready',
     blockers,
     schemaVersion: snapshot.schemaVersion ?? null,
     generatedAt: snapshot.generatedAt || null,

@@ -18,15 +18,15 @@ A snapshot commit by itself is **not** proof that GitHub Pages has been updated.
 
 ## What a successful refresh updates
 
-The Action writes a new `generatedAt` timestamp and provider outcome/health metadata. Successful providers replace their portion of the static observations; degraded providers retain prior usable observations and receive a new checked/error status. The generator then recalculates company scores, appends the daily company-history point, updates point-in-time/backtest coverage, and evaluates demo readiness. Market-price history and EIA observations therefore move when those providers succeed.
+The Action writes a new `generatedAt` timestamp and provider outcome/health metadata. Successful providers replace their portion of the static observations; degraded providers retain prior usable observations and receive a new checked/error status. The generator then calculates cited MA5/MA10 market signals, retains only v2 recorded signal history, and evaluates demo readiness. Market-price history and EIA observations move when those providers succeed.
 
 The dashboard's snapshot labels read `generatedAt` directly from the deployed JSON and display it in the viewer's local time zone. The Data Health page exposes the exact UTC timestamp. `generatedAt` represents when the file was generated; an observation's own `observedAt` remains the date of the underlying market or operating data.
 
-The headline Expansion/Pushback regime values, curated driver cards, and regional project assumptions are currently editorial MVP inputs. They do not change merely because the Action ran. A later methodology version can calculate those values from normalized observations once sufficient primary-source coverage exists.
+The previous Expansion/Pushback indexes, curated driver amounts, regional MW/stage/friction estimates, and invented company fundamentals/exposure scores have been removed from active views and new exports. The UI shows unavailable where dated primary-source measurements do not exist.
 
 The Events page and regime evidence timeline use a separate infrastructure-event pipeline. The scheduled `events` adapter discovers candidates from PJM's official Inside Lines RSS feed and reads additional exact-record candidates from `server/event-candidates.json`. Candidates must have a known primary-source host, a specific article path, a publication date, a relevant category and region, and an accessible page whose heading matches the candidate title. Failed checks are reported as rejected and do not create public events. ERCOT's news listing currently blocks automated requests, so ERCOT records require curated exact URLs. SEC filings are not used as infrastructure-event cards merely because a company filed them.
 
-Events stay in Current for 30 days from publication, then appear in Archive. Both are views over the same records. A successful refresh retains earlier event observations and revisions in the static snapshot and SQLite rather than deleting them when they age out of Current. On a feed failure, last-known-good events remain and the event source is marked degraded. The checked-in snapshot has no verified infrastructure events yet, so the page shows an empty state until the first successful event refresh finds a qualifying record. External sites can change or deny access after a record was validated; the archive retains the original URL and date.
+Events stay in Current for 30 days from publication, then appear in Archive. Both are views over the same records. A successful refresh retains earlier event observations and revisions in the static snapshot and SQLite rather than deleting them when they age out of Current. On a feed failure, last-known-good events remain and the event source is marked degraded. A separately dated `public/data/event-review.json` contains the three curated primary pages manually reviewed on 2026-09-23 with coverage through 2026-09-22; its scope explicitly excludes a complete PJM RSS review. The app merges that review with the older market snapshot without changing the market snapshot's generation time. Later automated event checks take precedence when newer. External sites can change or deny access after validation; the archive retains the original URL and date.
 
 To submit an exact primary record for a source without an automatic feed, add an object to `server/event-candidates.json` with `source` (`ERCOT`, `Loudoun`, `Oracle`, or `PJM`), `title` matching the source page heading, `category` (`POWER`, `GRID`, `PERMIT`, or `CAPEX`), `publishedAt` as an ISO timestamp, `region`, and the article `url`. A factual `summary` requires an `evidenceText` excerpt that must appear on the source page. The daily job rejects generic pages, unrelated hosts, unreachable pages, title mismatches, and missing supporting text. Do not enter an inferred headline or an unverified date.
 
@@ -37,8 +37,8 @@ The public snapshot must satisfy these critical checks before the daily workflow
 - snapshot schema is v4 or newer;
 - `generatedAt`, `companyHistory`, `backtestCoverage`, and company-score methodology metadata are present;
 - NBIS, CRWV, ORCL and AVGO each have at least 60 usable daily price rows and the latest row is no more than 10 calendar days stale;
-- no provider may be labelled `ok` while reporting zero records;
-- point-in-time history contains at least one explicitly labelled historical reconstruction.
+- no non-event provider may be labelled `ok` while reporting zero records;
+- no historical reconstruction is required or exported.
 
 Degraded optional providers are **warnings**, not automatic blockers, if the retained public snapshot still satisfies the critical data requirements. This makes partial-data behavior visible without unnecessarily taking down a useful demo.
 

@@ -2,18 +2,14 @@ const test = require('node:test');
 const assert = require('node:assert/strict');
 const { runScenario, normalizeScenario } = require('./scenario-engine');
 
-test('scenario baseline returns the configured regime scores', () => {
-  const result = runScenario({});
-  assert.equal(result.result.expansion, 76);
-  assert.equal(result.result.pushback, 58);
-  assert.equal(result.methodologyVersion, 'gridline-scenario-v1.0.0');
-});
-
-test('power delay raises pushback and lowers expansion', () => {
-  const result = runScenario({ region: 'Texas', powerDelayMonths: 12, availablePowerPctChange: -20 });
-  assert.ok(result.result.expansion < result.baseline.expansion);
-  assert.ok(result.result.pushback > result.baseline.pushback);
-  assert.ok(result.companyImpact.find(item => item.ticker === 'CRWV').riskDelta > 0);
+test('scenario API records assumptions without invented scores or company risk figures', () => {
+  const result = runScenario({ region: 'Texas', powerDelayMonths: 12, availablePowerPctChange: -15 });
+  assert.equal(result.status, 'assumptions-only');
+  assert.equal(result.input.region, 'Texas');
+  assert.equal(result.input.powerDelayMonths, 12);
+  for (const key of ['baseline', 'result', 'contributions', 'companyImpact']) {
+    assert.equal(Object.hasOwn(result, key), false, key);
+  }
 });
 
 test('scenario input is bounded', () => {

@@ -13,8 +13,8 @@ const readySnapshot = () => ({
   schemaVersion: 4,
   generatedAt: '2026-09-16T00:00:00.000Z',
   freshness: 'partial',
-  methodologies: { companyScore: 'gridline-company-v1.0.0' },
-  backtestCoverage: { start: '2026-06-01', end: '2026-09-15', recorded: 4, reconstructed: 52, reconstructionQuality: 'partial' },
+  methodologies: { companyScore: 'gridline-price-signal-v2.0.0' },
+  backtestCoverage: { start: null, end: null, recorded: 0, reconstructed: 0, reconstructionQuality: 'recorded-only' },
   observations: ['NBIS','CRWV','ORCL','AVGO'].flatMap(ticker => makePrices(ticker)),
   sourceHealth: {
     prices: { status: 'ok', recordCount: 280, lastSuccessAt: '2026-09-16T00:00:00.000Z' },
@@ -29,7 +29,7 @@ test('data health reports ready-with-warnings when demo-critical data is complet
   expect(result.state).toBe('ready-with-warnings');
   expect(result.blockers).toEqual([]);
   expect(result.priceCoverage.every(item => item.ready)).toBe(true);
-  expect(result.backtest.reconstructed).toBe(52);
+  expect(result.backtest.reconstructed).toBe(0);
 });
 
 test('data health makes missing price coverage visible as attention', () => {
@@ -41,7 +41,7 @@ test('data health makes missing price coverage visible as attention', () => {
   expect(result.priceCoverage.find(item => item.ticker === 'AVGO').count).toBe(0);
 });
 
-test('old schema without reconstruction is explicitly not demo-ready', () => {
+test('old schema without declared coverage is explicitly not demo-ready', () => {
   const snapshot = readySnapshot();
   snapshot.schemaVersion = 3;
   snapshot.backtestCoverage = null;

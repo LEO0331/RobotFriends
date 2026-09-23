@@ -7,11 +7,29 @@ const toTime = value => {
   return Number.isFinite(time) ? time : null;
 };
 
+const httpsUrl = value => {
+  try {
+    const url = new URL(value);
+    return url.protocol === 'https:' ? url.href : null;
+  } catch {
+    return null;
+  }
+};
+
 export function priceSeries(observations, ticker) {
-  return (observations || [])
-    .filter(item => item && item.source === 'prices' && item.type === 'close' && item.ticker === ticker && Number.isFinite(Number(item.value)) && toTime(item.observedAt) !== null)
-    .map(item => ({ date: item.observedAt, time: toTime(item.observedAt), value: Number(item.value) }))
+  const rows = (observations || [])
+    .filter(item => item && item.source === 'prices' && item.type === 'close' && item.ticker === ticker && Number.isFinite(Number(item.value)) && Number(item.value) > 0 && toTime(item.observedAt) !== null)
+    .map(item => ({
+      date: item.observedAt,
+      time: toTime(item.observedAt),
+      value: Number(item.value),
+      sourceUrl: httpsUrl(item.sourceUrl) || httpsUrl(item.provenance?.originUrl),
+      providerName: item.providerName || item.provenance?.provider || null,
+    }))
     .sort((a, b) => a.time - b.time);
+  const byDay = new Map();
+  rows.forEach(row => byDay.set(new Date(row.time).toISOString().slice(0, 10), row));
+  return Array.from(byDay.values());
 }
 
 function closestBaseline(rows, targetTime, toleranceDays = 10) {
@@ -47,43 +65,33 @@ export function computePeriodReturn(observations, ticker, period) {
   };
 }
 
-export function scoreBaseline(companyHistory, ticker, period, asOf) {
-  const days = PERIOD_DAYS[period];
-  const asOfTime = toTime(asOf);
-  if (!days || asOfTime === null) return null;
-  const rows = (companyHistory || [])
-    .filter(item => item && item.ticker === ticker && toTime(item.observedAt || item.date) !== null)
-    .map(item => ({ ...item, time: toTime(item.observedAt || item.date) }))
-    .sort((a, b) => a.time - b.time);
-  return closestBaseline(rows, asOfTime - days * DAY_MS, 10);
+function movingAverage(rows, count) {
+  if (rows.length < count) return null;
+  return rows.slice(-count).reduce((sum, row) => sum + row.value, 0) / count;
 }
 
-export function buildCompanyPeriodView(company, observations, companyHistory, period, generatedAt) {
+export function buildCompanyPeriodView(company, observations, period) {
   const price = computePeriodReturn(observations, company.ticker, period);
-  const currentPrice = price.available ? price.currentPrice : Number(company.price);
-  const asOf = price.available ? price.toDate : (generatedAt || new Date().toISOString());
-  const baseline = scoreBaseline(companyHistory, company.ticker, period, asOf);
-  const scoreHistoryAvailable = Boolean(baseline);
-  const emotionDelta = scoreHistoryAvailable && Number.isFinite(Number(baseline.emotion)) ? company.emotion - Number(baseline.emotion) : null;
-  const fundamentalsDelta = scoreHistoryAvailable && Number.isFinite(Number(baseline.fundamentals)) ? company.fundamentals - Number(baseline.fundamentals) : null;
-  const exposureDelta = scoreHistoryAvailable && Number.isFinite(Number(baseline.exposure)) ? company.exposure - Number(baseline.exposure) : null;
-  const currentGapScore = company.fundamentals - company.emotion;
-  const baselineGapScore = scoreHistoryAvailable && Number.isFinite(Number(baseline.fundamentals)) && Number.isFinite(Number(baseline.emotion))
-    ? Number(baseline.fundamentals) - Number(baseline.emotion)
-    : null;
+  const rows = priceSeries(observations, company.ticker);
+  const latestPrice = rows[rows.length - 1] || null;
+  const currentPrice = latestPrice ? latestPrice.value : null;
+  const ma5 = movingAverage(rows, 5);
+  const ma10 = movingAverage(rows, 10);
   return {
-    ...company,
+    ticker: company.ticker,
+    name: company.name,
     currentPrice,
     periodReturn: price.available ? price.returnPct : null,
     priceHistoryAvailable: price.available,
     priceFromDate: price.fromDate || null,
-    priceToDate: price.toDate || null,
+    priceToDate: latestPrice ? latestPrice.date : null,
+    priceSourceUrl: latestPrice ? latestPrice.sourceUrl : null,
+    priceProvider: latestPrice ? latestPrice.providerName : null,
     priceCoverageDays: price.coverageDays || null,
-    scoreHistoryAvailable,
-    emotionDelta,
-    fundamentalsDelta,
-    exposureDelta,
-    gapDelta: baselineGapScore === null ? null : currentGapScore - baselineGapScore,
+    baselinePrice: price.baselinePrice || null,
+    ma5,
+    ma10,
+    marketSignal: ma10 === null ? null : ma5 > ma10 ? 'MA5 > MA10' : ma5 < ma10 ? 'MA5 < MA10' : 'MA5 = MA10',
   };
 }
 
@@ -92,48 +100,33 @@ export function formatPercent(value) {
   return `${value >= 0 ? '+' : ''}${value.toFixed(1)}%`;
 }
 
-export function formatDelta(value) {
-  if (!Number.isFinite(value)) return null;
-  return `${value >= 0 ? '+' : ''}${Math.round(value)}`;
-}
-
 export function setupCopy(view, period, t) {
+  const marketSignal = view.marketSignal === null
+    ? t('Unavailable · requires 10 dated closes', '無資料 · 需 10 筆有日期的收盤價')
+    : `${view.marketSignal.replace('MA5', `MA5 $${view.ma5.toFixed(2)}`).replace('MA10', `MA10 $${view.ma10.toFixed(2)}`)}`;
+  if (view.currentPrice === null) {
+    return {
+      title: t('Observed price unavailable', '無可用的已觀察價格'),
+      body: t(`No valid dated closing price is available for ${view.ticker}.`, `${view.ticker} 沒有有效且附日期的收盤價。`),
+      marketSignal,
+    };
+  }
   if (!view.priceHistoryAvailable) {
     return {
-      title: t('History coverage building', '歷史資料累積中'),
+      title: t('Lookback return unavailable', '回溯報酬無資料'),
       body: t(
-        `The ${period} selector is ready, but this snapshot does not yet contain enough price history for ${view.ticker}. Current fundamentals and exposure remain point-in-time values.`,
-        `${period} 篩選已啟用，但目前快照尚未包含 ${view.ticker} 足夠的價格歷史。基本面與曝險仍顯示目前時間點數值。`
+        `${view.ticker} closed at $${view.currentPrice.toFixed(2)} on ${view.priceToDate.slice(0, 10)}. A close within 10 calendar days of the ${period} baseline is needed to calculate the return.`,
+        `${view.ticker} 於 ${view.priceToDate.slice(0, 10)} 的收盤價為 $${view.currentPrice.toFixed(2)}。需有距離 ${period} 基準日不超過 10 個日曆日的收盤價才能計算報酬。`
       ),
-      marketSignal: t('History unavailable', '歷史資料不足'),
-    };
-  }
-  if (view.periodReturn <= -10 && view.fundamentals >= view.emotion + 12) {
-    return {
-      title: t('Potential positive dislocation', '可能的正向錯價'),
-      body: t(
-        `${view.ticker} is ${formatPercent(view.periodReturn)} over ${period} while the current fundamentals score remains above market emotion. Confirm that physical capacity and power delivery still support the thesis.`,
-        `${view.ticker} 在 ${period} 期間報酬為 ${formatPercent(view.periodReturn)}，目前基本面分數仍高於市場情緒。需確認實體容量與供電交付是否仍支持投資論點。`
-      ),
-      marketSignal: t('Reset / cautious', '回落 / 審慎'),
-    };
-  }
-  if (view.periodReturn >= 20 && view.emotion >= view.fundamentals - 5) {
-    return {
-      title: t('Expectations running hot', '市場預期偏熱'),
-      body: t(
-        `${view.ticker} gained ${formatPercent(view.periodReturn)} over ${period}. Market emotion is close to fundamentals, so future upside depends more heavily on verified delivery and execution.`,
-        `${view.ticker} 在 ${period} 期間上漲 ${formatPercent(view.periodReturn)}。市場情緒已接近基本面，後續上行更依賴已驗證的交付與執行力。`
-      ),
-      marketSignal: t('Elevated', '偏高'),
+      marketSignal,
     };
   }
   return {
-    title: t('Mixed expectations signal', '預期訊號分歧'),
+    title: t('Observed price change', '已觀察的價格變動'),
     body: t(
-      `${view.ticker} returned ${formatPercent(view.periodReturn)} over ${period}. Current fundamentals, data-center exposure and the evidence ledger should be read together before treating the move as confirmation or dislocation.`,
-      `${view.ticker} 在 ${period} 期間報酬為 ${formatPercent(view.periodReturn)}。目前基本面、資料中心曝險與證據帳本應一起判讀，不宜單憑價格變動視為確認或錯價。`
+      `${view.ticker} moved from $${view.baselinePrice.toFixed(2)} on ${view.priceFromDate.slice(0, 10)} to $${view.currentPrice.toFixed(2)} on ${view.priceToDate.slice(0, 10)}: ${formatPercent(view.periodReturn)}. The baseline is the closest dated close within 10 calendar days of the ${period} target.`,
+      `${view.ticker} 從 ${view.priceFromDate.slice(0, 10)} 的 $${view.baselinePrice.toFixed(2)} 變動至 ${view.priceToDate.slice(0, 10)} 的 $${view.currentPrice.toFixed(2)}，報酬為 ${formatPercent(view.periodReturn)}。基準價取距離 ${period} 目標日不超過 10 個日曆日的最近收盤價。`
     ),
-    marketSignal: view.periodReturn >= 0 ? t('Constructive', '偏正向') : t('Cautious', '審慎'),
+    marketSignal,
   };
 }

@@ -1,17 +1,5 @@
 {
-  "version": "gridline-scenario-v1.0.0",
-  "baseline": { "expansion": 76, "pushback": 58 },
-  "regionMultipliers": {
-    "All regions": 1,
-    "Texas": 1.15,
-    "Northern Virginia": 1.2,
-    "Arizona": 0.9,
-    "Ohio": 0.85
-  },
-  "companySensitivity": {
-    "NBIS": { "powerDelay": 1.0, "availablePower": 1.0, "demand": 0.8, "capex": 0.5, "regulation": 0.6 },
-    "CRWV": { "powerDelay": 1.15, "availablePower": 1.1, "demand": 0.9, "capex": 0.7, "regulation": 0.6 },
-    "ORCL": { "powerDelay": 0.7, "availablePower": 0.65, "demand": 0.55, "capex": 0.8, "regulation": 0.4 },
-    "AVGO": { "powerDelay": 0.45, "availablePower": 0.4, "demand": 0.95, "capex": 0.45, "regulation": 0.25 }
-  }
+  "version": "gridline-scenario-v2.0.0",
+  "status": "assumptions-only",
+  "regions": ["All regions", "Texas", "Northern Virginia", "Arizona", "Ohio"]
 }

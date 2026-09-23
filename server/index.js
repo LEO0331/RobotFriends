@@ -4,8 +4,9 @@ const { URL } = require('url');
 const config = require('./config');
 const { createService } = require('./service');
 const { startScheduler } = require('./scheduler');
-const { runScenario } = require('./scenario-engine');
-const { runBacktest } = require('./backtest');
+const { runScenario, methodology: SCENARIO_METHODOLOGY } = require('./scenario-engine');
+const { runBacktest, BACKTEST_VERSION } = require('./backtest');
+const { VERSION: SCORE_VERSION } = require('./scoring/engine');
 
 const MAX_BODY_BYTES = 64 * 1024;
 const MAX_QUERY_LIMIT = 500;
@@ -149,6 +150,7 @@ async function handler(request, response) {
     if (request.method === 'GET' && url.pathname === '/api/scores') {
       return send(request, response, 200, await service.store.scoreSnapshots({
         ticker: tickerValue(url.searchParams.get('ticker')),
+        methodologyVersion: SCORE_VERSION,
         since: queryText(url.searchParams.get('since'), 'since', 40),
         until: queryText(url.searchParams.get('until'), 'until', 40),
         limit: queryLimit(url.searchParams.get('limit'), MAX_QUERY_LIMIT),
@@ -160,18 +162,16 @@ async function handler(request, response) {
       const run = await service.store.saveScenarioRun(output.input, output, output.methodologyVersion);
       return send(request, response, 200, { run, ...output });
     }
-    if (request.method === 'GET' && url.pathname === '/api/scenario/runs') return send(request, response, 200, await service.store.scenarioRuns(queryLimit(url.searchParams.get('limit'), 20)));
+    if (request.method === 'GET' && url.pathname === '/api/scenario/runs') return send(request, response, 200, await service.store.scenarioRuns(queryLimit(url.searchParams.get('limit'), 20), SCENARIO_METHODOLOGY.version));
     if (request.method === 'POST' && url.pathname === '/api/backtest') {
       const input = await readJsonBody(request); const ticker = tickerValue(input.ticker, true);
-      const horizonDays = Number(input.horizonDays);
-      if (![30, 90].includes(horizonDays)) throw new HttpError(400, 'horizonDays must be 30 or 90');
-      const scores = await service.store.scoreSnapshots({ ticker });
-      const observations = await service.observations({ ticker, type: 'close' });
-      const output = runBacktest({ ticker, horizonDays }, scores, observations);
-      const run = await service.store.saveBacktestRun({ ticker, horizonDays }, output, output.backtestVersion);
+      if (input.horizonDays !== undefined || (input.horizonSessions !== undefined && Number(input.horizonSessions) !== 10)) throw new HttpError(400, 'Only the 10-session price backtest is supported');
+      const observations = await service.observations({ source: 'prices', ticker, type: 'close' });
+      const output = runBacktest({ ticker }, observations);
+      const run = await service.store.saveBacktestRun({ ticker, horizonSessions: 10 }, output, output.backtestVersion);
       return send(request, response, 200, { run, ...output });
     }
-    if (request.method === 'GET' && url.pathname === '/api/backtest/runs') return send(request, response, 200, await service.store.backtestRuns(queryLimit(url.searchParams.get('limit'), 20)));
+    if (request.method === 'GET' && url.pathname === '/api/backtest/runs') return send(request, response, 200, await service.store.backtestRuns(queryLimit(url.searchParams.get('limit'), 20), BACKTEST_VERSION));
     if (request.method === 'POST' && url.pathname === '/api/ingest') {
       const source = queryText(url.searchParams.get('source'), 'source', 30);
       if (!source || !service.sources().includes(source)) throw new HttpError(400, 'A supported source query parameter is required');

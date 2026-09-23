@@ -1,0 +1,121 @@
+{
+  "schemaVersion": 1,
+  "checkedAt": "2026-09-23T07:45:05.000Z",
+  "coverageThrough": "2026-09-22",
+  "scope": "curated-candidates-only",
+  "method": "manual review of official source pages",
+  "sourceHealth": {
+    "events": {
+      "status": "partial",
+      "checkedAt": "2026-09-23T07:45:05.000Z",
+      "lastSuccessAt": "2026-09-23T07:45:05.000Z",
+      "recordCount": 3,
+      "scope": "curated-candidates-only",
+      "message": "3 curated primary records checked through 2026-09-22; PJM RSS coverage not verified in this check."
+    }
+  },
+  "observations": [
+    {
+      "source": "events",
+      "type": "infrastructureEvent",
+      "value": {
+        "source": "Loudoun",
+        "title": "Board Approves Plan to Temporarily Pause Legislative Data Center and Substation Applications",
+        "category": "PERMIT",
+        "summary": "Loudoun County approved a plan to pause final action on certain data center and substation applications for up to 12 months.",
+        "evidenceText": "for up to 12 months",
+        "publishedAt": "2026-09-17T00:00:00Z",
+        "region": "Northern Virginia",
+        "url": "https://www.loudoun.gov/m/newsflash/home/detail/10874"
+      },
+      "observedAt": "2026-09-17T00:00:00Z",
+      "retrievedAt": "2026-09-23T07:45:05.000Z",
+      "sourceUrl": "https://www.loudoun.gov/m/newsflash/home/detail/10874",
+      "region": "Northern Virginia",
+      "id": "obs_9d3ea47aab6871526b789669",
+      "observationId": "obs_9d3ea47aab6871526b789669",
+      "provenance": {
+        "observationId": "obs_9d3ea47aab6871526b789669",
+        "source": "events",
+        "provider": "Verified infrastructure event sources",
+        "dataClass": "primary",
+        "originUrl": "https://www.loudoun.gov/m/newsflash/home/detail/10874",
+        "observedAt": "2026-09-17T00:00:00Z",
+        "retrievedAt": "2026-09-23T07:45:05.000Z",
+        "confidence": null,
+        "lineage": [
+          "obs_9d3ea47aab6871526b789669"
+        ],
+        "transformation": "normalized-observation-v1"
+      }
+    },
+    {
+      "source": "events",
+      "type": "infrastructureEvent",
+      "value": {
+        "source": "Loudoun",
+        "title": "Loudoun Board Opposes Valley North Transmission Line, Denies Substation Near Dulles Airport",
+        "category": "PERMIT",
+        "summary": "Loudoun County opposed a proposed transmission line and denied a land-use application for a substation near Dulles Airport.",
+        "evidenceText": "denied land use applications for a new electrical substation near Dulles Airport",
+        "publishedAt": "2026-09-18T00:00:00Z",
+        "region": "Northern Virginia",
+        "url": "https://www.loudoun.gov/m/newsflash/Home/Detail/10876"
+      },
+      "observedAt": "2026-09-18T00:00:00Z",
+      "retrievedAt": "2026-09-23T07:45:05.000Z",
+      "sourceUrl": "https://www.loudoun.gov/m/newsflash/Home/Detail/10876",
+      "region": "Northern Virginia",
+      "id": "obs_17773fe3c023d5ef42c4873d",
+      "observationId": "obs_17773fe3c023d5ef42c4873d",
+      "provenance": {
+        "observationId": "obs_17773fe3c023d5ef42c4873d",
+        "source": "events",
+        "provider": "Verified infrastructure event sources",
+        "dataClass": "primary",
+        "originUrl": "https://www.loudoun.gov/m/newsflash/Home/Detail/10876",
+        "observedAt": "2026-09-18T00:00:00Z",
+        "retrievedAt": "2026-09-23T07:45:05.000Z",
+        "confidence": null,
+        "lineage": [
+          "obs_17773fe3c023d5ef42c4873d"
+        ],
+        "transformation": "normalized-observation-v1"
+      }
+    },
+    {
+      "source": "events",
+      "type": "infrastructureEvent",
+      "value": {
+        "source": "Oracle",
+        "title": "Oracle Announces Q1 Results Driven by Triple Digit Growth in Cloud Infrastructure Revenues",
+        "category": "CAPEX",
+        "summary": "Oracle reported Q1 FY27 results that included capital expenditures and additional data center capacity delivery.",
+        "evidenceText": "delivery of 850MW additional datacenter capacity",
+        "publishedAt": "2026-09-10T00:00:00Z",
+        "region": "All regions",
+        "url": "https://investor.oracle.com/investor-news/news-details/2026/Oracle-Announces-Q1-Results-Driven-by-Triple-Digit-Growth-in-Cloud-Infrastructure-Revenues/default.aspx"
+      },
+      "observedAt": "2026-09-10T00:00:00Z",
+      "retrievedAt": "2026-09-23T07:45:05.000Z",
+      "sourceUrl": "https://investor.oracle.com/investor-news/news-details/2026/Oracle-Announces-Q1-Results-Driven-by-Triple-Digit-Growth-in-Cloud-Infrastructure-Revenues/default.aspx",
+      "region": "All regions",
+      "id": "obs_d3ddf1e6b40e84d911c1dd67",
+      "observationId": "obs_d3ddf1e6b40e84d911c1dd67",
+      "provenance": {
+        "observationId": "obs_d3ddf1e6b40e84d911c1dd67",
+        "source": "events",
+        "provider": "Verified infrastructure event sources",
+        "dataClass": "primary",
+        "originUrl": "https://investor.oracle.com/investor-news/news-details/2026/Oracle-Announces-Q1-Results-Driven-by-Triple-Digit-Growth-in-Cloud-Infrastructure-Revenues/default.aspx",
+        "observedAt": "2026-09-10T00:00:00Z",
+        "retrievedAt": "2026-09-23T07:45:05.000Z",
+        "confidence": null,
+        "lineage": [
+          "obs_d3ddf1e6b40e84d911c1dd67"
+        ],
+        "transformation": "normalized-observation-v1"
+      }
+    }
+  ]
+}

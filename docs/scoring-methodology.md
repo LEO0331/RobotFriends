@@ -1,60 +1,18 @@
-# Versioned scoring methodology
+# Market signal methodology (v2)
 
-Gridline scoring is implemented as a versioned domain service rather than UI constants.
+Gridline currently publishes a **descriptive price trend**, not a company fundamental score, valuation target, confidence percentage, or investment recommendation. The previous v1 values for fundamentals, data-center exposure, market emotion, and expectations gap were based partly on curated numerical inputs. New snapshots set those fields to `null`; old v1 and reconstructed company-history records are excluded from the public export and API views.
 
-Current company methodology: `gridline-company-v1.0.0`.
+## Inputs and formula
 
-## Fundamental score
+For each tracked ticker, take the latest ten **distinct trading dates** with positive daily closing prices at or before the snapshot cutoff. All ten records must identify the same provider URL. Otherwise the trend is unavailable.
 
-The v1 fundamental score is a weighted research model:
+- `MA5 = sum(last 5 closes) / 5`
+- `MA10 = sum(last 10 closes) / 10`
+- `spreadPct = (MA5 / MA10 - 1) × 100`
+- `above` when `latest close > MA5 > MA10`
+- `below` when `latest close < MA5 < MA10`
+- `mixed` in other complete cases
 
-| Component | Weight |
-| --- | ---: |
-| Revenue quality | 25% |
-| AI/data-center CAPEX commitment | 20% |
-| Balance-sheet capacity | 20% |
-| Execution | 20% |
-| Power-delivery confidence | 15% |
+The output stores the ten observation IDs, observed close date, provider URL, formula, and methodology version `gridline-price-signal-v2.0.0`. Missing dates, invalid prices, or a missing/mixed provider reference produce an unavailable signal. The market-price provider is a demo feed and can revise history or restrict direct browser access.
 
-Each score response includes component values, weights and contributions.
-
-The current v1 component inputs are curated methodology inputs. They are versioned and explainable, but they do not yet carry full historical-vintage metadata. That distinction matters for reconstructed historical validation and is surfaced as a quality limitation rather than hidden.
-
-## Market emotion
-
-When sufficient price history exists, market emotion is calculated from:
-
-- 30-calendar-day momentum — 45%;
-- 90-calendar-day momentum — 35%;
-- realized volatility — 20%.
-
-The implementation uses historical observations at or before the score's `asOf` cutoff. If sufficient point-in-time market history is unavailable for a normal current score, v1 uses an explicitly labelled curated fallback rather than manufacturing price history.
-
-For **historical reconstruction**, that fallback is not permitted: a reconstructed row is emitted only when the market-emotion component is backed by real historical price observations. This prevents a present-day fallback value from being written into an older date.
-
-## Structural data-center exposure
-
-V1 structural exposure is a curated methodology input. It is deliberately slower-moving than market emotion and is returned with the mode `curated-structural-exposure-v1`.
-
-Because both structural exposure and the fundamental component inputs currently lack complete historical vintages, reconstructed history is labelled `pointInTimeQuality: partial`. Native Recorded snapshots remain the strongest point-in-time evidence because they capture the model as it actually existed on that date.
-
-## Expectations gap
-
-The expectations gap compares fundamentals with market emotion while also considering structural data-center exposure. The returned payload includes both the label and numerical spread.
-
-Directional validation currently treats `Positive` as constructive and `Elevated` as cautionary; `Balanced` is non-directional and is not included as a directional backtest signal.
-
-## Auditability
-
-Every score records:
-
-- methodology version;
-- `asOf` point-in-time cutoff;
-- calculation timestamp;
-- component breakdown;
-- confidence;
-- source observation lineage.
-
-Historical score snapshots must not be recomputed with observations that arrived after their `asOf` timestamp. Historical reconstructions carry an explicit origin label and quality state, and existing reconstructed ticker/date rows are retained rather than silently rewritten on later snapshot refreshes.
-
-See [Point-in-time backtesting](backtesting.md) for Recorded vs Reconstructed semantics, 30D/90D calendar-day handling and no-look-ahead guardrails.
+This ordering describes past prices. It does not estimate fair value, future return, physical power delivery, or the probability of an investment outcome. The separate MA5/MA10 backtest is retrospective and has its own limitations in [Backtesting](backtesting.md).

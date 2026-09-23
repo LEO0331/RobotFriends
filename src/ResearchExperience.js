@@ -3,7 +3,6 @@ import RegimeExperience from './RegimeExperience';
 import ScenarioLab from './ScenarioLab';
 import BacktestLab from './BacktestLab';
 import DataHealth from './DataHealth';
-import InfrastructureRegionFocusPortal from './InfrastructureRegionFocusPortal';
 import { researchLabCopy } from './researchLabI18n';
 import './ResearchExperience.css';
 
@@ -60,7 +59,6 @@ export default function ResearchExperience() {
 
   return <>
     <RegimeExperience />
-    <InfrastructureRegionFocusPortal locationHash={locationHash} />
     <div className="research-dock"><span>{copy.dockLabel}</span><button onClick={() => go('scenario')}>{copy.scenarioButton}</button><button onClick={() => go('backtest')}>{copy.backtestButton}</button><button className="ops" onClick={() => go('health')}>{healthButton}</button></div>
   </>;
 }

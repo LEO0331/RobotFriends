@@ -6,8 +6,6 @@ const { mergeCompanyHistory } = require('./company-history');
 const { mergeSnapshotObservations, mergeSnapshotHealth } = require('./snapshot-merge');
 const { evaluateDemoReadiness } = require('./demo-readiness');
 const {
-  reconstructCompanyHistory,
-  mergeReconstructedHistory,
   reconstructionSummary,
 } = require('./historical-reconstruction');
 const { scoreCompanies, VERSION: companyScoreVersion } = require('./scoring/engine');
@@ -35,48 +33,20 @@ async function main() {
   const health = mergeSnapshotHealth(previous.sourceHealth || {}, currentHealth, observations);
   const generatedAt = new Date().toISOString();
   const scores = scoreCompanies(companies, observations, generatedAt);
-  const scoreSnapshots = scores.map(score => ({
+  const scoreSnapshots = scores.filter(score => score.marketSignal.available).map(score => ({
     ticker: score.ticker,
     asOf: score.asOf,
-    emotion: score.emotion,
-    fundamentals: score.fundamentals,
-    exposure: score.exposure,
-    gap: score.gap,
-    confidence: score.confidence,
+    marketSignal: score.marketSignal,
     methodologyVersion: score.methodologyVersion,
     lineage: score.lineage || [],
     origin: 'recorded',
     pointInTimeQuality: 'recorded',
   }));
 
-  const reconstructionEnabled = process.env.BACKTEST_DEMO_RECONSTRUCTION !== 'false';
-  const reconstructed = reconstructionEnabled
-    ? reconstructCompanyHistory({ companies, observations, generatedAt })
-    : [];
-  const historyWithReconstruction = mergeReconstructedHistory(previous.companyHistory || [], reconstructed);
-  const companyHistory = mergeCompanyHistory(historyWithReconstruction, scoreSnapshots, generatedAt);
+  const companyHistory = mergeCompanyHistory(previous.companyHistory || [], scoreSnapshots, generatedAt);
   const backtestCoverage = reconstructionSummary(companyHistory);
 
-  await service.store.saveScoreSnapshots(scores);
-  if (reconstructed.length) {
-    const existingScores = await service.store.scoreSnapshots({});
-    const existingKeys = new Set(existingScores.map(item => `${item.ticker}:${item.asOf}:${item.methodologyVersion}`));
-    const newReconstructed = reconstructed.filter(item => !existingKeys.has(`${item.ticker}:${item.asOf}:${item.methodologyVersion}`));
-    if (newReconstructed.length) {
-      await service.store.saveScoreSnapshots(newReconstructed.map(item => ({
-        ...item,
-        calculatedAt: item.reconstructedAt,
-        provenance: {
-          methodologyVersion: item.methodologyVersion,
-          lineage: item.lineage,
-          pointInTimeCutoff: item.asOf,
-          origin: item.origin,
-          pointInTimeQuality: item.pointInTimeQuality,
-          qualityNotes: item.qualityNotes,
-        },
-      })));
-    }
-  }
+  await service.store.saveScoreSnapshots(scores.filter(score => score.marketSignal.available));
 
   const snapshot = {
     schemaVersion: 4,
@@ -89,7 +59,7 @@ async function main() {
     methodologies: { companyScore: companyScoreVersion },
     companyHistory,
     backtestCoverage,
-    note: 'Static dashboard snapshot. Successful sources replace their prior static data; degraded sources retain last-known-good observations and last-success metadata. Recorded scores are native point-in-time observations. Demo historical reconstructions are clearly labeled and enforce historical observation cutoffs; they remain partial because methodology-v1 fundamental and structural-exposure inputs do not yet have historical vintages. Not investment advice.',
+    note: 'Static dashboard snapshot. Successful sources replace their prior static data; degraded sources retain last-known-good observations and last-success metadata. Market signals use cited daily closes and the published MA5/MA10 formula. Fundamental, exposure, emotion, confidence, and expectations-gap scores are unavailable pending sourced methodology. No historical scores are reconstructed. Not investment advice.',
   };
   const readiness = evaluateDemoReadiness(snapshot, { tickers: config.tickers, now: generatedAt });
   snapshot.demoReadiness = {

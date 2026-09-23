@@ -26,14 +26,14 @@ function readySnapshot() {
     schemaVersion: 4,
     generatedAt: generatedAt.toISOString(),
     observations: tickers.flatMap(ticker => priceRows(ticker, generatedAt)),
-    companyHistory: [{ ticker: 'NBIS', observedAt: generatedAt.toISOString(), origin: 'historical-reconstruction' }],
-    backtestCoverage: { recorded: 1, reconstructed: 4 },
-    methodologies: { companyScore: 'gridline-company-v1.0.0' },
+    companyHistory: [{ ticker: 'NBIS', observedAt: generatedAt.toISOString(), origin: 'recorded' }],
+    backtestCoverage: { recorded: 1, reconstructed: 0 },
+    methodologies: { companyScore: 'gridline-price-signal-v2.0.0' },
     sourceHealth: { prices: { status: 'ok', recordCount: 280 } },
   };
 }
 
-test('demo readiness passes a schema-v4 snapshot with full price and reconstruction coverage', () => {
+test('demo readiness passes a schema-v4 snapshot with recent price coverage', () => {
   const result = evaluateDemoReadiness(readySnapshot());
   assert.equal(result.ready, true);
   assert.equal(result.blockerCount, 0);
@@ -66,12 +66,21 @@ test('optional degraded sources are visible warnings rather than demo blockers',
   assert.equal(result.warningCount, 1);
 });
 
-test('schema and reconstructed history are required for the finished demo gate', () => {
+test('schema is required for the finished demo gate', () => {
   const snapshot = readySnapshot();
   snapshot.schemaVersion = 3;
   snapshot.backtestCoverage.reconstructed = 0;
   const result = evaluateDemoReadiness(snapshot);
   assert.equal(result.ready, false);
   assert.ok(result.checks.some(item => item.id === 'schema-v4' && !item.ok));
-  assert.ok(result.checks.some(item => item.id === 'reconstructed-history' && !item.ok));
+  assert.ok(!result.checks.some(item => item.id === 'reconstructed-history'));
+});
+
+test('verified price history is sufficient without reconstructed score history', () => {
+  const snapshot = readySnapshot();
+  snapshot.companyHistory = [];
+  snapshot.backtestCoverage = { recorded: 0, reconstructed: 0 };
+  const result = evaluateDemoReadiness(snapshot);
+  assert.equal(result.ready, true);
+  assert.ok(!result.checks.some(item => item.id === 'reconstructed-history'));
 });

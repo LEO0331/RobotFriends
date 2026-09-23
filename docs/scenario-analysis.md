@@ -1,23 +1,5 @@
-# Scenario analysis
+# Scenario assumptions worksheet
 
-`#scenario` is a deterministic sensitivity-analysis workspace for stress-testing the physical data-center thesis.
+The scenario page accepts user-entered assumptions for power delay, power availability, demand, capital expenditure, and regulatory pressure. It validates and stores those inputs with methodology version `gridline-scenario-v2.0.0`.
 
-Inputs:
-
-- region
-- power-delivery delay (months)
-- available-power change (%)
-- AI/cloud demand change (%)
-- capacity CAPEX change (%)
-- regulatory-pressure change (points)
-
-Outputs:
-
-- Expansion Index sensitivity
-- Pushback Index sensitivity
-- per-driver contribution
-- relative company-risk sensitivity for NBIS, CRWV, ORCL and AVGO
-
-The model is versioned as `gridline-scenario-v1.0.0`. The same methodology configuration is bundled into the static demo and required by the server. A connected production API persists scenario inputs and outputs in SQLite for later audit.
-
-Scenario results are not forecasts, price targets or investment recommendations. They show deterministic sensitivity to user-entered assumptions.
+The former example baselines (76/58), regional multipliers, and company sensitivity coefficients were removed because they had no calibrated source. The worksheet does **not** calculate an expansion score, pushback score, company impact, forecast, or investment ranking. Saved values are hypothetical user inputs, not observed measurements. A future quantitative scenario model requires dated baseline observations, sourced parameter estimates, and retrospective validation before publishing outputs.

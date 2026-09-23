@@ -1,5 +1,5 @@
 import React from 'react';
-import { render, screen } from '@testing-library/react';
+import { render, screen, waitFor } from '@testing-library/react';
 import '@testing-library/jest-dom';
 import ScenarioLab from './ScenarioLab';
 import BacktestLab from './BacktestLab';
@@ -33,14 +33,13 @@ test('scenario lab renders Traditional Chinese copy and localized regions', () =
   expect(screen.getByRole('button', { name: 'EN' })).toBeInTheDocument();
 });
 
-test('point-in-time backtest explains reconstructed demo history in Traditional Chinese', () => {
+test('price-only backtest explains its calculation and limits in Traditional Chinese', async () => {
   render(<BacktestLab language="zh-TW" onBack={() => {}} />);
-  expect(screen.getByText('時點驗證')).toBeInTheDocument();
-  expect(screen.getByText('模型驗證 / 禁止前視偏誤')).toBeInTheDocument();
-  expect(screen.getByText('這個驗證如何運作')).toBeInTheDocument();
-  expect(screen.getByText('資料涵蓋範圍')).toBeInTheDocument();
-  expect(screen.getByText('歷史重建')).toBeInTheDocument();
-  expect(screen.getByText('時點資料防護規則')).toBeInTheDocument();
-  expect(screen.getByText(/歷史重建資料會與原生實際記錄清楚區分/)).toBeInTheDocument();
+  expect(screen.getByText('價格訊號研究')).toBeInTheDocument();
+  expect(screen.getByText('回溯價格測試')).toBeInTheDocument();
+  expect(screen.getByText('計算方式')).toBeInTheDocument();
+  expect(screen.getByText('價格資料範圍')).toBeInTheDocument();
+  expect(screen.getByText('解讀限制')).toBeInTheDocument();
+  await waitFor(() => expect(global.fetch).toHaveBeenCalled());
   expect(screen.getByRole('button', { name: 'EN' })).toBeInTheDocument();
 });

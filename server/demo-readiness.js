@@ -75,15 +75,6 @@ function evaluateDemoReadiness(snapshot, {
     }
   }
 
-  const reconstructed = Number(snapshot?.backtestCoverage?.reconstructed || 0);
-  checks.push(check(
-    'reconstructed-history',
-    'blocker',
-    reconstructed > 0,
-    'Point-in-time demo contains at least one labelled historical reconstruction.',
-    { reconstructed },
-  ));
-
   const ageHours = generatedAt ? Math.max(0, (Date.now() - Date.parse(generatedAt)) / (60 * 60 * 1000)) : null;
   checks.push(check(
     'snapshot-age',

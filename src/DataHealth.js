@@ -1,5 +1,6 @@
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { buildDataHealth } from './dataHealthModel';
+import { loadDashboardSnapshot } from './snapshotMeta';
 import './DataHealth.css';
 
 const emptySnapshot = { observations: [], sourceHealth: {}, outcomes: [] };
@@ -8,6 +9,7 @@ const sourceLabel = (source, language) => {
   const zh = language === 'zh-TW';
   const labels = {
     prices: zh ? '市場價格' : 'Market prices',
+    events: zh ? '事件來源' : 'Event sources',
     sec: 'SEC',
     eia: 'EIA',
     pjm: 'PJM',
@@ -28,8 +30,8 @@ function copyFor(language) {
     title: t('Know when the dashboard is', '確認儀表板是否'),
     titleEm: t('safe to demo.', '可安心展示。'),
     intro: t(
-      'This page reads the same committed snapshot used by the public dashboard and makes freshness, provider degradation, market-price coverage and point-in-time reconstruction coverage visible.',
-      '此頁直接讀取公開儀表板使用的同一份已提交快照，顯示資料新鮮度、來源降級、市場價格涵蓋範圍與時點重建涵蓋狀態。'
+      'This page shows the dated market snapshot and the separately dated event review, including provider failures and price coverage.',
+      '此頁顯示有日期的市場快照與獨立的事件審查，以及來源失敗與價格涵蓋情況。'
     ),
     refresh: t('Refresh status', '重新整理狀態'),
     loading: t('Loading snapshot…', '正在載入快照…'),
@@ -47,7 +49,7 @@ function copyFor(language) {
     generated: t('Snapshot generated', '快照產生時間'),
     age: t('Snapshot age', '快照年齡'),
     priceCoverage: t('Price coverage', '價格涵蓋'),
-    reconstructions: t('Reconstructions', '歷史重建'),
+    reconstructions: t('Reviewed event records', '已審查事件紀錄'),
     hours: t('hours', '小時'),
     sourceHealth: t('SOURCE HEALTH', '來源健康狀態'),
     source: t('Source', '來源'),
@@ -61,6 +63,7 @@ function copyFor(language) {
       retained: t('Retained', '保留舊資料'),
       unavailable: t('Unavailable', '無資料'),
       cached: t('Cached', '快取'),
+      partial: t('Partial review', '部分審查'),
     },
     priceHistory: t('MARKET PRICE COVERAGE', '市場價格涵蓋'),
     ticker: t('Ticker', '標的'),
@@ -80,8 +83,8 @@ function copyFor(language) {
     qualityRecorded: t('Recorded only', '僅實際記錄'),
     noteTitle: t('Demo boundary', '示範邊界'),
     note: t(
-      'Green demo readiness means the public snapshot has valid schema-v4 history, usable recent prices for every tracked ticker and labeled reconstructed backtest history. It does not mean every optional provider is live, nor does it make Gridline an investment recommendation system.',
-      '綠色示範就緒代表公開快照具有有效的 schema-v4 歷史資料、所有追蹤標的都有近期可用價格，且回測歷史重建已清楚標示。這不代表所有選用來源都必須即時在線，也不代表 Gridline 是投資建議系統。'
+      'Ready means recent dated prices are available for tracked tickers. Event review may be partial; current event status and scope are shown above. Moving-average and backtest results are descriptive, not investment recommendations.',
+      '就緒表示追蹤標的具備近期有日期的價格。事件審查可能只涵蓋部分來源；上方顯示狀態與範圍。均線及回測結果為描述性資料，非投資建議。'
     ),
   };
 }
@@ -93,8 +96,7 @@ export default function DataHealth({ onBack, language = 'en', onLanguageChange =
 
   const load = useCallback(() => {
     setLoadState('loading');
-    fetch(`${process.env.PUBLIC_URL}/data/dashboard-snapshot.json`, { cache: 'no-store' })
-      .then(response => response.ok ? response.json() : Promise.reject(new Error('snapshot unavailable')))
+    loadDashboardSnapshot()
       .then(data => { setSnapshot({ ...emptySnapshot, ...data }); setLoadState('ready'); })
       .catch(() => setLoadState('error'));
   }, []);
@@ -123,7 +125,7 @@ export default function DataHealth({ onBack, language = 'en', onLanguageChange =
         <Metric label={copy.generated} value={health.generatedAt ? health.generatedAt.replace('T', ' ').slice(0, 16) + ' UTC' : '—'} />
         <Metric label={copy.age} value={health.ageHours === null ? '—' : `${health.ageHours} ${copy.hours}`} />
         <Metric label={copy.priceCoverage} value={`${readyPrices}/${health.priceCoverage.length}`} />
-        <Metric label={copy.reconstructions} value={health.backtest.reconstructed} />
+        <Metric label={copy.reconstructions} value={snapshot.observations?.filter(item => item.source === 'events').length || 0} />
       </section>
 
       <section className="health-grid">
@@ -133,7 +135,6 @@ export default function DataHealth({ onBack, language = 'en', onLanguageChange =
       </section>
 
       <section className="health-grid lower">
-        <article className="health-panel backtest-health"><h2>{copy.backtest}</h2><dl><div><dt>{copy.recorded}</dt><dd>{health.backtest.recorded}</dd></div><div><dt>{copy.reconstructed}</dt><dd>{health.backtest.reconstructed}</dd></div><div><dt>{copy.signalRange}</dt><dd>{dateOnly(health.backtest.start)} → {dateOnly(health.backtest.end)}</dd></div><div><dt>{copy.methodology}</dt><dd>{health.methodologyVersion || '—'}</dd></div><div><dt>{copy.quality}</dt><dd>{health.backtest.quality === 'partial' ? copy.qualityPartial : copy.qualityRecorded}</dd></div></dl></article>
         <article className="health-panel health-boundary"><h2>{copy.noteTitle}</h2><p>{copy.note}</p>{health.blockers.length > 0 && <code>{health.blockers.join(' · ')}</code>}</article>
       </section>
     </>}

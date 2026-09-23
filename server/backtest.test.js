@@ -2,44 +2,29 @@ const test = require('node:test');
 const assert = require('node:assert/strict');
 const { runBacktest } = require('./backtest');
 
-const price = (id, date, value) => ({ id, source: 'prices', type: 'close', ticker: 'NBIS', observedAt: `${date}T00:00:00.000Z`, value });
-
-test('point-in-time backtest evaluates completed constructive and caution signals', () => {
-  const observations = [
-    price('p1','2026-01-02',100), price('p2','2026-02-02',110), price('p3','2026-03-04',100), price('p4','2026-04-03',105),
-  ];
-  const scores = [
-    { ticker: 'NBIS', asOf: '2026-01-01T22:00:00.000Z', gap: 'Positive', methodologyVersion: 'v1' },
-    { ticker: 'NBIS', asOf: '2026-02-01T22:00:00.000Z', gap: 'Elevated', methodologyVersion: 'v1' },
-  ];
-  const result = runBacktest({ ticker: 'NBIS', horizonDays: 30 }, scores, observations);
-  assert.equal(result.metrics.sampleSize, 2);
-  assert.equal(result.metrics.directionalHitRate, 1);
-  assert.equal(result.metrics.recordedSignals, 2);
-  assert.equal(result.status, 'complete');
+const price = (day, value, sourceUrl = 'https://stooq.com/q/d/l/?s=nbis.us&i=d') => ({
+  source: 'prices', type: 'close', ticker: 'NBIS', value, sourceUrl,
+  observedAt: new Date(Date.UTC(2026, 0, day)).toISOString(),
 });
 
-test('future-dated lineage invalidates a signal', () => {
-  const observations = [price('future','2026-02-01',100)];
-  const scores = [{ ticker: 'NBIS', asOf: '2026-01-01T00:00:00.000Z', gap: 'Positive', lineage: ['future'] }];
-  const result = runBacktest({ ticker: 'NBIS', horizonDays: 30 }, scores, observations);
-  assert.equal(result.metrics.invalidSignals, 1);
-  assert.equal(result.rows[0].status, 'invalid');
+test('price-only crossover enters next session and exits ten observed sessions later', () => {
+  const observations = [...Array.from({ length: 10 }, (_, index) => price(index + 1, 100)), price(11, 110),
+    ...Array.from({ length: 11 }, (_, index) => price(index + 12, 111 + index))];
+  const result = runBacktest({ ticker: 'NBIS' }, observations);
+  assert.equal(result.rows.length, 1);
+  assert.equal(result.rows[0].signalAt, price(11, 110).observedAt);
+  assert.equal(result.rows[0].entryAt, price(12, 111).observedAt);
+  assert.equal(result.rows[0].exitAt, price(22, 121).observedAt);
+  assert.equal(result.metrics.sampleSize, 1);
+  assert.equal(result.rows[0].sourceUrl, price(11, 110).sourceUrl);
 });
 
-test('server backtest preserves reconstructed origin and partial-quality label', () => {
-  const observations = [price('p1','2026-06-02',100), price('p2','2026-07-02',110)];
-  const scores = [{
-    ticker: 'NBIS',
-    asOf: '2026-06-01T22:00:00.000Z',
-    gap: 'Positive',
-    methodologyVersion: 'v1',
-    origin: 'historical-reconstruction',
-    pointInTimeQuality: 'partial',
-  }];
-  const result = runBacktest({ ticker: 'NBIS', horizonDays: 30 }, scores, observations);
-  assert.equal(result.metrics.reconstructedSignals, 1);
-  assert.equal(result.rows[0].origin, 'historical-reconstruction');
-  assert.equal(result.rows[0].pointInTimeQuality, 'partial');
-  assert.equal(result.rows[0].forwardReturn, 0.1);
+test('pending and unreferenced signals cannot enter performance statistics', () => {
+  const observations = [...Array.from({ length: 10 }, (_, index) => price(index + 1, 100)), price(11, 110), price(12, 111)];
+  const pending = runBacktest({ ticker: 'NBIS' }, observations);
+  assert.equal(pending.metrics.sampleSize, 0);
+  assert.equal(pending.metrics.pendingSignals, 1);
+  assert.equal(pending.metrics.directionalHitRate, null);
+  const unreferenced = runBacktest({ ticker: 'NBIS' }, observations.map(item => ({ ...item, sourceUrl: null })));
+  assert.equal(unreferenced.coverage.priceObservations, 0);
 });

@@ -3,7 +3,24 @@ export const emptySnapshot = { generatedAt: null, freshness: 'unknown', sourceHe
 export async function loadDashboardSnapshot() {
   const response = await fetch(`${process.env.PUBLIC_URL}/data/dashboard-snapshot.json`, { cache: 'no-store' });
   if (!response.ok) throw new Error('Snapshot unavailable');
-  return { ...emptySnapshot, ...await response.json() };
+  const snapshot = { ...emptySnapshot, ...await response.json() };
+  try {
+    const reviewResponse = await fetch(`${process.env.PUBLIC_URL}/data/event-review.json`, { cache: 'no-store' });
+    if (!reviewResponse.ok) return snapshot;
+    const review = await reviewResponse.json();
+    if (!Array.isArray(review.observations) || !Number.isFinite(Date.parse(review.checkedAt))) return snapshot;
+    const observations = new Map((snapshot.observations || []).map(item => [item.id, item]));
+    review.observations.forEach(item => { if (item?.source === 'events' && item.id) observations.set(item.id, item); });
+    const latestCheck = Date.parse(snapshot.sourceHealth?.events?.checkedAt || '') || 0;
+    return {
+      ...snapshot,
+      observations: [...observations.values()],
+      sourceHealth: {
+        ...snapshot.sourceHealth,
+        events: Date.parse(review.checkedAt) > latestCheck ? review.sourceHealth?.events : snapshot.sourceHealth?.events,
+      },
+    };
+  } catch { return snapshot; }
 }
 
 export function summarizeSnapshot(snapshot = emptySnapshot, language = 'en', timeZone = Intl.DateTimeFormat().resolvedOptions().timeZone) {
