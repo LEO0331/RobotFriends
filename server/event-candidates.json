@@ -1,0 +1,32 @@
+[
+  {
+    "source": "Loudoun",
+    "title": "Board Approves Plan to Temporarily Pause Legislative Data Center and Substation Applications",
+    "category": "PERMIT",
+    "summary": "Loudoun County approved a plan to pause final action on certain data center and substation applications for up to 12 months.",
+    "evidenceText": "for up to 12 months",
+    "publishedAt": "2026-09-17T00:00:00Z",
+    "region": "Northern Virginia",
+    "url": "https://www.loudoun.gov/m/newsflash/home/detail/10874"
+  },
+  {
+    "source": "Loudoun",
+    "title": "Loudoun Board Opposes Valley North Transmission Line, Denies Substation Near Dulles Airport",
+    "category": "PERMIT",
+    "summary": "Loudoun County opposed a proposed transmission line and denied a land-use application for a substation near Dulles Airport.",
+    "evidenceText": "denied land use applications for a new electrical substation near Dulles Airport",
+    "publishedAt": "2026-09-18T00:00:00Z",
+    "region": "Northern Virginia",
+    "url": "https://www.loudoun.gov/m/newsflash/Home/Detail/10876"
+  },
+  {
+    "source": "Oracle",
+    "title": "Oracle Announces Q1 Results Driven by Triple Digit Growth in Cloud Infrastructure Revenues",
+    "category": "CAPEX",
+    "summary": "Oracle reported Q1 FY27 results that included capital expenditures and additional data center capacity delivery.",
+    "evidenceText": "delivery of 850MW additional datacenter capacity",
+    "publishedAt": "2026-09-10T00:00:00Z",
+    "region": "All regions",
+    "url": "https://investor.oracle.com/investor-news/news-details/2026/Oracle-Announces-Q1-Results-Driven-by-Triple-Digit-Growth-in-Cloud-Infrastructure-Revenues/default.aspx"
+  }
+]

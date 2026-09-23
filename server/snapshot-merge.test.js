@@ -33,6 +33,13 @@ test('merge deduplicates retained and persistent observations by stable identity
   assert.equal(merged.length, 1);
 });
 
+test('successful event refresh preserves older event versions for the archive', () => {
+  const previous = [{ id: 'event-old', source: 'events', type: 'infrastructureEvent', observedAt: '2026-07-01T00:00:00Z', value: { title: 'Earlier record' } }];
+  const fresh = [{ id: 'event-new', source: 'events', type: 'infrastructureEvent', observedAt: '2026-09-20T00:00:00Z', value: { title: 'New record' } }];
+  const merged = mergeSnapshotObservations(previous, fresh, [{ source: 'events', status: 'ok', recordCount: 1 }]);
+  assert.deepEqual(merged.map(item => item.id), ['event-old', 'event-new']);
+});
+
 test('degraded health retains prior last-success timestamp and reports retained row count', () => {
   const observations = [
     observation('p1', 'prices', '2026-09-14', 100),

@@ -11,7 +11,7 @@ function createService(config) {
       const result = await adapters[source](config);
       await store.saveRaw(source, result.payload);
       const observations = normalizeObservations(source, result.observations);
-      if (!observations.length) {
+      if (!observations.length && source !== 'events') {
         throw new Error(`${source} returned zero usable observations; last-known-good data retained.`);
       }
       await store.saveObservations(source, observations);

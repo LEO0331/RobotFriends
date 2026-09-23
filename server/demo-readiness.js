@@ -60,8 +60,8 @@ function evaluateDemoReadiness(snapshot, {
       checks.push(check(
         `healthy-source-${source}`,
         'blocker',
-        Number(health.recordCount ?? 1) > 0,
-        `${source} is not labelled healthy with zero records.`,
+        source === 'events' || Number(health.recordCount ?? 1) > 0,
+        source === 'events' ? 'An empty verified event feed is allowed.' : `${source} is not labelled healthy with zero records.`,
         { status: health.status, recordCount: health.recordCount ?? null },
       ));
     } else if (health?.status === 'degraded') {

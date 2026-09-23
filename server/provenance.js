@@ -7,6 +7,7 @@ const PROVIDERS = {
   ferc: { name: 'Federal Energy Regulatory Commission', url: 'https://data.ferc.gov/', dataClass: 'primary' },
   'company-ir': { name: 'Company investor relations', url: null, dataClass: 'primary' },
   prices: { name: 'Stooq market data', url: 'https://stooq.com/', dataClass: 'market' },
+  events: { name: 'Verified infrastructure event sources', url: null, dataClass: 'primary' },
 };
 
 function canonical(value) {

@@ -50,6 +50,14 @@ test('demo readiness blocks the old zero-row price failure mode', () => {
   assert.ok(result.checks.some(item => item.id === 'prices-NBIS' && !item.ok));
 });
 
+test('an empty verified event feed does not block a snapshot', () => {
+  const snapshot = readySnapshot();
+  snapshot.sourceHealth.events = { status: 'ok', recordCount: 0 };
+  const result = evaluateDemoReadiness(snapshot);
+  assert.equal(result.ready, true);
+  assert.ok(result.checks.some(item => item.id === 'healthy-source-events' && item.ok));
+});
+
 test('optional degraded sources are visible warnings rather than demo blockers', () => {
   const snapshot = readySnapshot();
   snapshot.sourceHealth.pjm = { status: 'degraded', message: 'PJM_API_KEY is not configured.' };

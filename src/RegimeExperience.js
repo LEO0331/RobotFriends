@@ -2,7 +2,7 @@ import React, { useEffect, useState } from 'react';
 import App from './Containers/App';
 import ExposurePeriodPortal from './ExposurePeriodMonitor';
 import { emptySnapshot, loadDashboardSnapshot, summarizeSnapshot } from './snapshotMeta';
-import { filingEvents } from './eventModel';
+import { infrastructureEvents } from './eventModel';
 import './RegimeExperience.css';
 
 const LANGUAGE_KEY = 'gridline-language';
@@ -88,7 +88,7 @@ function RegimeExperience() {
 
 function RegimeDetail({ language, setLanguage, navigate, snapshot }) {
   const zh = language === 'zh-TW';
-  const evidenceTimeline = filingEvents(snapshot).filter(item => !item.archived).slice(0, 4);
+  const evidenceTimeline = infrastructureEvents(snapshot).filter(item => !item.archived).slice(0, 4);
   const t = (en, tw) => (zh ? tw : en);
   const snapshotMeta = summarizeSnapshot(snapshot, language);
 
@@ -155,7 +155,7 @@ function RegimeDetail({ language, setLanguage, navigate, snapshot }) {
       </section>
 
       <section className="regime-section-head">
-        <div><p className="regime-kicker">{t('EVIDENCE TIMELINE', '證據時間軸')}</p><h2>{t('Recent SEC filings', '近期 SEC 申報')}</h2></div>
+        <div><p className="regime-kicker">{t('EVIDENCE TIMELINE', '證據時間軸')}</p><h2>{t('Recent verified events', '近期已驗證事件')}</h2></div>
         <button onClick={() => navigate('events?region=All%20regions&filter=All%20evidence')}>{t('Open all evidence →', '開啟所有證據 →')}</button>
       </section>
       <section className="regime-timeline">
@@ -163,13 +163,13 @@ function RegimeDetail({ language, setLanguage, navigate, snapshot }) {
           <button
             key={item.id}
             className="regime-timeline-item"
-            onClick={() => navigate('events?region=All%20regions&filter=FILING')}
+            onClick={() => navigate('events?region=All%20regions&filter=All%20evidence')}
           >
-            <span className="regime-impact">↗</span>
-            <div><small>{item.filed} · {item.type}</small><b>{item.title}</b><em>{item.source}</em></div>
+            <span className="regime-impact neutral">•</span>
+            <div><small>{item.publishedAt.slice(0, 10)} · {item.category}</small><b>{item.title}</b><em>{item.source}</em></div>
             <span className="regime-arrow">→</span>
           </button>
-        )) : <p className="event-empty">{t('No SEC filings in the past 30 days.', '過去 30 天沒有 SEC 申報。')}</p>}
+        )) : <p className="event-empty">{snapshot.sourceHealth?.events?.status === 'degraded' ? t('Event sources could not refresh; no current retained events.', '事件來源無法更新；目前沒有已保留事件。') : t('No verified infrastructure events in the past 30 days.', '過去 30 天沒有已驗證的基礎設施事件。')}</p>}
       </section>
 
       <section className="regime-section-head">

@@ -8,7 +8,7 @@ function observationKey(item) {
 
 function mergeSnapshotObservations(previous = [], fresh = [], outcomes = []) {
   const successful = new Set((outcomes || []).filter(item => item.status === 'ok').map(item => item.source));
-  const retained = (previous || []).filter(item => !successful.has(item.source));
+  const retained = (previous || []).filter(item => item.source === 'events' || !successful.has(item.source));
   const merged = new Map();
   for (const item of [...retained, ...(fresh || [])]) merged.set(observationKey(item), item);
   return [...merged.values()].sort((a, b) => {
