@@ -6,11 +6,19 @@ const MAX_PRICE_STALENESS_DAYS = 10;
 function validDate(value) {
   return Number.isFinite(Date.parse(value));
 }
+function secureUrl(value) {
+  try { return new URL(value).protocol === 'https:'; } catch { return false; }
+}
 
 function priceRows(snapshot, ticker) {
-  return (snapshot?.observations || [])
-    .filter(item => item.source === 'prices' && item.type === 'close' && item.ticker === ticker && Number.isFinite(Number(item.value)) && validDate(item.observedAt))
-    .sort((a, b) => Date.parse(a.observedAt) - Date.parse(b.observedAt));
+  const byDay = new Map();
+  for (const item of snapshot?.observations || []) {
+    if (item.source !== 'prices' || item.type !== 'close' || item.ticker !== ticker ||
+      !Number.isFinite(Number(item.value)) || Number(item.value) <= 0 || !validDate(item.observedAt) ||
+      !secureUrl(item.provenance?.originUrl || item.sourceUrl)) continue;
+    byDay.set(item.observedAt.slice(0, 10), item);
+  }
+  return [...byDay.values()].sort((a, b) => Date.parse(a.observedAt) - Date.parse(b.observedAt));
 }
 
 function check(id, severity, ok, message, detail = null) {
@@ -31,6 +39,10 @@ function evaluateDemoReadiness(snapshot, {
   checks.push(check('history-array', 'blocker', Array.isArray(snapshot?.companyHistory), 'Snapshot contains companyHistory.'));
   checks.push(check('backtest-coverage', 'blocker', Boolean(snapshot?.backtestCoverage && typeof snapshot.backtestCoverage === 'object'), 'Snapshot contains backtestCoverage.'));
   checks.push(check('methodology-version', 'blocker', Boolean(snapshot?.methodologies?.companyScore), 'Snapshot identifies the company-score methodology version.', { actual: snapshot?.methodologies?.companyScore ?? null }));
+  const unsupportedScores = (snapshot?.scores || []).filter(score =>
+    score.methodologyVersion !== 'gridline-price-signal-v2.0.0' ||
+    ['fundamentals', 'emotion', 'exposure', 'gap', 'confidence'].some(field => score[field] !== null));
+  checks.push(check('no-unsourced-company-scores', 'blocker', unsupportedScores.length === 0, 'The public snapshot contains no legacy curated company scores.', { count: unsupportedScores.length }));
 
   const reference = validDate(now) ? Date.parse(now) : Date.now();
   const coverage = {};

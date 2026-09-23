@@ -39,9 +39,10 @@ function parsePjmFeed(xml) {
 
 function validCandidate(item, now = new Date()) {
   if (!item || !PROVIDERS[item.source] || !CATEGORIES.has(item.category) || typeof item.title !== 'string' || item.title.trim().length < 12 || !item.region) return false;
-  if (item.summary && (typeof item.summary !== 'string' || typeof item.evidenceText !== 'string' || item.evidenceText.length < 12)) return false;
+  if (item.summary && (typeof item.summary !== 'string' || typeof item.evidenceText !== 'string' || item.evidenceText.length < 12 || typeof item.dateText !== 'string')) return false;
   const date = Date.parse(item.publishedAt);
   if (!Number.isFinite(date) || date > now.getTime()) return false;
+  if (item.dateText && (!Number.isFinite(Date.parse(`${item.dateText} UTC`)) || new Date(`${item.dateText} UTC`).toISOString().slice(0, 10) !== String(item.publishedAt).slice(0, 10))) return false;
   try {
     const url = new URL(item.url);
     const provider = PROVIDERS[item.source];
@@ -85,6 +86,7 @@ async function ingestEvents(config = {}, dependencies = {}) {
       const html = await read(item.url, { ...headers, Accept: 'text/html' });
       if (!pageMatchesTitle(html, item.title)) { rejected.push({ title: item.title, reason: 'record title mismatch' }); continue; }
       if (!pageSupportsEvidence(html, item.evidenceText)) { rejected.push({ title: item.title, reason: 'supporting text missing' }); continue; }
+      if (item.dateText && !pageSupportsEvidence(html, item.dateText)) { rejected.push({ title: item.title, reason: 'publication date missing' }); continue; }
       accepted.push(item);
     } catch (error) { rejected.push({ title: item.title, reason: `record inaccessible: ${error.message}` }); }
   }

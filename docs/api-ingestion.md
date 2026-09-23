@@ -9,7 +9,7 @@ The API binds to `127.0.0.1` by default. If it is deliberately exposed on a netw
 | `GET /api/health` | Per-source status, latest success and degradation reason. |
 | `GET /api/observations?ticker=ORCL&type=close` | Normalized historical observations. |
 | `GET /api/provenance?observationId=...` | Provenance for one normalized observation. |
-| `GET /api/scores?ticker=NBIS` | Versioned score snapshots. |
+| `GET /api/scores?ticker=NBIS` | Current-version price-signal snapshots; legacy curated scores are excluded. |
 | `POST /api/ingest?source=prices` | Refresh one adapter. Sources: `sec`, `eia`, `pjm`, `ferc`, `company-ir`, `prices`. |
 | `POST /api/ingest/all` | Refresh all adapters independently; unavailable credentials degrade only that source. |
 | `POST /api/scenario` | Run/persist one scenario analysis. |
@@ -37,7 +37,7 @@ The actual provider and origin URL used for each price observation are carried i
 
 ## Fail-closed ingestion
 
-An HTTP `200` does not imply a healthy data refresh. After adapter execution, normalized observations must contain usable records. Empty results are marked `degraded` and are **not** saved as a successful empty refresh.
+An HTTP `200` does not imply a healthy data refresh. After adapter execution, normalized price, SEC and grid observations must contain usable records. Empty results are marked `degraded`. The event adapter may validly return zero verified events; it records a dated check and retains prior event history.
 
 For the static snapshot, a degraded source retains last-known-good data. For the SQLite profile, immutable historical observations remain present. This is particularly important for price history because 30D/90D lookbacks and point-in-time backtests depend on continuity.
 
@@ -51,7 +51,7 @@ After generating a static snapshot, run:
 npm run demo:check
 ```
 
-The gate checks schema-v4 metadata, complete/recent market-price coverage for all tracked tickers, non-zero semantics for healthy sources, and labelled point-in-time reconstruction coverage. The scheduled snapshot workflow runs this gate automatically before committing an updated public snapshot.
+The gate checks schema-v4 metadata, complete/recent market-price coverage for all tracked tickers, and non-zero semantics for healthy non-event sources. Historical v1 reconstruction is no longer required or published. The scheduled snapshot workflow runs this gate before committing an updated public snapshot.
 
 Use `#health` / **Research Lab → Data health** to inspect the same committed snapshot from the UI.
 

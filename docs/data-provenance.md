@@ -7,17 +7,17 @@ Each observation receives a deterministic `observationId` derived from source, t
 - provider and source key;
 - primary/market/external data class;
 - original source URL when available;
-- `observedAt` — when the underlying fact or market value applied;
+- `observedAt` — price/data observation time, or SEC filing availability date;
 - `retrievedAt` — when Gridline fetched it;
-- source confidence;
+- SEC `periodStart`/`periodEnd` and unit separately from filing availability;
 - lineage identifiers;
 - normalization transformation version.
 
-Derived scores store the observation IDs that contributed to the calculation. This allows a reviewer to distinguish source facts from Gridline transformations and lets point-in-time validation reject lineage that falls after a score's historical cutoff.
+Derived MA5/MA10 signals store the ten price-observation IDs that contributed to the calculation. A source category is recorded, but no arbitrary numerical confidence percentage is assigned. Company fundamentals, exposure and valuation scores remain unavailable without a validated source method.
 
 ## Observed time vs retrieval time
 
-Do not overwrite `observedAt` with ingestion time. Historical prices, filings and grid records preserve their original effective timestamp. Re-fetching the same observation later may update retrieval/provenance metadata in persistent storage, but deterministic identity prevents it from becoming a second economic observation.
+Do not overwrite `observedAt` with ingestion time. Historical prices and grid records preserve their original observation timestamp; SEC facts use the filing-availability date as `observedAt` and preserve the economic reporting period separately. Re-fetching the same observation may update retrieval metadata, but deterministic identity prevents it from becoming a second observation.
 
 This distinction is required for lookback calculations and no-look-ahead validation.
 

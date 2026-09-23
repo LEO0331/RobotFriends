@@ -14,7 +14,7 @@ function priceRows(ticker, end = new Date(), count = 70) {
       ticker,
       value: 100 + index,
       observedAt: date.toISOString(),
-      provenance: { provider: 'Fixture market data' },
+      provenance: { provider: 'Fixture market data', originUrl: 'https://example.com/prices' },
     };
   });
 }
@@ -48,6 +48,15 @@ test('demo readiness blocks the old zero-row price failure mode', () => {
   assert.equal(result.ready, false);
   assert.ok(result.checks.some(item => item.id === 'healthy-source-prices' && !item.ok));
   assert.ok(result.checks.some(item => item.id === 'prices-NBIS' && !item.ok));
+});
+
+test('demo readiness blocks legacy curated scores and unreferenced prices', () => {
+  const snapshot = readySnapshot();
+  snapshot.scores = [{ methodologyVersion: 'gridline-company-v1.0.0', fundamentals: 83, emotion: 50, exposure: 92, gap: 'Positive', confidence: 86 }];
+  assert.equal(evaluateDemoReadiness(snapshot).ready, false);
+  snapshot.scores = [];
+  snapshot.observations.forEach(row => { row.provenance.originUrl = null; });
+  assert.equal(evaluateDemoReadiness(snapshot).ready, false);
 });
 
 test('an empty verified event feed does not block a snapshot', () => {

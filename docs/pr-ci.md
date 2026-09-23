@@ -20,7 +20,7 @@ Snapshot acceptance is deliberately separate:
 npm run demo:check
 ```
 
-This checks the data artifact itself (schema v4, price coverage, reconstruction coverage, etc.). The scheduled daily snapshot workflow runs `demo:check` before committing refreshed public data. For a complete pre-demo check after generating a fresh snapshot, use:
+This checks the data artifact itself (schema v4, recent price coverage, source health, etc.). Historical v1 reconstruction is no longer required. The scheduled daily snapshot workflow runs `demo:check` before committing refreshed public data. For a complete pre-demo check after generating a fresh snapshot, use:
 
 ```bash
 npm run verify:demo

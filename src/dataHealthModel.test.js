@@ -6,7 +6,7 @@ const makePrices = (ticker, count = 70) => Array.from({ length: count }, (_, ind
   ticker,
   value: 100 + index,
   observedAt: new Date(Date.UTC(2026, 6, 8 + index)).toISOString(),
-  provenance: { provider: 'Fixture' },
+  provenance: { provider: 'Fixture', originUrl: 'https://example.com/prices' },
 }));
 
 const readySnapshot = () => ({

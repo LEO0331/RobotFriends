@@ -9,14 +9,14 @@ Gridline 是雙語決策輔助與研究驗證儀表板，將 AI／資料中心�
 
 ## 這個 Demo 展示什麼
 
-- **基礎設施情報**：Arizona、Texas、Ohio/PJM、Northern Virginia 的全國／區域切換與限制分析。
-- **期間化公司曝險**：30D / 90D / 1Y 市場 lookback；資料不足時明確顯示 unavailable，不製造數字。
-- **可稽核 provenance**：deterministic observation ID、provider/source metadata、`observedAt` / `retrievedAt`、confidence、來源 URL 與 lineage。
-- **版本化 scoring**：公司分數具方法論版本、component contribution 與 point-in-time cutoff。
+- **基礎設施情報**：區域導覽及有一級來源的里程碑；無來源的容量與階段數值不顯示。
+- **價格回溯**：30D / 90D / 1Y 已觀察收盤價；資料不足時明確顯示 unavailable。
+- **可稽核 provenance**：deterministic observation ID、provider/source metadata、觀察與擷取日期、來源 URL 與 lineage。
+- **版本化訊號**：有來源的 MA5/MA10 價格趨勢與明確的時點截止時間。
 - **持久化歷史**：Node API profile 以 SQLite/WAL 保存不可變觀察值、來源健康狀態、分數快照、情境分析與回測執行紀錄。
-- **Scenario Lab**：針對供電交付、可用電力、需求、CAPEX、法規進行 deterministic sensitivity analysis。
-- **時點驗證**：區分實際記錄與歷史重建、30D / 90D 後續結果、pending window 與 no-look-ahead 防護。
-- **資料健康**：`#health` 顯示公開 snapshot 的新鮮度、來源降級、價格涵蓋、方法論與歷史重建狀態。
+- **Scenario Lab**：記錄供電、需求、CAPEX、法規的使用者假設，不產生未校準預測。
+- **回溯價格測試**：MA5/MA10 交叉後以下一筆交易日及十筆交易日後收盤價評估，揭露待完成結果與禁止前視偏誤規則。
+- **資料健康**：`#health` 顯示市場快照新鮮度、來源狀態、價格涵蓋及獨立日期的事件審查。
 - **Fail-closed ingestion**：空白／無效 provider 回應標為 degraded，不視為成功；保留 last-known-good 歷史。
 - **雙語研究 UX**：Research Lab 的主要流程支援 English / 繁中。
 - **選用帳戶**：Supabase 註冊、登入、密碼恢復與偏好設定已完成 React 專案端實作，但不會阻擋公開研究 demo。
@@ -85,10 +85,10 @@ provider refresh → schema-v4 snapshot → demo readiness gate
 - `server/service.js`：cache/source health 與 zero-row fail-closed 行為。
 - `server/provenance.js`：deterministic observation identity 與 audit metadata。
 - `server/database.js` / `server/store.js`：SQLite schema 與持久化研究歷史。
-- `server/scoring/`：版本化、可解釋公司 scoring。
-- `server/scenario-engine.js`：deterministic infrastructure sensitivity model。
-- `server/backtest.js` / `src/backtestModel.js`：point-in-time validation。
-- `server/historical-reconstruction.js`：具有歷史 cutoff、且清楚標示來源的 demo reconstruction。
+- `server/scoring/`：有價格來源的 MA5/MA10 訊號；無來源的公司分數為 null。
+- `server/scenario-engine.js`：只保存受界定的使用者假設，不產生未校準預測。
+- `server/backtest.js` / `src/backtestModel.js`：純價格 MA5/MA10 回溯交叉測試。
+- `server/historical-reconstruction.js`：實際紀錄歷史涵蓋摘要；不再產生 v1 重建。
 - `server/demo-readiness.js`：公開 snapshot 的驗收條件。
 - `src/DataHealth.js`：營運／示範準備度 workspace。
 - `src/ScenarioLab.js` / `src/BacktestLab.js`：研究工作區。
@@ -121,17 +121,11 @@ GET  /api/backtest/runs
 
 HTTP `200` 但 0 筆可用資料會標成 **degraded**，不會標 `ok`。降級更新不會刪掉既有歷史；實際使用的 provider 與 origin URL 會保存到 provenance。若用於商業金融情境，應改成公司核准／授權的市場資料 provider。
 
-## 時點驗證
+## 專題訊號視角與回溯測試
 
-公開 demo 清楚區分：
+總覽可切換**市場動能、公司執行、電網需求、專案里程碑**。各視角說明來源、日期、規則及無資料原因，不合成買賣分數。公司執行需具期間資訊與精確連結的 SEC 營收或稀釋 EPS；電網需求需明確類型的 EIA 實際負載及完整可比較日期；專案里程碑需特定一級來源紀錄。詳見 [訊號視角](docs/signal-lenses.md) 與 [市場訊號方法](docs/scoring-methodology.zh-TW.md)。
 
-- **實際記錄**：原日期當天產生的 score snapshot。
-- **歷史重建**：之後以明確 historical `asOf` cutoff 重建的資料。
-- **部分重建品質**：methodology-v1 的基本面與結構性曝險目前尚未具備完整 historical-vintage source inputs。
-
-30D / 90D 是**日曆日**，不是交易日。若目標日期落在週末或市場假日，Gridline 會在文件規範的 tolerance 內使用下一個可取得的收盤價，不會對不存在的價格做 interpolation。每日 snapshot 向前推進時，舊訊號保持固定，pending outcome 則可能成熟為 complete。
-
-詳見 [docs/backtesting.md](docs/backtesting.md)。
+MA5/MA10 回測只用有日期的收盤價，於下一筆觀察交易日收盤價進場，十筆交易日後評估。此為不含交易成本的描述性回溯計算，不證明預測能力。詳見 [回測說明](docs/backtesting.md)。
 
 ## 驗證
 
@@ -165,11 +159,11 @@ npm run verify:demo
 
 ## 靜態每日 Snapshot 與 Pages 部署
 
-`Refresh daily dashboard snapshot` 於工作日 **22:00 UTC** 執行，也支援手動 dispatch。它會重試各來源、對 degraded provider 保留 last-known-good 資料、產生 schemaVersion 4 歷史資料（`scores`、`companyHistory`、`backtestCoverage`、`demoReadiness`），然後執行 `npm run demo:check`。
+`Refresh daily dashboard snapshot` 於工作日 **22:00 UTC** 執行，也支援手動 dispatch。它會重試各來源、對 degraded provider 保留 last-known-good 資料、產生 schemaVersion 4 快照與有來源的 MA5/MA10 訊號，然後執行 `npm run demo:check`。
 
 只有通過示範關鍵 gate 的 snapshot 才會提交到 `main`。接著 refresh workflow 會明確 dispatch `Deploy to GitHub Pages`，再執行 Node 22 lockfile install、production build、Pages deploy 與 Lighthouse CI。這個明確 dispatch 是必要的，因為使用 repository `GITHUB_TOKEN` 產生的 push 不會再觸發另一個以 `push` 為條件的 workflow。
 
-Gate 的關鍵條件包含：四個追蹤 ticker 都有近期可用價格歷史，且至少有一筆清楚標示的 historical reconstruction。選用 provider degraded 會以警示顯示，不會被靜默隱藏。
+Gate 的關鍵條件包含四個追蹤 ticker 均有近期可用價格歷史。舊版 v1 歷史重建不再公布或要求；選用來源降級會顯示警示。
 
 部署文件：[繁體中文](docs/static-snapshot-deployment.zh-TW.md) · [English](docs/static-snapshot-deployment.en.md)。
 

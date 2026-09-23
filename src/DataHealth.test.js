@@ -10,7 +10,7 @@ const priceRows = ticker => Array.from({ length: 70 }, (_, index) => ({
   ticker,
   value: 100 + index,
   observedAt: new Date(Date.now() - (69 - index) * DAY_MS).toISOString(),
-  provenance: { provider: 'Fixture provider' },
+  provenance: { provider: 'Fixture provider', originUrl: 'https://example.com/prices' },
 }));
 
 const fixture = {

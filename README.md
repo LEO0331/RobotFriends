@@ -9,14 +9,14 @@ Account setup (optional Supabase): [English](docs/accounts.en.md) · [繁體中�
 
 ## What the demo demonstrates
 
-- **Infrastructure intelligence** — national and selected-region data-center buildout views for Arizona, Texas, Ohio/PJM and Northern Virginia.
-- **Period-aware company exposure** — 30D / 90D / 1Y market lookbacks with explicit insufficient-history states rather than fabricated values.
-- **Auditable provenance** — deterministic observation IDs, provider/source metadata, `observedAt` vs `retrievedAt`, confidence, origin URLs and lineage.
-- **Versioned scoring** — explainable company scores with methodology version, component contributions and a point-in-time cutoff.
+- **Infrastructure intelligence** — region navigation and verified primary-source milestones; unsourced regional capacity/stage figures are withheld.
+- **Price lookback** — 30D / 90D / 1Y observed closes with explicit insufficient-history states.
+- **Auditable provenance** — deterministic observation IDs, provider/source metadata, observation and retrieval dates, origin URLs and lineage.
+- **Versioned signals** — reproducible MA5/MA10 price trends with dated observations, provider links and an explicit point-in-time cutoff.
 - **Persistent history** — the Node API profile stores immutable observations, source health, score snapshots, scenario runs and backtest runs in SQLite/WAL.
-- **Scenario Lab** — deterministic sensitivity analysis for power delivery, available power, demand, CAPEX and regulatory assumptions.
-- **Point-in-time Validation** — Recorded vs Reconstructed signals, 30D / 90D forward outcomes, pending windows and no-look-ahead controls.
-- **Data Health** — `#health` exposes the exact public snapshot's freshness, provider degradation, price coverage, methodology and reconstruction coverage.
+- **Scenario Lab** — records bounded user assumptions for power, demand, CAPEX and regulation without an uncalibrated forecast.
+- **Retrospective price test** — MA5/MA10 crossover outcomes using the next observed session and a ten-session exit, with pending windows and no-look-ahead rules.
+- **Data Health** — `#health` exposes market-snapshot freshness, source status, price coverage, and the separately dated event review.
 - **Fail-closed ingestion** — empty/invalid provider responses are degraded, not successful; last-known-good history is retained.
 - **Bilingual research UX** — core Research Lab workflows support English and Traditional Chinese.
 - **Optional accounts** — Supabase signup/signin/recovery/preferences are implemented in the React project but do not block the public research demo.
@@ -85,10 +85,10 @@ Key modules:
 - `server/service.js` — cache/source health and zero-row fail-closed behavior.
 - `server/provenance.js` — deterministic observation identity and audit metadata.
 - `server/database.js` / `server/store.js` — SQLite schema and persistent research history.
-- `server/scoring/` — versioned/explainable company scoring.
-- `server/scenario-engine.js` — deterministic infrastructure sensitivity model.
-- `server/backtest.js` / `src/backtestModel.js` — point-in-time validation.
-- `server/historical-reconstruction.js` — explicitly labelled demo reconstruction with historical cutoffs.
+- `server/scoring/` — versioned MA5/MA10 signal from cited prices; unsupported company scores are null.
+- `server/scenario-engine.js` — bounded user assumptions without an uncalibrated forecast.
+- `server/backtest.js` / `src/backtestModel.js` — retrospective price-only MA5/MA10 crossover test.
+- `server/historical-reconstruction.js` — recorded-history coverage summary; no v1 reconstructions are generated.
 - `server/demo-readiness.js` — public-snapshot acceptance criteria.
 - `src/DataHealth.js` — operational/demo-readiness workspace.
 - `src/ScenarioLab.js` / `src/BacktestLab.js` — research workflows.
@@ -121,17 +121,11 @@ The public demo attempts Stooq first. If a ticker's history is empty, stale, und
 
 An HTTP `200` with zero usable rows is **degraded**, not `ok`. Degraded refreshes do not erase existing history. Provider identity and origin URL are preserved in provenance. Free demo feeds should be replaced by an approved/licensed market-data provider for commercial finance use.
 
-## Point-in-time validation
+## Niche signal lenses and retrospective test
 
-The public demo distinguishes:
+The Overview lets a researcher switch between **market momentum**, **company execution**, **grid demand**, and **project milestones**. Each lens shows its source, date, rule, and unavailable state. It avoids a composite buy/sell score. Company execution uses period-aware SEC revenue or diluted EPS only when an exact record link exists. Grid demand requires explicitly typed EIA actual load and complete comparable days. Project milestones require exact primary records. See [Signal lenses](docs/signal-lenses.md) and [Market signal methodology](docs/scoring-methodology.md).
 
-- **Recorded** — score snapshots created on their original date.
-- **Reconstructed** — later point-in-time reconstructions that enforce a historical `asOf` cutoff.
-- **Partial reconstruction quality** — methodology-v1 fundamentals and structural exposure do not yet have complete historical-vintage source inputs.
-
-30D and 90D are **calendar-day** horizons. If the target lands on a weekend or market holiday, Gridline uses the first available subsequent close within the documented tolerance; it never interpolates a nonexistent market price. As daily snapshots advance, old signals remain fixed while pending outcomes can mature into completed outcomes.
-
-See [docs/backtesting.md](docs/backtesting.md).
+The MA5/MA10 backtest uses only dated closes, enters at the next observed session close and evaluates ten observed sessions later. It is a retrospective descriptive calculation with no transaction costs or claim of predictive skill. See [Backtesting](docs/backtesting.md).
 
 ## Verification
 
@@ -165,11 +159,11 @@ npm run verify:demo
 
 ## Static daily snapshot and Pages deployment
 
-`Refresh daily dashboard snapshot` runs at **22:00 UTC on weekdays** and supports manual dispatch. It retries sources, preserves last-known-good data for degraded providers, generates schemaVersion 4 history (`scores`, `companyHistory`, `backtestCoverage`, `demoReadiness`), and then runs `npm run demo:check`.
+`Refresh daily dashboard snapshot` runs at **22:00 UTC on weekdays** and supports manual dispatch. It retries sources, preserves last-known-good data for degraded providers, generates a schemaVersion 4 snapshot with price-derived v2 signals, source health and `demoReadiness`, and then runs `npm run demo:check`.
 
 Only a snapshot that passes the demo-critical gate is committed to `main`. The refresh workflow then explicitly dispatches `Deploy to GitHub Pages`, which performs a Node 22 lockfile install, production build, Pages deployment and Lighthouse CI. This explicit dispatch is necessary because a push made by a workflow using the repository `GITHUB_TOKEN` does not itself start another push-triggered workflow.
 
-The gate requires, among other things, usable recent price history for all four tracked tickers and at least one labelled historical reconstruction. Optional degraded providers remain visible as warnings rather than being silently hidden.
+The gate requires usable recent price history for all four tracked tickers. Historical v1 reconstructions are no longer published or required. Optional degraded providers remain visible as warnings.
 
 Deployment runbook: [English](docs/static-snapshot-deployment.en.md) · [繁體中文](docs/static-snapshot-deployment.zh-TW.md).
 
@@ -194,6 +188,6 @@ To demonstrate live accounts, configure the project, redirects, RLS SQL and brow
 
 ## EIA attribution
 
-Where EIA observations appear, Gridline identifies the **U.S. Energy Information Administration (EIA)** as the source and retains observation/retrieval timestamps. Gridline scores are not produced, endorsed or approved by EIA. Keep EIA attribution and time context with any displayed derived research result.
+Where EIA observations appear, Gridline identifies the **U.S. Energy Information Administration (EIA)** as the source and retains observation/retrieval timestamps. Gridline's derived grid-demand comparison is not produced, endorsed or approved by EIA. Keep attribution and time context with any displayed result.
 
 Traditional Chinese README: [README.zh-TW.md](README.zh-TW.md).

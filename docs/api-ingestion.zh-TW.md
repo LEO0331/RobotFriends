@@ -9,7 +9,7 @@ API 預設只綁定 `127.0.0.1`。若刻意對外開放，請設定 `HOST`、限
 | `GET /api/health` | 各來源狀態、最近成功時間與降級原因。 |
 | `GET /api/observations?ticker=ORCL&type=close` | 正規化後的歷史觀察值。 |
 | `GET /api/provenance?observationId=...` | 查詢單一觀察值的資料血緣。 |
-| `GET /api/scores?ticker=NBIS` | 版本化分數快照。 |
+| `GET /api/scores?ticker=NBIS` | 當前版本價格訊號快照；不回傳舊版人工分數。 |
 | `POST /api/ingest?source=prices` | 更新單一來源；支援 `sec`、`eia`、`pjm`、`ferc`、`company-ir`、`prices`。 |
 | `POST /api/ingest/all` | 各來源獨立更新；缺少憑證只會讓該來源降級。 |
 | `POST /api/scenario` | 執行／保存一筆情境分析。 |

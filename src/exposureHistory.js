@@ -26,6 +26,7 @@ export function priceSeries(observations, ticker) {
       sourceUrl: httpsUrl(item.sourceUrl) || httpsUrl(item.provenance?.originUrl),
       providerName: item.providerName || item.provenance?.provider || null,
     }))
+    .filter(item => item.sourceUrl)
     .sort((a, b) => a.time - b.time);
   const byDay = new Map();
   rows.forEach(row => byDay.set(new Date(row.time).toISOString().slice(0, 10), row));
@@ -53,7 +54,7 @@ export function computePeriodReturn(observations, ticker, period) {
   const latest = rows[rows.length - 1];
   const targetTime = latest.time - days * DAY_MS;
   const baseline = closestBaseline(rows, targetTime);
-  if (!baseline || baseline.time >= latest.time || baseline.value === 0) return { available: false, reason: 'price-history-insufficient', latest };
+  if (!baseline || baseline.time >= latest.time || baseline.value === 0 || baseline.sourceUrl !== latest.sourceUrl) return { available: false, reason: 'price-history-insufficient', latest };
   return {
     available: true,
     currentPrice: latest.value,
@@ -75,8 +76,10 @@ export function buildCompanyPeriodView(company, observations, period) {
   const rows = priceSeries(observations, company.ticker);
   const latestPrice = rows[rows.length - 1] || null;
   const currentPrice = latestPrice ? latestPrice.value : null;
-  const ma5 = movingAverage(rows, 5);
-  const ma10 = movingAverage(rows, 10);
+  const latestTen = rows.slice(-10);
+  const consistentSource = latestTen.length === 10 && new Set(latestTen.map(row => row.sourceUrl)).size === 1;
+  const ma5 = consistentSource ? movingAverage(rows, 5) : null;
+  const ma10 = consistentSource ? movingAverage(rows, 10) : null;
   return {
     ticker: company.ticker,
     name: company.name,

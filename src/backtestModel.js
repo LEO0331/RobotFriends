@@ -18,7 +18,9 @@ function verifiedPriceRows(observations, ticker) {
     const old = byDay.get(date);
     if (!old || Date.parse(item.retrievedAt || '') > Date.parse(old.retrievedAt || '')) byDay.set(date, item);
   }
-  return [...byDay.values()].sort((a, b) => Date.parse(a.observedAt) - Date.parse(b.observedAt));
+  const rows = [...byDay.values()].sort((a, b) => Date.parse(a.observedAt) - Date.parse(b.observedAt));
+  const latestSource = rows.at(-1)?.sourceUrl;
+  return rows.filter(row => row.sourceUrl === latestSource);
 }
 
 function meanEndingAt(rows, end, length) {

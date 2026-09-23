@@ -1,6 +1,6 @@
 import { buildCompanyPeriodView, computePeriodReturn, formatPercent, setupCopy } from './exposureHistory';
 
-const price = (ticker, date, value) => ({ source: 'prices', type: 'close', ticker, observedAt: `${date}T00:00:00.000Z`, value });
+const price = (ticker, date, value) => ({ source: 'prices', type: 'close', ticker, observedAt: `${date}T00:00:00.000Z`, value, sourceUrl: `https://example.com/${ticker}-history` });
 
 test('computes a return from the closest trading date to the requested window', () => {
   const observations = [
@@ -91,4 +91,12 @@ test('does not expose a non-HTTPS observation link', () => {
   ];
   const view = buildCompanyPeriodView({ ticker: 'ORCL' }, observations, '30D');
   expect(view.priceSourceUrl).toBeNull();
+});
+
+test('lookback and moving averages stay unavailable across mismatched provider datasets', () => {
+  const observations = Array.from({ length: 10 }, (_, index) => price('NBIS', `2026-09-${String(index + 1).padStart(2, '0')}`, 100 + index));
+  observations[0].sourceUrl = 'https://example.com/other-provider';
+  const view = buildCompanyPeriodView({ ticker: 'NBIS' }, observations, '30D');
+  expect(view.marketSignal).toBeNull();
+  expect(view.ma10).toBeNull();
 });

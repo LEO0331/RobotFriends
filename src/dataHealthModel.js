@@ -3,6 +3,7 @@ const SOURCE_ORDER = ['prices', 'events', 'sec', 'eia', 'pjm', 'ferc', 'company-
 const DAY_MS = 24 * 60 * 60 * 1000;
 
 const validDate = value => Number.isFinite(Date.parse(value));
+const secureUrl = value => { try { return new URL(value).protocol === 'https:'; } catch { return false; } };
 
 export function buildDataHealth(snapshot = {}, now = new Date()) {
   const observations = Array.isArray(snapshot.observations) ? snapshot.observations : [];
@@ -12,9 +13,10 @@ export function buildDataHealth(snapshot = {}, now = new Date()) {
   const ageHours = generatedTime === null || !Number.isFinite(nowTime) ? null : Math.max(0, (nowTime - generatedTime) / 3600000);
 
   const priceCoverage = TRACKED_TICKERS.map(ticker => {
-    const rows = observations
-      .filter(item => item.source === 'prices' && item.type === 'close' && item.ticker === ticker && validDate(item.observedAt) && Number.isFinite(Number(item.value)))
-      .sort((a, b) => Date.parse(a.observedAt) - Date.parse(b.observedAt));
+    const byDay = new Map(observations
+      .filter(item => item.source === 'prices' && item.type === 'close' && item.ticker === ticker && validDate(item.observedAt) && Number.isFinite(Number(item.value)) && Number(item.value) > 0 && secureUrl(item.provenance?.originUrl || item.sourceUrl))
+      .map(item => [item.observedAt.slice(0, 10), item]));
+    const rows = [...byDay.values()].sort((a, b) => Date.parse(a.observedAt) - Date.parse(b.observedAt));
     const first = rows[0] || null;
     const last = rows[rows.length - 1] || null;
     const stalenessDays = last && Number.isFinite(nowTime) ? Math.max(0, (nowTime - Date.parse(last.observedAt)) / DAY_MS) : null;

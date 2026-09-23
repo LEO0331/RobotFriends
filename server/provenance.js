@@ -59,7 +59,7 @@ function attachProvenance(item, defaults = {}) {
       originUrl,
       observedAt,
       retrievedAt,
-      confidence: Number.isFinite(Number(normalized.confidence)) ? Number(normalized.confidence) : null,
+      confidence: normalized.confidence === null || normalized.confidence === undefined ? null : Number.isFinite(Number(normalized.confidence)) ? Number(normalized.confidence) : null,
       lineage: [id],
       transformation: 'normalized-observation-v1',
     },

@@ -6,11 +6,62 @@ const SEC_TICKERS = 'https://www.sec.gov/files/company_tickers.json';
 const SEC_SUBMISSIONS = cik => `https://data.sec.gov/submissions/CIK${String(cik).padStart(10, '0')}.json`;
 const SEC_FACTS = cik => `https://data.sec.gov/api/xbrl/companyfacts/CIK${String(cik).padStart(10, '0')}.json`;
 const now = () => new Date().toISOString();
-const observation = (source, type, value, extra = {}) => ({ id: `${source}:${type}:${extra.ticker || extra.region || 'all'}`, source, type, value, observedAt: extra.observedAt || now(), retrievedAt: now(), confidence: extra.confidence || 0.9, ...extra });
-const latestFact = (facts, name) => {
-  const units = facts?.facts?.['us-gaap']?.[name]?.units || {}; const entries = Object.values(units).flat();
-  return entries.filter(item => item.form === '10-K' || item.form === '10-Q').sort((a, b) => String(b.filed).localeCompare(String(a.filed)))[0];
+const observation = (source, type, value, extra = {}) => ({ id: `${source}:${type}:${extra.ticker || extra.region || 'all'}`, source, type, value, observedAt: extra.observedAt || now(), retrievedAt: now(), ...extra });
+const SEC_FORMS = new Set(['10-K', '10-Q', '10-K/A', '10-Q/A', '20-F', '20-F/A', '6-K', '6-K/A']);
+const FACT_TAGS = {
+  revenue: [['us-gaap', 'RevenueFromContractWithCustomerExcludingAssessedTax'], ['us-gaap', 'Revenues'], ['us-gaap', 'SalesRevenueNet'], ['ifrs-full', 'Revenue']],
+  capex: [['us-gaap', 'PaymentsToAcquirePropertyPlantAndEquipment'], ['ifrs-full', 'PurchaseOfPropertyPlantAndEquipmentClassifiedAsInvestingActivities']],
+  currentDebt: [['us-gaap', 'LongTermDebtCurrent'], ['ifrs-full', 'CurrentBorrowings']],
+  longTermDebt: [['us-gaap', 'LongTermDebtNoncurrent'], ['ifrs-full', 'NoncurrentBorrowings']],
+  dilutedEps: [['us-gaap', 'EarningsPerShareDiluted'], ['ifrs-full', 'DilutedEarningsLossPerShare']],
 };
+
+function factCandidates(facts, tags, requiredUnit) {
+  const candidates = tags.flatMap(([taxonomy, tag]) => Object.entries(facts?.facts?.[taxonomy]?.[tag]?.units || {})
+    .flatMap(([unit, entries]) => entries.map(item => ({ ...item, unit, taxonomy, tag }))));
+  return candidates.filter(item => item.unit === requiredUnit && SEC_FORMS.has(item.form) && /^\d{4}-\d{2}-\d{2}$/.test(item.end || '') && /^\d{4}-\d{2}-\d{2}$/.test(item.filed || '') && item.val !== null && item.val !== '' && Number.isFinite(Number(item.val)));
+}
+
+function latestFact(facts, tags, requiredUnit) {
+  const valid = factCandidates(facts, tags, requiredUnit);
+  // Compare reporting periods before filing dates; a later filing may repeat an older comparative value.
+  valid.sort((a, b) => b.end.localeCompare(a.end) || String(b.start || '').localeCompare(String(a.start || '')) || b.filed.localeCompare(a.filed));
+  return valid[0];
+}
+
+const daysBetween = (start, end) => (Date.parse(`${end}T00:00:00Z`) - Date.parse(`${start}T00:00:00Z`)) / 86400000;
+const quarterly = fact => /^\d{4}-\d{2}-\d{2}$/.test(fact?.start || '') && daysBetween(fact.start, fact.end) >= 60 && daysBetween(fact.start, fact.end) <= 120;
+
+function priorYearQuarter(facts, tags, unit, current) {
+  if (!quarterly(current)) return null;
+  const duration = daysBetween(current.start, current.end);
+  const comparable = factCandidates(facts, tags, unit).filter(item => item.taxonomy === current.taxonomy && item.tag === current.tag && quarterly(item)
+    && Math.abs(daysBetween(item.start, item.end) - duration) <= 14
+    && Math.abs(daysBetween(item.end, current.end) - 365) <= 35
+    && Math.abs(daysBetween(item.start, current.start) - 365) <= 35
+    && item.filed <= current.filed);
+  // The first filing of the old period is the point-in-time value; later filings often repeat it as a comparative.
+  comparable.sort((a, b) => Math.abs(daysBetween(a.end, current.end) - 365) - Math.abs(daysBetween(b.end, current.end) - 365)
+    || a.filed.localeCompare(b.filed));
+  return comparable[0] || null;
+}
+
+function filingUrl(cik, fact, documents) {
+  const document = documents.get(fact.accn);
+  if (document && /^\d{10}-\d{2}-\d{6}$/.test(fact.accn) && /^[\w.%-]+$/.test(document)) {
+    return `https://www.sec.gov/Archives/edgar/data/${Number(cik)}/${fact.accn.replaceAll('-', '')}/${document}`;
+  }
+  return SEC_FACTS(cik);
+}
+
+function factObservation(cik, ticker, type, fact, documents) {
+  return observation('sec', type, Number(fact.val), {
+    ticker, unit: fact.unit, periodStart: fact.start || null, periodEnd: fact.end,
+    filedAt: fact.filed, observedAt: `${fact.filed}T00:00:00.000Z`, form: fact.form, accession: fact.accn,
+    fiscalYear: fact.fy, fiscalPeriod: fact.fp, frame: fact.frame, taxonomy: fact.taxonomy, factTag: fact.tag,
+    sourceUrl: filingUrl(cik, fact, documents),
+  });
+}
 
 async function ingestSec(config) {
   if (!config.secUserAgent) throw new Error('SEC_USER_AGENT is required for SEC requests.');
@@ -20,35 +71,52 @@ async function ingestSec(config) {
   for (const company of matches) {
     const [submissions, facts] = await Promise.all([getJson(SEC_SUBMISSIONS(company.cik_str, headers), headers), getJson(SEC_FACTS(company.cik_str), headers)]);
     payload.push({ ticker: company.ticker, submissions, facts });
-    const filings = submissions.filings?.recent || {}; const forms = (filings.form || []).map((form, index) => ({ form, filed: filings.filingDate[index], accession: filings.accessionNumber[index], primaryDocument: filings.primaryDocument[index] })).filter(item => ['10-K', '10-Q', '8-K'].includes(item.form)).slice(0, 12);
-    observations.push(observation('sec', 'filings', forms, { ticker: company.ticker, confidence: 1 }));
-    for (const [factName, label] of [['Revenues', 'revenue'], ['PaymentsToAcquirePropertyPlantAndEquipment', 'capex'], ['LongTermDebtCurrent', 'currentDebt'], ['LongTermDebtNoncurrent', 'longTermDebt']]) {
-      const fact = latestFact(facts, factName); if (fact) observations.push(observation('sec', label, Number(fact.val), { ticker: company.ticker, unit: fact.unit, periodEnd: fact.end, filedAt: fact.filed, form: fact.form, confidence: 1 }));
+    const filings = submissions.filings?.recent || {}; const allForms = (filings.form || []).map((form, index) => ({ form, filed: filings.filingDate?.[index], accession: filings.accessionNumber?.[index], primaryDocument: filings.primaryDocument?.[index] }));
+    const documents = new Map(allForms.filter(item => item.accession && item.primaryDocument).map(item => [item.accession, item.primaryDocument]));
+    const forms = allForms.filter(item => SEC_FORMS.has(item.form) || item.form === '8-K').slice(0, 12);
+    observations.push(observation('sec', 'filings', forms, { ticker: company.ticker, sourceUrl: SEC_SUBMISSIONS(company.cik_str) }));
+    for (const [label, tags] of Object.entries(FACT_TAGS)) {
+      const unit = label === 'dilutedEps' ? 'USD/shares' : 'USD';
+      const fact = latestFact(facts, tags, unit);
+      if (!fact) continue;
+      observations.push(factObservation(company.cik_str, company.ticker, label, fact, documents));
+      if (label === 'revenue' || label === 'dilutedEps') {
+        const prior = priorYearQuarter(facts, tags, unit, fact);
+        if (prior) observations.push(factObservation(company.cik_str, company.ticker, `${label}Prior`, prior, documents));
+      }
     }
   }
   return { payload, observations, message: `${matches.length} tracked issuers ingested` };
 }
 async function ingestEia(config) {
   if (!config.eiaKey) throw new Error('EIA_API_KEY is not configured.');
-  const url = `https://api.eia.gov/v2/electricity/rto/region-data/data/?api_key=${encodeURIComponent(config.eiaKey)}&frequency=hourly&data[0]=value&facets[respondent][]=PJM&length=24&sort[0][column]=period&sort[0][direction]=desc`;
+  const datasetUrl = 'https://api.eia.gov/v2/electricity/rto/region-data/data/?frequency=hourly&data[0]=value&facets[respondent][]=PJM&facets[type][]=D';
+  const url = `${datasetUrl}&length=336&sort[0][column]=period&sort[0][direction]=desc&api_key=${encodeURIComponent(config.eiaKey)}`;
   const payload = await getJson(url); const rows = payload.response?.data || [];
-  return { payload, observations: rows.map(row => observation('eia', 'rtoLoad', Number(row.value), { region: row.respondent || 'PJM', unit: row['value-units'], observedAt: row.period, confidence: 1 })), message: `${rows.length} EIA records ingested` };
+  const actualDemand = rows.filter(row => row.respondent === 'PJM' && row.type === 'D' && /^\d{4}-\d{2}-\d{2}T\d{2}$/.test(row.period || '') && row.value !== null && row.value !== '' && Number.isFinite(Number(row.value)))
+    .map(row => ({ ...row, observedAt: new Date(`${row.period}:00:00Z`).toISOString() }));
+  if (!actualDemand.length) throw new Error('EIA returned no verified PJM actual-demand records.');
+  return { payload, observations: actualDemand.map(row => observation('eia', 'rtoDemandActual', Number(row.value), {
+    region: 'PJM', dataType: 'D', unit: row['value-units'], observedAt: row.observedAt, sourcePeriod: row.period,
+    sourceUrl: `${datasetUrl}&start=${row.period}&end=${row.period}`,
+  })), message: `${actualDemand.length} EIA actual-demand records ingested` };
 }
 async function ingestPjm(config) {
   if (!config.pjmKey) throw new Error('PJM_API_KEY is not configured.');
   const url = `https://api.pjm.com/api/v1/gen_by_fuel?rowCount=48&startRow=1&subscription-key=${encodeURIComponent(config.pjmKey)}`;
   const payload = await getJson(url); const rows = payload.items || [];
-  return { payload, observations: rows.map(row => observation('pjm', 'generationByFuel', Number(row.mw || row.generation_mw || 0), { region: 'PJM', fuel: row.fuel_type || row.fuel, observedAt: row.datetime_beginning_utc || now(), confidence: 1 })), message: `${rows.length} PJM records ingested` };
+  const validRows = rows.filter(row => Number.isFinite(Number(row.mw ?? row.generation_mw)) && Number(row.mw ?? row.generation_mw) > 0 && row.datetime_beginning_utc);
+  return { payload, observations: validRows.map(row => observation('pjm', 'generationByFuel', Number(row.mw ?? row.generation_mw), { region: 'PJM', fuel: row.fuel_type || row.fuel, observedAt: row.datetime_beginning_utc })), message: `${validRows.length} PJM records ingested` };
 }
 async function ingestFerc(config) {
   if (!config.fercKey) throw new Error('FERC_API_KEY is not configured.');
   const payload = await getJson('https://api.data.ferc.gov/v1/dataset/0/details/', { 'X-Api-Key': config.fercKey });
-  return { payload, observations: [observation('ferc', 'datasetCatalog', { retrieved: true }, { confidence: 1 })], message: 'FERC dataset catalog ingested; configure a selected dataset connector next.' };
+  return { payload, observations: [], message: 'FERC dataset catalog checked; no selected dataset connector provides a usable observation yet.' };
 }
 async function ingestIr(config) {
   const feeds = Object.entries(config.companyIrFeeds); if (!feeds.length) throw new Error('COMPANY_IR_FEEDS has no configured official feed URLs.');
   const payload = []; const observations = [];
-  for (const [ticker, url] of feeds) { const text = await getText(url, { 'User-Agent': config.secUserAgent || 'Gridline research client' }); payload.push({ ticker, url, text }); observations.push(observation('company-ir', 'officialFeed', { url }, { ticker, confidence: 0.85 })); }
+  for (const [ticker, url] of feeds) { const text = await getText(url, { 'User-Agent': config.secUserAgent || 'Gridline research client' }); payload.push({ ticker, url, text }); observations.push(observation('company-ir', 'officialFeed', { url }, { ticker, sourceUrl: url })); }
   return { payload, observations, message: `${feeds.length} official IR feeds ingested` };
 }
 async function ingestPrices(config) {
@@ -73,7 +141,6 @@ async function ingestPrices(config) {
       ticker,
       currency: 'USD',
       observedAt: `${row.date}T00:00:00.000Z`,
-      confidence: history.provider === 'Stooq' ? 0.7 : 0.68,
       providerName: history.provider,
       sourceUrl: history.providerUrl,
     })));

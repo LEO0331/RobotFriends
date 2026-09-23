@@ -8,7 +8,7 @@ export const researchLabCopy = language => {
     languageToggle: zh ? 'EN' : '繁中',
     dockLabel: t('RESEARCH LAB', '研究實驗室'),
     scenarioButton: t('Scenario analysis →', '情境分析 →'),
-    backtestButton: t('Point-in-time backtest →', '時點回測 →'),
+    backtestButton: t('Price backtest →', '價格回測 →'),
     scenario: {
       lab: t('SCENARIO LAB', '情境分析實驗室'),
       back: t('← Back to regime', '← 返回週期分析'),

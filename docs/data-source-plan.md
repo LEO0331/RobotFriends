@@ -14,8 +14,8 @@ This prototype uses explicitly labelled sample observations. Production ingestio
 
 ## Confidence controls
 
-Bronze records retain raw payload, source URL and retrieval time. Silver normalizes identifiers, dates and units. Gold derives scores. Primary records receive quality 5; grid operators/company releases 4; established media 3; local media 2; community signals 1. Missing data remains null, never zero.
+Bronze records retain raw payload, source URL and retrieval time. Silver normalizes identifiers, dates, units and data type. Published research signals are derived only when their required observations and method are available. Source category is recorded; no numerical quality score is assigned without a validated calibration. Missing data remains null, never zero.
 
 ## Fail-closed snapshot refresh
 
-A provider response is not considered healthy merely because the HTTP request succeeded. Ingestion must produce usable observations. Empty responses are marked `degraded`. Price ingestion additionally requires complete coverage for every configured ticker before the source can be marked `ok`. During static snapshot export, only successful sources replace their previous records; degraded sources retain their last-known-good observations. This prevents an upstream empty response from erasing the history needed by lookback and point-in-time validation features.
+A provider response is not considered healthy merely because the HTTP request succeeded. Price, SEC and grid ingestion must produce usable observations; empty responses are marked `degraded`. An event check may legitimately find zero qualifying records and still preserve prior event history. Price ingestion additionally requires complete coverage for every configured ticker before the source can be marked `ok`. During static snapshot export, degraded sources retain their last-known-good observations. This prevents an upstream empty response from erasing the history needed by lookback and retrospective price validation.

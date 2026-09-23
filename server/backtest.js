@@ -16,7 +16,9 @@ function priceRows(observations, ticker) {
     const previous = byDay.get(day);
     if (!previous || Date.parse(row.retrievedAt || '') > Date.parse(previous.retrievedAt || '')) byDay.set(day, row);
   }
-  return [...byDay.values()].sort((a, b) => Date.parse(a.observedAt) - Date.parse(b.observedAt));
+  const rows = [...byDay.values()].sort((a, b) => Date.parse(a.observedAt) - Date.parse(b.observedAt));
+  const latestSource = rows.at(-1)?.provenance?.originUrl || rows.at(-1)?.sourceUrl;
+  return rows.filter(row => (row.provenance?.originUrl || row.sourceUrl) === latestSource);
 }
 
 function mean(rows, end, count) {

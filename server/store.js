@@ -73,7 +73,7 @@ function createStore(dataDir) {
             item.region || null,
             observedAt,
             retrievedAt,
-            Number.isFinite(Number(item.confidence)) ? Number(item.confidence) : null,
+            item.confidence === null || item.confidence === undefined ? null : Number.isFinite(Number(item.confidence)) ? Number(item.confidence) : null,
             JSON.stringify(item.value ?? null),
             JSON.stringify(item.provenance || null),
             JSON.stringify({ ...item, id, observedAt, retrievedAt }),

@@ -1,16 +1,18 @@
 {
   "schemaVersion": 1,
-  "checkedAt": "2026-09-23T07:45:05.000Z",
+  "checkedAt": "2026-09-23T08:25:25.000Z",
   "coverageThrough": "2026-09-22",
   "scope": "curated-candidates-only",
-  "method": "manual review of official source pages",
+  "method": "manual review of official source pages and visible publication dates",
   "sourceHealth": {
     "events": {
       "status": "partial",
-      "checkedAt": "2026-09-23T07:45:05.000Z",
-      "lastSuccessAt": "2026-09-23T07:45:05.000Z",
+      "checkedAt": "2026-09-23T08:25:25.000Z",
+      "lastSuccessAt": "2026-09-23T08:25:25.000Z",
       "recordCount": 3,
       "scope": "curated-candidates-only",
+      "coverageThrough": "2026-09-22",
+      "method": "manual review of official source pages and visible publication dates",
       "message": "3 curated primary records checked through 2026-09-22; PJM RSS coverage not verified in this check."
     }
   },
@@ -24,27 +26,28 @@
         "category": "PERMIT",
         "summary": "Loudoun County approved a plan to pause final action on certain data center and substation applications for up to 12 months.",
         "evidenceText": "for up to 12 months",
+        "dateText": "September 17, 2026",
         "publishedAt": "2026-09-17T00:00:00Z",
         "region": "Northern Virginia",
         "url": "https://www.loudoun.gov/m/newsflash/home/detail/10874"
       },
       "observedAt": "2026-09-17T00:00:00Z",
-      "retrievedAt": "2026-09-23T07:45:05.000Z",
+      "retrievedAt": "2026-09-23T08:25:25.000Z",
       "sourceUrl": "https://www.loudoun.gov/m/newsflash/home/detail/10874",
       "region": "Northern Virginia",
-      "id": "obs_9d3ea47aab6871526b789669",
-      "observationId": "obs_9d3ea47aab6871526b789669",
+      "id": "obs_22d2d83c4f684bcdd65533c2",
+      "observationId": "obs_22d2d83c4f684bcdd65533c2",
       "provenance": {
-        "observationId": "obs_9d3ea47aab6871526b789669",
+        "observationId": "obs_22d2d83c4f684bcdd65533c2",
         "source": "events",
         "provider": "Verified infrastructure event sources",
         "dataClass": "primary",
         "originUrl": "https://www.loudoun.gov/m/newsflash/home/detail/10874",
         "observedAt": "2026-09-17T00:00:00Z",
-        "retrievedAt": "2026-09-23T07:45:05.000Z",
+        "retrievedAt": "2026-09-23T08:25:25.000Z",
         "confidence": null,
         "lineage": [
-          "obs_9d3ea47aab6871526b789669"
+          "obs_22d2d83c4f684bcdd65533c2"
         ],
         "transformation": "normalized-observation-v1"
       }
@@ -58,27 +61,28 @@
         "category": "PERMIT",
         "summary": "Loudoun County opposed a proposed transmission line and denied a land-use application for a substation near Dulles Airport.",
         "evidenceText": "denied land use applications for a new electrical substation near Dulles Airport",
+        "dateText": "September 18, 2026",
         "publishedAt": "2026-09-18T00:00:00Z",
         "region": "Northern Virginia",
         "url": "https://www.loudoun.gov/m/newsflash/Home/Detail/10876"
       },
       "observedAt": "2026-09-18T00:00:00Z",
-      "retrievedAt": "2026-09-23T07:45:05.000Z",
+      "retrievedAt": "2026-09-23T08:25:25.000Z",
       "sourceUrl": "https://www.loudoun.gov/m/newsflash/Home/Detail/10876",
       "region": "Northern Virginia",
-      "id": "obs_17773fe3c023d5ef42c4873d",
-      "observationId": "obs_17773fe3c023d5ef42c4873d",
+      "id": "obs_87d025fecf57c7e574c13b78",
+      "observationId": "obs_87d025fecf57c7e574c13b78",
       "provenance": {
-        "observationId": "obs_17773fe3c023d5ef42c4873d",
+        "observationId": "obs_87d025fecf57c7e574c13b78",
         "source": "events",
         "provider": "Verified infrastructure event sources",
         "dataClass": "primary",
         "originUrl": "https://www.loudoun.gov/m/newsflash/Home/Detail/10876",
         "observedAt": "2026-09-18T00:00:00Z",
-        "retrievedAt": "2026-09-23T07:45:05.000Z",
+        "retrievedAt": "2026-09-23T08:25:25.000Z",
         "confidence": null,
         "lineage": [
-          "obs_17773fe3c023d5ef42c4873d"
+          "obs_87d025fecf57c7e574c13b78"
         ],
         "transformation": "normalized-observation-v1"
       }
@@ -92,27 +96,28 @@
         "category": "CAPEX",
         "summary": "Oracle reported Q1 FY27 results that included capital expenditures and additional data center capacity delivery.",
         "evidenceText": "delivery of 850MW additional datacenter capacity",
+        "dateText": "September 10, 2026",
         "publishedAt": "2026-09-10T00:00:00Z",
         "region": "All regions",
         "url": "https://investor.oracle.com/investor-news/news-details/2026/Oracle-Announces-Q1-Results-Driven-by-Triple-Digit-Growth-in-Cloud-Infrastructure-Revenues/default.aspx"
       },
       "observedAt": "2026-09-10T00:00:00Z",
-      "retrievedAt": "2026-09-23T07:45:05.000Z",
+      "retrievedAt": "2026-09-23T08:25:25.000Z",
       "sourceUrl": "https://investor.oracle.com/investor-news/news-details/2026/Oracle-Announces-Q1-Results-Driven-by-Triple-Digit-Growth-in-Cloud-Infrastructure-Revenues/default.aspx",
       "region": "All regions",
-      "id": "obs_d3ddf1e6b40e84d911c1dd67",
-      "observationId": "obs_d3ddf1e6b40e84d911c1dd67",
+      "id": "obs_547ea12dcf05e655b307f9e1",
+      "observationId": "obs_547ea12dcf05e655b307f9e1",
       "provenance": {
-        "observationId": "obs_d3ddf1e6b40e84d911c1dd67",
+        "observationId": "obs_547ea12dcf05e655b307f9e1",
         "source": "events",
         "provider": "Verified infrastructure event sources",
         "dataClass": "primary",
         "originUrl": "https://investor.oracle.com/investor-news/news-details/2026/Oracle-Announces-Q1-Results-Driven-by-Triple-Digit-Growth-in-Cloud-Infrastructure-Revenues/default.aspx",
         "observedAt": "2026-09-10T00:00:00Z",
-        "retrievedAt": "2026-09-23T07:45:05.000Z",
+        "retrievedAt": "2026-09-23T08:25:25.000Z",
         "confidence": null,
         "lineage": [
-          "obs_d3ddf1e6b40e84d911c1dd67"
+          "obs_547ea12dcf05e655b307f9e1"
         ],
         "transformation": "normalized-observation-v1"
       }

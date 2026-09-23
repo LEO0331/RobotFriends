@@ -18,10 +18,10 @@ test('research dock copy has English and Traditional Chinese labels', () => {
   const chinese = researchLabCopy('zh-TW');
   expect(english.dockLabel).toBe('RESEARCH LAB');
   expect(english.scenarioButton).toBe('Scenario analysis →');
-  expect(english.backtestButton).toBe('Point-in-time backtest →');
+  expect(english.backtestButton).toBe('Price backtest →');
   expect(chinese.dockLabel).toBe('研究實驗室');
   expect(chinese.scenarioButton).toBe('情境分析 →');
-  expect(chinese.backtestButton).toBe('時點回測 →');
+  expect(chinese.backtestButton).toBe('價格回測 →');
 });
 
 test('scenario lab renders Traditional Chinese copy and localized regions', () => {
