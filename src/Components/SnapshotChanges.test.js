@@ -136,7 +136,7 @@ test('renders Traditional Chinese snapshot-change copy', () => {
   expect(screen.getByRole('heading', { level: 3, name: '自上次快照以來的變化' })).toBeInTheDocument();
   expect(screen.getByText('混合 → 向上')).toBeInTheDocument();
   expect(screen.getByText('部分更新 → 正常')).toBeInTheDocument();
-  expect(screen.getByText('德州 · 發布日期: 2026-09-24')).toBeInTheDocument();
+  expect(screen.getByText('電網 · 德州 · 發布日期: 2026-09-24')).toBeInTheDocument();
 });
 
 test('shows a transparent unavailable state before a valid comparison baseline exists', () => {
