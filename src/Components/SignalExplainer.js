@@ -93,7 +93,9 @@ export default function SignalExplainer({
         {SIGNAL_METHODS.map(option => <button
           key={option.id}
           type="button"
+          id={`signal-method-tab-${option.id}`}
           role="tab"
+          aria-controls="signal-method-panel"
           aria-selected={option.id === method.id}
           className={option.id === method.id ? 'selected-method' : ''}
           onClick={() => onMethodChange(option.id)}
@@ -103,7 +105,12 @@ export default function SignalExplainer({
         </button>)}
       </div>
 
-      <div className="signal-current">
+      <div
+        id="signal-method-panel"
+        className="signal-current"
+        role="tabpanel"
+        aria-labelledby={`signal-method-tab-${method.id}`}
+      >
         <div><h4>{state}</h4><p>{summary}</p></div>
         <strong>{metric}</strong>
       </div>
