@@ -84,7 +84,8 @@ export function signalLens(snapshot, ticker, lensId, now = new Date()) {
         labelZh: signal.trend === 'above' ? '短期價格趨勢向上' : signal.trend === 'below' ? '短期價格趨勢向下' : '短期價格趨勢混合',
         method: 'Classified from recent sourced closing-price history. This is a descriptive trend signal, not a forecast of future returns.',
         methodZh: '依據具來源的近期收盤價歷史進行分類。此為描述性趨勢訊號，不代表未來報酬預測。',
-        observedAt: signal.observedAt, sourceUrl: signal.sourceUrl, scope: ticker, scopeZh: ticker }
+        observedAt: signal.observedAt, sourceUrl: signal.sourceUrl, scope: ticker, scopeZh: ticker,
+        signalMethodId: signal.signalMethodId, signalMethod: signal.signalMethod }
       : { available: false, label: 'Market momentum unavailable', labelZh: '暫無市場動能訊號', method: 'Requires 10 distinct dated closes from one linked provider.', methodZh: '須有同一資料來源連結提供的 10 個不同交易日收盤價。', scope: ticker, scopeZh: ticker };
   }
   if (lensId === 'execution') {
