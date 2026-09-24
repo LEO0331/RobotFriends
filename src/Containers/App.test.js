@@ -19,9 +19,9 @@ const snapshot = {
 
 const dateAt = index => new Date(Date.UTC(2026, 7, 25 + index)).toISOString();
 const richSnapshot = {
-  generatedAt: '2026-09-24T00:00:00Z',
+  generatedAt: dateAt(89),
   sourceHealth: { prices: { status: 'ok' } },
-  observations: Array.from({ length: 30 }, (_, index) => ({
+  observations: Array.from({ length: 90 }, (_, index) => ({
     id: `r${index}`, source: 'prices', type: 'close', ticker: 'NBIS', value: 100 + index,
     observedAt: dateAt(index),
     provenance: { provider: 'Fixture', originUrl: 'https://example.com/prices' },
@@ -50,6 +50,8 @@ test('technical method selection updates the selected market-signal lens', () =>
 
   expect(screen.getByRole('heading', { level: 2, name: 'RSI above upper reference range' })).toBeInTheDocument();
   expect(screen.getByText('RSI 100.0')).toBeInTheDocument();
+  expect(screen.getByText('Momentum · Relative Strength Index')).toBeInTheDocument();
+  expect(screen.getByText(/state changes in this range/)).toBeInTheDocument();
 });
 
 test('saved local language is not overwritten when account preferences reload after navigation', () => {
