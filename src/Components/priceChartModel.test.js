@@ -75,12 +75,15 @@ test('chart model respects the snapshot point-in-time cutoff', () => {
 });
 
 test('invalid or missing snapshot time fails closed', () => {
-  const snapshot = snapshotWith(70);
-  snapshot.generatedAt = 'invalid';
+  const invalid = snapshotWith(70);
+  invalid.generatedAt = 'invalid';
 
-  const model = buildPriceChartModel(snapshot, 'NBIS', 30);
+  const invalidModel = buildPriceChartModel(invalid, 'NBIS', 30);
+  const missingModel = buildPriceChartModel({ observations: invalid.observations }, 'NBIS', 30);
 
-  expect(model.available).toBe(false);
-  expect(model.reason).toBe('price-history-missing');
-  expect(model.availableSessions).toBe(0);
+  for (const model of [invalidModel, missingModel]) {
+    expect(model.available).toBe(false);
+    expect(model.reason).toBe('price-history-missing');
+    expect(model.availableSessions).toBe(0);
+  }
 });
