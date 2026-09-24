@@ -17,6 +17,17 @@ const snapshot = {
   })),
 };
 
+const dateAt = index => new Date(Date.UTC(2026, 7, 25 + index)).toISOString();
+const richSnapshot = {
+  generatedAt: '2026-09-24T00:00:00Z',
+  sourceHealth: { prices: { status: 'ok' } },
+  observations: Array.from({ length: 30 }, (_, index) => ({
+    id: `r${index}`, source: 'prices', type: 'close', ticker: 'NBIS', value: 100 + index,
+    observedAt: dateAt(index),
+    provenance: { provider: 'Fixture', originUrl: 'https://example.com/prices' },
+  })),
+};
+
 beforeEach(() => {
   window.localStorage.clear();
   window.history.pushState({}, '', '#overview');
@@ -28,6 +39,17 @@ test('overview switches research lenses without presenting unsourced earnings va
   fireEvent.click(screen.getByRole('button', { name: 'Company financials' }));
   expect(screen.getByText('Company execution evidence unavailable')).toBeInTheDocument();
   expect(screen.queryByText('86%')).not.toBeInTheDocument();
+});
+
+test('technical method selection updates the selected market-signal lens', () => {
+  render(<App snapshot={richSnapshot} />);
+  expect(screen.getByRole('button', { name: 'Market signals' })).toBeInTheDocument();
+  expect(screen.getByRole('heading', { level: 2, name: 'Short-term price trend: upward' })).toBeInTheDocument();
+
+  fireEvent.click(screen.getByRole('tab', { name: /Relative Strength Index/ }));
+
+  expect(screen.getByRole('heading', { level: 2, name: 'RSI above upper reference range' })).toBeInTheDocument();
+  expect(screen.getByText('RSI 100.0')).toBeInTheDocument();
 });
 
 test('saved local language is not overwritten when account preferences reload after navigation', () => {
