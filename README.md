@@ -11,7 +11,7 @@ Account setup (optional Supabase): [English](docs/accounts.en.md) · [繁體中�
 
 - **Infrastructure intelligence** — region navigation and verified primary-source milestones; unsourced regional capacity/stage figures are withheld.
 - **Price lookback** — 30D / 90D / 1Y observed closes with explicit insufficient-history states.
-- **Lightweight price chart** — native SVG 30 / 60 / 90-session views use the same dated close observations, keep one continuous provider segment, and link back to the price source without adding a charting dependency.
+- **Lightweight price chart** — native SVG 30 / 60 / 90-session views use the same dated close observations, keep one continuous provider segment, link back to the price source, and overlay dated state-change markers from the currently selected technical method.
 - **Auditable provenance** — deterministic observation IDs, provider/source metadata, observation and retrieval dates, origin URLs and lineage.
 - **Extensible technical signals** — a common registry covers trend/moving averages, RSI momentum and Bollinger volatility with dated evidence, provider continuity checks and descriptive states rather than buy/sell verdicts.
 - **Persistent history** — the Node API profile stores immutable observations, source health, score snapshots, scenario runs and backtest runs in SQLite/WAL.
@@ -93,6 +93,7 @@ Key modules:
 - `server/demo-readiness.js` — public-snapshot acceptance criteria.
 - `src/signals/registry.js` — common frontend contract for trend, momentum and volatility methods; calculations fail closed when the latest provider segment is insufficient.
 - `src/Components/PriceChart.js` / `src/Components/priceChartModel.js` — dependency-free SVG price history using the same normalized, source-continuous close observations as the signal layer.
+- `src/Components/chartSignalMarkers.js` — maps the selected registered method's dated events onto matching visible chart observations without recalculating indicator logic in the chart.
 - `src/DataHealth.js` — operational/demo-readiness workspace.
 - `src/ScenarioLab.js` / `src/BacktestLab.js` — research workflows.
 
@@ -128,7 +129,7 @@ An HTTP `200` with zero usable rows is **degraded**, not `ok`. Degraded refreshe
 
 The Overview lets a researcher switch between **market signals**, **company execution**, **grid demand**, and **project milestones**. Each lens shows its source, date, rule, and unavailable state. It avoids a composite buy/sell score. Company execution uses period-aware SEC revenue or diluted EPS only when an exact record link exists. Grid demand requires explicitly typed EIA actual load and complete comparable days. Project milestones require exact primary records. See [Signal lenses](docs/signal-lenses.md) and [Market signal methodology](docs/scoring-methodology.md).
 
-The frontend signal explorer exposes three conventional technical-analysis families under one result contract: moving-average trend, 14-period Wilder RSI momentum, and 20-period Bollinger volatility bands. Users can switch methods on the Overview and open an “About this signal” drawer showing what the method measures, common use, settings, sourced evidence, data requirements and interpretation limits. Each method remains descriptive and does not emit a buy/sell verdict. See [Technical signal methods](docs/signal-methods.md).
+The frontend signal explorer exposes three conventional technical-analysis families under one result contract: moving-average trend, 14-period Wilder RSI momentum, and 20-period Bollinger volatility bands. Users can switch methods on the Overview; that same selection drives the Market signals lens, the “About this signal” drawer, and dated state-change markers on the price chart. Marker hover text explains the event state while keeping the visualization descriptive rather than turning technical changes into buy/sell instructions. See [Technical signal methods](docs/signal-methods.md).
 
 The MA5/MA10 backtest uses only dated closes, enters at the next observed session close and evaluates ten observed sessions later. It is a retrospective descriptive calculation with no transaction costs or claim of predictive skill. See [Backtesting](docs/backtesting.md).
 
