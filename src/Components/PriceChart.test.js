@@ -2,6 +2,7 @@ import React from 'react';
 import { fireEvent, render, screen } from '@testing-library/react';
 import '@testing-library/jest-dom';
 import PriceChart from './PriceChart';
+import { SIGNAL_METHOD_IDS } from '../signals/registry';
 
 const day = index => new Date(Date.UTC(2026, 0, index + 1)).toISOString();
 
@@ -55,6 +56,50 @@ test('shows an explicit insufficient-history state rather than drawing a partial
   expect(screen.getByRole('status')).toHaveTextContent('requires 60 dated closes');
   expect(screen.getByRole('status')).toHaveTextContent('available: 40');
   expect(screen.queryByRole('img')).not.toBeInTheDocument();
+});
+
+test('renders dated signal markers for the selected technical method', () => {
+  const snapshot = {
+    generatedAt: day(61),
+    observations: [
+      ...Array(15).fill(100),
+      ...Array(45).fill(110),
+    ].map((value, index) => ({
+      id: `m${index}`,
+      source: 'prices',
+      type: 'close',
+      ticker: 'NBIS',
+      value,
+      observedAt: day(index),
+      provenance: { provider: 'Fixture provider', originUrl: 'https://example.com/nbis-history' },
+    })),
+  };
+  const { container } = render(<PriceChart snapshot={snapshot} ticker="NBIS" />);
+
+  expect(screen.getByText('Signal markers')).toBeInTheDocument();
+  expect(screen.getByText('Trend · Moving-average trend')).toBeInTheDocument();
+  expect(screen.getByText('1 state changes in this range')).toBeInTheDocument();
+  expect(container.querySelectorAll('.price-signal-marker')).toHaveLength(1);
+  expect(screen.getByRole('img')).toHaveAttribute('aria-label', expect.stringContaining('1 signal state changes shown'));
+});
+
+test('selected RSI method controls chart markers and hover explanation', () => {
+  const snapshot = snapshotWith(60);
+  const { container } = render(<PriceChart
+    snapshot={snapshot}
+    ticker="NBIS"
+    methodId={SIGNAL_METHOD_IDS.MOMENTUM_RSI}
+  />);
+
+  expect(screen.getByText('Momentum · Relative Strength Index')).toBeInTheDocument();
+  expect(screen.getByText('1 state changes in this range')).toBeInTheDocument();
+  expect(container.querySelectorAll('.price-signal-marker')).toHaveLength(1);
+
+  const svg = screen.getByRole('img');
+  svg.getBoundingClientRect = () => ({ left: 0, width: 780, top: 0, right: 780, bottom: 270, height: 270 });
+  fireEvent.mouseMove(svg, { clientX: 225 });
+
+  expect(screen.getByText('RSI entered upper reference range')).toBeInTheDocument();
 });
 
 test('renders Traditional Chinese labels and provenance note', () => {

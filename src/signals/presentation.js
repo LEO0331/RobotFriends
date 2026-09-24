@@ -21,6 +21,23 @@ const stateCopy = {
   },
 };
 
+const eventCopy = {
+  [SIGNAL_METHOD_IDS.TREND_MOVING_AVERAGE]: {
+    upward: ['Trend changed upward', '趨勢轉為向上'],
+    downward: ['Trend changed downward', '趨勢轉為向下'],
+  },
+  [SIGNAL_METHOD_IDS.MOMENTUM_RSI]: {
+    'upper-reference-range': ['RSI entered upper reference range', 'RSI 進入上方參考區間'],
+    'middle-range': ['RSI returned to middle reference range', 'RSI 回到中間參考區間'],
+    'lower-reference-range': ['RSI entered lower reference range', 'RSI 進入下方參考區間'],
+  },
+  [SIGNAL_METHOD_IDS.VOLATILITY_BOLLINGER]: {
+    'above-upper-band': ['Price moved above upper volatility band', '價格移至上方波動通道之外'],
+    'within-bands': ['Price returned within volatility bands', '價格回到波動通道內'],
+    'below-lower-band': ['Price moved below lower volatility band', '價格移至下方波動通道之外'],
+  },
+};
+
 const summaryCopy = {
   [SIGNAL_METHOD_IDS.TREND_MOVING_AVERAGE]: {
     upward: ['Recent sourced closes are classified as an upward short-term trend under this method.', '依此方法，近期具來源的收盤價目前分類為短期向上趨勢。'],
@@ -69,6 +86,11 @@ export function signalFamilyLabel(family, language = 'en') {
 export function signalStateLabel(methodId, state, language = 'en') {
   return pick(language, stateCopy[methodId]?.[state] || stateCopy[methodId]?.unavailable) ||
     (language === 'zh-TW' ? '訊號無資料' : 'Signal unavailable');
+}
+
+export function signalEventLabel(methodId, state, language = 'en') {
+  return pick(language, eventCopy[methodId]?.[state]) ||
+    signalStateLabel(methodId, state, language);
 }
 
 export function signalStateSummary(methodId, result, language = 'en') {

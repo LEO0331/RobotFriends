@@ -2,7 +2,7 @@
 
 Gridline keeps technical indicators behind a common, descriptive signal contract. The signal engine does **not** emit buy/sell recommendations. It reports what a method observed, the evidence window used, method-specific values, dated state changes, data requirements, and interpretation limits.
 
-The Overview now exposes all three methods through the technical-signal explorer. The selected method also drives the Market signals research lens. An “About this signal” drawer shows the method description, conventional use, current observation, settings, provider evidence, minimum data requirement and interpretation limits. A lightweight SVG price chart now renders the same normalized provider-continuous closing-price history; the dated signal event stream remains available for the planned chart-marker work.
+The Overview now exposes all three methods through the technical-signal explorer. The selected method drives the Market signals research lens, the “About this signal” drawer, and the price chart's dated state-change markers. The lightweight SVG chart renders the same normalized provider-continuous closing-price history, while the marker layer maps method events onto matching visible dates without duplicating indicator calculations.
 
 ## Registry
 
@@ -40,7 +40,7 @@ Every method returns the same top-level structure:
 
 - `state` is descriptive rather than prescriptive.
 - `value` contains the method-specific calculated values and parameters.
-- `events` contains dated state/crossover changes that can later be rendered as chart markers.
+- `events` contains dated state/crossover changes that are mapped onto matching visible price-chart observations.
 - `evidence` identifies the provider segment and observation IDs supporting the result.
 - `requirements` states the minimum observation count and whether the current data satisfies it.
 - `limitations` provides method boundaries for the customer-facing explainer.
@@ -68,7 +68,7 @@ The current dashboard behavior is preserved. It calculates short and long simple
 - `downward` for the reverse ordering;
 - `mixed` otherwise.
 
-The event stream records crossings between the short and long averages. These events are intended for the later chart-marker feature.
+The event stream records crossings between the short and long averages. When those dates are visible in the selected chart range, they appear as neutral state-change markers.
 
 ### Momentum / RSI
 
@@ -105,7 +105,7 @@ sourced price observations
      ┌────┼───────────┐
      ↓    ↓           ↓
  explainer price chart chart markers
-   (live)    (live)      (planned)
+   (live)    (live)       (live)
 ```
 
 This separation keeps calculation, evidence, explanation, and presentation independently testable.
