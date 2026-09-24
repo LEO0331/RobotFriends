@@ -20,9 +20,24 @@ test('manual event review keeps the market snapshot date and records its own che
     .mockResolvedValueOnce({ ok: true, json: async () => ({ checkedAt: '2026-09-23T07:45:00Z', sourceHealth: { events: { status: 'partial', checkedAt: '2026-09-23T07:45:00Z' } }, observations: [{ id: 'event-1', source: 'events', type: 'infrastructureEvent' }] }) });
   try {
     const result = await loadDashboardSnapshot();
+    expect(global.fetch.mock.calls[0][0]).toContain('/data/dashboard-overview.json');
     expect(result.generatedAt).toBe('2026-09-22T23:56:00Z');
     expect(result.sourceHealth.events.checkedAt).toBe('2026-09-23T07:45:00Z');
     expect(result.observations).toHaveLength(1);
+  } finally { global.fetch = originalFetch; }
+});
+
+test('dashboard loader falls back to the full snapshot when the compact runtime file is unavailable', async () => {
+  const originalFetch = global.fetch;
+  global.fetch = jest.fn()
+    .mockResolvedValueOnce({ ok: false })
+    .mockResolvedValueOnce({ ok: true, json: async () => ({ generatedAt: '2026-09-24T00:04:00Z', observations: [{ id: 'fallback' }], sourceHealth: {} }) })
+    .mockResolvedValueOnce({ ok: false });
+  try {
+    const result = await loadDashboardSnapshot();
+    expect(global.fetch.mock.calls[0][0]).toContain('/data/dashboard-overview.json');
+    expect(global.fetch.mock.calls[1][0]).toContain('/data/dashboard-snapshot.json');
+    expect(result.observations.map(item => item.id)).toEqual(['fallback']);
   } finally { global.fetch = originalFetch; }
 });
 
