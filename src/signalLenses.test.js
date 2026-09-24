@@ -11,9 +11,9 @@ test('momentum summary is bilingual and does not expose indicator shorthand', ()
     sourceUrl: 'https://example.com/prices/orcl',
   }));
   const result = signalLens({ generatedAt: '2026-09-12T00:00:00Z', observations }, 'ORCL', 'momentum');
-  expect(result).toMatchObject({ available: true, label: 'Short-term price trend positive', labelZh: '短期價格趨勢偏強', scopeZh: 'ORCL' });
+  expect(result).toMatchObject({ available: true, label: 'Short-term price trend: upward', labelZh: '短期價格趨勢向上', scopeZh: 'ORCL' });
   expect(result.label).not.toMatch(/MA5|MA10/);
-  expect(result.methodZh).toContain('不預測未來報酬');
+  expect(result.methodZh).toContain('不代表未來報酬預測');
   expect(result.sourceUrl).toBe('https://example.com/prices/orcl');
 });
 

@@ -104,9 +104,9 @@ export function formatPercent(value) {
 }
 
 export function marketSignalLabel(signal, t) {
-  if (signal === 'upward') return t('Short-term price trend positive', '短期價格趨勢偏正向');
-  if (signal === 'downward') return t('Short-term price trend negative', '短期價格趨勢偏負向');
-  if (signal === 'mixed') return t('Price trend mixed', '價格趨勢混合');
+  if (signal === 'upward') return t('Short-term price trend: upward', '短期價格趨勢向上');
+  if (signal === 'downward') return t('Short-term price trend: downward', '短期價格趨勢向下');
+  if (signal === 'mixed') return t('Short-term price trend: mixed', '短期價格趨勢混合');
   return t('Unavailable · requires 10 dated closes', '無資料 · 需 10 筆有日期的收盤價');
 }
 

@@ -33,14 +33,18 @@ test('scenario lab renders Traditional Chinese copy and localized regions', () =
   expect(screen.getByRole('button', { name: 'EN' })).toBeInTheDocument();
 });
 
-test('price-only backtest explains its calculation and limits in Traditional Chinese', async () => {
+test('historical signal page uses customer-facing signal families in Traditional Chinese', async () => {
   render(<BacktestLab language="zh-TW" onBack={() => {}} />);
   expect(screen.getByText('歷史訊號')).toBeInTheDocument();
   expect(screen.getByText('歷史訊號回顧')).toBeInTheDocument();
-  expect(screen.getByText('涵蓋的訊號')).toBeInTheDocument();
-  expect(screen.getByText('計算細節')).toBeInTheDocument();
+  expect(screen.getByText('訊號類型')).toBeInTheDocument();
+  expect(screen.getByText(/趨勢／移動平均/)).toBeInTheDocument();
+  expect(screen.getByText(/動能／震盪指標/)).toBeInTheDocument();
+  expect(screen.getByText('判定時間與衡量方式')).toBeInTheDocument();
+  expect(screen.getByText('訊號日收盤價')).toBeInTheDocument();
   expect(screen.getByText('資料涵蓋')).toBeInTheDocument();
   expect(screen.getByText('解讀限制')).toBeInTheDocument();
+  expect(screen.queryByText(/MA5|MA10/)).not.toBeInTheDocument();
   await waitFor(() => expect(global.fetch).toHaveBeenCalled());
   expect(screen.getByRole('button', { name: 'EN' })).toBeInTheDocument();
 });
