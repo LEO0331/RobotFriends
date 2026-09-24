@@ -20,7 +20,7 @@
 .period-coverage {
   margin: 6px 0 0;
   color: #72849a;
-  font: 9px 'DM Mono';
+  font: 9px ui-monospace,SFMono-Regular,Consolas,monospace;
   line-height: 1.5;
   max-width: 680px;
 }
@@ -33,7 +33,7 @@
 
 .period-companies .company-top > span small {
   color: #6f8197;
-  font: 8px 'DM Mono';
+  font: 8px ui-monospace,SFMono-Regular,Consolas,monospace;
 }
 
 .period-unavailable {
@@ -44,7 +44,7 @@
   display: block;
   margin-top: 3px;
   color: #72849a;
-  font: 8px 'DM Mono';
+  font: 8px ui-monospace,SFMono-Regular,Consolas,monospace;
   font-weight: 400;
 }
 
@@ -62,7 +62,7 @@
   color: var(--green);
   background: rgba(85, 215, 170, .12);
   padding: 6px 8px;
-  font: 9px 'DM Mono';
+  font: 9px ui-monospace,SFMono-Regular,Consolas,monospace;
 }
 
 .period-window-meta {
@@ -71,7 +71,7 @@
   flex-wrap: wrap;
   gap: 8px 18px;
   color: #73859a;
-  font: 8px 'DM Mono';
+  font: 8px ui-monospace,SFMono-Regular,Consolas,monospace;
 }
 
 .period-window-meta b {

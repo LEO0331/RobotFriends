@@ -3,7 +3,7 @@ import { fireEvent, render, screen } from '@testing-library/react';
 import '@testing-library/jest-dom';
 import App from './App';
 
-jest.mock('../Components/Account', () => ({ onPreferences }) => (
+jest.mock('../Components/AccountGate', () => ({ onPreferences }) => (
   <button type="button" onClick={() => onPreferences({ language: 'en' })}>Apply account language</button>
 ));
 

@@ -1,15 +1,22 @@
-import React, { useEffect, useState } from 'react';
+import React, { lazy, Suspense, useEffect, useState } from 'react';
 import RegimeExperience from './RegimeExperience';
-import ScenarioLab from './ScenarioLab';
-import BacktestLab from './BacktestLab';
-import DataHealth from './DataHealth';
 import { researchLabCopy } from './researchLabI18n';
 import { persistLanguage, readPreferredLanguage } from './i18n';
 import './ResearchExperience.css';
 
+const ScenarioLab = lazy(() => import('./ScenarioLab'));
+const BacktestLab = lazy(() => import('./BacktestLab'));
+const DataHealth = lazy(() => import('./DataHealth'));
+
 const currentHash = () => window.location.hash || '#overview';
 const routeFromHash = hash => (String(hash).replace(/^#/, '').split('?')[0] || 'overview').toLowerCase();
 const go = route => { window.location.hash = route; window.scrollTo(0, 0); };
+
+function RouteFallback({ language }) {
+  return <main className="research-route-loading" lang={language} role="status">
+    {language === 'zh-TW' ? '正在載入研究工具…' : 'Loading research tool…'}
+  </main>;
+}
 
 export default function ResearchExperience() {
   const [locationHash, setLocationHash] = useState(currentHash);
@@ -36,9 +43,9 @@ export default function ResearchExperience() {
     };
   }, []);
 
-  if (route === 'scenario') return <ScenarioLab language={language} onLanguageChange={setResearchLanguage} onBack={() => go('overview')} />;
-  if (route === 'backtest') return <BacktestLab language={language} onLanguageChange={setResearchLanguage} onBack={() => go('overview')} />;
-  if (route === 'health') return <DataHealth language={language} onLanguageChange={setResearchLanguage} onBack={() => go('overview')} />;
+  if (route === 'scenario') return <Suspense fallback={<RouteFallback language={language} />}><ScenarioLab language={language} onLanguageChange={setResearchLanguage} onBack={() => go('overview')} /></Suspense>;
+  if (route === 'backtest') return <Suspense fallback={<RouteFallback language={language} />}><BacktestLab language={language} onLanguageChange={setResearchLanguage} onBack={() => go('overview')} /></Suspense>;
+  if (route === 'health') return <Suspense fallback={<RouteFallback language={language} />}><DataHealth language={language} onLanguageChange={setResearchLanguage} onBack={() => go('overview')} /></Suspense>;
 
   return <>
     <RegimeExperience language={language} onLanguageChange={setResearchLanguage} />

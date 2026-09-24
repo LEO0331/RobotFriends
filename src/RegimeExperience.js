@@ -1,12 +1,46 @@
-import React, { useEffect, useState } from 'react';
+import React, { lazy, Suspense, useEffect, useState } from 'react';
 import SnapshotLoadState from './Components/SnapshotLoadState';
 import App from './Containers/App';
-import ExposurePeriodPortal from './ExposurePeriodMonitor';
 import companyList from './data/companyExposure.json';
 import { emptySnapshot, loadDashboardSnapshot, summarizeSnapshot } from './snapshotMeta';
 import { infrastructureEvents } from './eventModel';
 import { formatUsd, marketSignals } from './marketSignals';
 import './RegimeExperience.css';
+
+const ExposurePeriodPortal = lazy(() => import('./ExposurePeriodMonitor'));
+
+function DeferredExposurePeriodPortal({ enabled }) {
+  const [visible, setVisible] = useState(false);
+
+  useEffect(() => {
+    if (!enabled || visible) return undefined;
+    const anchor = document.querySelector('.company-title');
+    if (!anchor) return undefined;
+
+    if ('IntersectionObserver' in window) {
+      const observer = new IntersectionObserver(entries => {
+        if (entries.some(entry => entry.isIntersecting)) {
+          setVisible(true);
+          observer.disconnect();
+        }
+      }, { rootMargin: '320px 0px' });
+      observer.observe(anchor);
+      return () => observer.disconnect();
+    }
+
+    const activate = () => setVisible(true);
+    window.addEventListener('scroll', activate, { once: true, passive: true });
+    window.addEventListener('pointerdown', activate, { once: true });
+    window.addEventListener('keydown', activate, { once: true });
+    return () => {
+      window.removeEventListener('scroll', activate);
+      window.removeEventListener('pointerdown', activate);
+      window.removeEventListener('keydown', activate);
+    };
+  }, [enabled, visible]);
+
+  return visible ? <Suspense fallback={null}><ExposurePeriodPortal /></Suspense> : null;
+}
 
 const routeName = () => (window.location.hash.replace(/^#/, '').split('?')[0] || 'overview').toLowerCase();
 
@@ -51,7 +85,7 @@ export default function RegimeExperience({ language = 'en', onLanguageChange = (
     onRetrySnapshot={retrySnapshot}
     language={language}
     onLanguageChange={onLanguageChange}
-  /><ExposurePeriodPortal /></>;
+  /><DeferredExposurePeriodPortal enabled={snapshotState === 'ready' && Boolean(snapshot.observations?.length)} /></>;
 }
 
 function SignalDetail({ language, setLanguage, navigate, snapshot, snapshotState, onRetrySnapshot }) {
