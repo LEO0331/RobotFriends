@@ -1,12 +1,12 @@
 import React, { lazy, Suspense, useEffect, useState } from 'react';
 import RegimeExperience from './RegimeExperience';
+import { researchLabCopy } from './researchLabI18n';
+import { persistLanguage, readPreferredLanguage } from './i18n';
+import './ResearchExperience.css';
 
 const ScenarioLab = lazy(() => import('./ScenarioLab'));
 const BacktestLab = lazy(() => import('./BacktestLab'));
 const DataHealth = lazy(() => import('./DataHealth'));
-import { researchLabCopy } from './researchLabI18n';
-import { persistLanguage, readPreferredLanguage } from './i18n';
-import './ResearchExperience.css';
 
 const currentHash = () => window.location.hash || '#overview';
 const routeFromHash = hash => (String(hash).replace(/^#/, '').split('?')[0] || 'overview').toLowerCase();
