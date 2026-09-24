@@ -84,7 +84,10 @@ export default function SignalExplainer({
     if (!open) return undefined;
     closeRef.current?.focus();
     const closeOnEscape = event => {
-      if (event.key === 'Escape') closeDrawer();
+      if (event.key === 'Escape') {
+        setOpen(false);
+        openerRef.current?.focus();
+      }
     };
     window.addEventListener('keydown', closeOnEscape);
     return () => window.removeEventListener('keydown', closeOnEscape);
