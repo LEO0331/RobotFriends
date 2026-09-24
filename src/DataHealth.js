@@ -105,7 +105,7 @@ export default function DataHealth({ onBack, language = 'en', onLanguageChange =
   const health = useMemo(() => buildDataHealth(snapshot, new Date()), [snapshot]);
   const readyPrices = health.priceCoverage.filter(item => item.ready).length;
 
-  return <main className="data-health-shell" lang={language}>
+  return <main className="data-health-shell" lang={language} aria-busy={loadState === 'loading'}>
     <header className="data-health-header">
       <button onClick={onBack}><b>GRIDLINE</b><small>{copy.lab}</small></button>
       <div><button onClick={() => onLanguageChange(language === 'zh-TW' ? 'en' : 'zh-TW')}>{copy.toggle}</button><button onClick={onBack}>{copy.back}</button></div>
@@ -116,8 +116,12 @@ export default function DataHealth({ onBack, language = 'en', onLanguageChange =
       <button onClick={load} disabled={loadState === 'loading'}>{loadState === 'loading' ? copy.loading : copy.refresh}</button>
     </section>
 
-    {loadState === 'error' ? <section className="health-alert error">{copy.loadError}</section> : <>
-      <section className={`health-status ${health.state}`}>
+    {loadState === 'error'
+      ? <section className="health-alert error" role="alert">{copy.loadError}</section>
+      : loadState === 'loading'
+        ? <section className="health-alert loading" role="status" aria-live="polite">{copy.loading}</section>
+        : <>
+      <section className={`health-status ${health.state}`} role="status">
         <strong>{copy.states[health.state]}</strong><span>{copy.stateNotes[health.state]}</span>
       </section>
 

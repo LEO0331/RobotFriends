@@ -25,9 +25,25 @@ test('renders a lightweight 60-session sourced closing-price chart', () => {
   expect(screen.getByRole('heading', { level: 3, name: 'NBIS · Sourced closing prices' })).toBeInTheDocument();
   expect(screen.getByText('$189.00')).toBeInTheDocument();
   expect(screen.getByText('Fixture provider')).toBeInTheDocument();
+  expect(screen.getByText('Recency')).toBeInTheDocument();
+  expect(screen.getByText('2 days before snapshot')).toBeInTheDocument();
   expect(screen.getByRole('img')).toHaveAttribute('aria-label', expect.stringContaining('NBIS closing-price chart, 60 sessions'));
   expect(container.querySelector('path.price-line')).toBeInTheDocument();
   expect(screen.getByRole('link', { name: 'Price source ↗' })).toHaveAttribute('href', 'https://example.com/nbis-history');
+});
+
+test('chart can be inspected with keyboard arrows as well as pointer hover', () => {
+  render(<PriceChart snapshot={snapshotWith(90)} ticker="NBIS" />);
+
+  const chart = screen.getByRole('img');
+  fireEvent.focus(chart);
+  expect(screen.getByText(/2026-03-31, \$189\.00/)).toBeInTheDocument();
+
+  fireEvent.keyDown(chart, { key: 'ArrowLeft' });
+  expect(screen.getByText(/2026-03-30, \$188\.00/)).toBeInTheDocument();
+
+  fireEvent.keyDown(chart, { key: 'Home' });
+  expect(screen.getByText(/2026-01-31, \$130\.00/)).toBeInTheDocument();
 });
 
 test('range controls update the chart without fetching another data source', () => {
@@ -38,7 +54,7 @@ test('range controls update the chart without fetching another data source', () 
 
   expect(screen.getByRole('button', { name: '30' })).toHaveAttribute('aria-pressed', 'true');
   expect(screen.getByRole('img')).toHaveAttribute('aria-label', expect.stringContaining('30 sessions'));
-  expect(screen.getByText(/30 sessions/)).toBeInTheDocument();
+  expect(screen.getByText(/30 sessions · 2026-03-02/)).toBeInTheDocument();
 });
 
 test('range control is disabled when the current provider segment lacks enough closes', () => {
