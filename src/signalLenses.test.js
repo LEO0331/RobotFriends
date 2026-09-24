@@ -1,6 +1,8 @@
 import { SIGNAL_LENSES, signalLens } from './signalLenses';
+import { SIGNAL_METHOD_IDS } from './signals/registry';
 
 test('customer-facing lens names describe the available evidence', () => {
+  expect(SIGNAL_LENSES.find(lens => lens.id === 'momentum')).toMatchObject({ name: 'Market signals', nameZh: '市場訊號' });
   expect(SIGNAL_LENSES.find(lens => lens.id === 'execution')).toMatchObject({ name: 'Company financials', nameZh: '公司財務' });
 });
 
@@ -17,6 +19,29 @@ test('momentum summary is bilingual and does not expose indicator shorthand', ()
   expect(result.sourceUrl).toBe('https://example.com/prices/orcl');
   expect(result.signalMethodId).toBe('trend-moving-average');
   expect(result.signalMethod).toMatchObject({ family: 'trend', state: 'upward' });
+});
+
+test('market lens can switch to RSI while keeping sourced evidence and descriptive wording', () => {
+  const observations = Array.from({ length: 20 }, (_, index) => ({
+    source: 'prices', type: 'close', ticker: 'ORCL', value: 100 + index,
+    observedAt: `2026-09-${String(index + 1).padStart(2, '0')}T20:00:00Z`,
+    sourceUrl: 'https://example.com/prices/orcl',
+    providerName: 'Fixture',
+  }));
+  const result = signalLens(
+    { generatedAt: '2026-09-21T00:00:00Z', observations },
+    'ORCL',
+    'momentum',
+    new Date('2026-09-21T00:00:00Z'),
+    SIGNAL_METHOD_IDS.MOMENTUM_RSI
+  );
+  expect(result.available).toBe(true);
+  expect(result.signalMethodId).toBe('momentum-rsi');
+  expect(result.label).toBe('RSI above upper reference range');
+  expect(result.labelZh).toBe('RSI 高於上方參考區間');
+  expect(result.method).toContain('0–100 momentum scale');
+  expect(result.method).toContain('does not establish future returns');
+  expect(result.sourceUrl).toBe('https://example.com/prices/orcl');
 });
 
 test('execution lens withholds stale or generic SEC facts', () => {
