@@ -11,6 +11,7 @@ Account setup (optional Supabase): [English](docs/accounts.en.md) · [繁體中�
 
 - **Infrastructure intelligence** — region navigation and verified primary-source milestones; unsourced regional capacity/stage figures are withheld.
 - **Price lookback** — 30D / 90D / 1Y observed closes with explicit insufficient-history states.
+- **Lightweight price chart** — native SVG 30 / 60 / 90-session views use the same dated close observations, keep one continuous provider segment, and link back to the price source without adding a charting dependency.
 - **Auditable provenance** — deterministic observation IDs, provider/source metadata, observation and retrieval dates, origin URLs and lineage.
 - **Extensible technical signals** — a common registry covers trend/moving averages, RSI momentum and Bollinger volatility with dated evidence, provider continuity checks and descriptive states rather than buy/sell verdicts.
 - **Persistent history** — the Node API profile stores immutable observations, source health, score snapshots, scenario runs and backtest runs in SQLite/WAL.
@@ -91,6 +92,7 @@ Key modules:
 - `server/historical-reconstruction.js` — recorded-history coverage summary; no v1 reconstructions are generated.
 - `server/demo-readiness.js` — public-snapshot acceptance criteria.
 - `src/signals/registry.js` — common frontend contract for trend, momentum and volatility methods; calculations fail closed when the latest provider segment is insufficient.
+- `src/Components/PriceChart.js` / `src/Components/priceChartModel.js` — dependency-free SVG price history using the same normalized, source-continuous close observations as the signal layer.
 - `src/DataHealth.js` — operational/demo-readiness workspace.
 - `src/ScenarioLab.js` / `src/BacktestLab.js` — research workflows.
 
