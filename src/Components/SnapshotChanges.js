@@ -3,7 +3,7 @@ import './SnapshotChanges.css';
 
 const DEFAULT_VISIBLE = 6;
 const dateOnly = value => value ? String(value).slice(0, 10) : '—';
-const money = value => value !== null && value !== undefined && Number.isFinite(Number(value)) ? '
+const money = value => value !== null && value !== undefined && Number.isFinite(Number(value)) ? String.fromCharCode(36) + Number(value).toFixed(2) : '—';
 
 const signalStates = {
   above: ['Upward', '向上'],
