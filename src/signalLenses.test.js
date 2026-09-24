@@ -15,6 +15,8 @@ test('momentum summary is bilingual and does not expose indicator shorthand', ()
   expect(result.label).not.toMatch(/MA5|MA10/);
   expect(result.methodZh).toContain('不代表未來報酬預測');
   expect(result.sourceUrl).toBe('https://example.com/prices/orcl');
+  expect(result.signalMethodId).toBe('trend-moving-average');
+  expect(result.signalMethod).toMatchObject({ family: 'trend', state: 'upward' });
 });
 
 test('execution lens withholds stale or generic SEC facts', () => {
