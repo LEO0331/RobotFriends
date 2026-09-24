@@ -1,3 +1,9 @@
+import {
+  DEFAULT_SIGNAL_METHOD_ID,
+  evaluateSignalMethod,
+  normalizePriceObservations,
+} from './signals/registry';
+
 export const PERIOD_DAYS = { '30D': 30, '90D': 90, '1Y': 365 };
 
 const DAY_MS = 24 * 60 * 60 * 1000;
@@ -7,30 +13,18 @@ const toTime = value => {
   return Number.isFinite(time) ? time : null;
 };
 
-const httpsUrl = value => {
-  try {
-    const url = new URL(value);
-    return url.protocol === 'https:' ? url.href : null;
-  } catch {
-    return null;
-  }
-};
-
 export function priceSeries(observations, ticker) {
-  const rows = (observations || [])
-    .filter(item => item && item.source === 'prices' && item.type === 'close' && item.ticker === ticker && Number.isFinite(Number(item.value)) && Number(item.value) > 0 && toTime(item.observedAt) !== null)
-    .map(item => ({
-      date: item.observedAt,
-      time: toTime(item.observedAt),
-      value: Number(item.value),
-      sourceUrl: httpsUrl(item.sourceUrl) || httpsUrl(item.provenance?.originUrl),
-      providerName: item.providerName || item.provenance?.provider || null,
-    }))
+  return normalizePriceObservations(observations, ticker)
     .filter(item => item.sourceUrl)
-    .sort((a, b) => a.time - b.time);
-  const byDay = new Map();
-  rows.forEach(row => byDay.set(new Date(row.time).toISOString().slice(0, 10), row));
-  return Array.from(byDay.values());
+    .map(item => ({
+      id: item.id,
+      date: item.observedAt,
+      observedAt: item.observedAt,
+      time: toTime(item.observedAt),
+      value: item.value,
+      sourceUrl: item.sourceUrl,
+      providerName: item.provider,
+    }));
 }
 
 function closestBaseline(rows, targetTime, toleranceDays = 10) {
@@ -66,20 +60,14 @@ export function computePeriodReturn(observations, ticker, period) {
   };
 }
 
-function movingAverage(rows, count) {
-  if (rows.length < count) return null;
-  return rows.slice(-count).reduce((sum, row) => sum + row.value, 0) / count;
-}
-
 export function buildCompanyPeriodView(company, observations, period) {
   const price = computePeriodReturn(observations, company.ticker, period);
   const rows = priceSeries(observations, company.ticker);
   const latestPrice = rows[rows.length - 1] || null;
   const currentPrice = latestPrice ? latestPrice.value : null;
-  const latestTen = rows.slice(-10);
-  const consistentSource = latestTen.length === 10 && new Set(latestTen.map(row => row.sourceUrl)).size === 1;
-  const ma5 = consistentSource ? movingAverage(rows, 5) : null;
-  const ma10 = consistentSource ? movingAverage(rows, 10) : null;
+  const trendMethod = evaluateSignalMethod(DEFAULT_SIGNAL_METHOD_ID, rows);
+  const ma5 = trendMethod.value?.shortAverage ?? null;
+  const ma10 = trendMethod.value?.longAverage ?? null;
   return {
     ticker: company.ticker,
     name: company.name,
@@ -94,7 +82,8 @@ export function buildCompanyPeriodView(company, observations, period) {
     baselinePrice: price.baselinePrice || null,
     ma5,
     ma10,
-    marketSignal: ma10 === null ? null : ma5 > ma10 ? 'upward' : ma5 < ma10 ? 'downward' : 'mixed',
+    marketSignal: trendMethod.state === 'unavailable' ? null : trendMethod.state,
+    signalMethodId: trendMethod.id,
   };
 }
 

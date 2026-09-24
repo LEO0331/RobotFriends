@@ -12,7 +12,7 @@ Account setup (optional Supabase): [English](docs/accounts.en.md) · [繁體中�
 - **Infrastructure intelligence** — region navigation and verified primary-source milestones; unsourced regional capacity/stage figures are withheld.
 - **Price lookback** — 30D / 90D / 1Y observed closes with explicit insufficient-history states.
 - **Auditable provenance** — deterministic observation IDs, provider/source metadata, observation and retrieval dates, origin URLs and lineage.
-- **Versioned signals** — reproducible MA5/MA10 price trends with dated observations, provider links and an explicit point-in-time cutoff.
+- **Extensible technical signals** — a common registry covers trend/moving averages, RSI momentum and Bollinger volatility with dated evidence, provider continuity checks and descriptive states rather than buy/sell verdicts.
 - **Persistent history** — the Node API profile stores immutable observations, source health, score snapshots, scenario runs and backtest runs in SQLite/WAL.
 - **Scenario Lab** — records bounded user assumptions for power, demand, CAPEX and regulation without an uncalibrated forecast.
 - **Retrospective price test** — MA5/MA10 crossover outcomes using the next observed session and a ten-session exit, with pending windows and no-look-ahead rules.
@@ -22,7 +22,7 @@ Account setup (optional Supabase): [English](docs/accounts.en.md) · [繁體中�
 - **Optional accounts** — Supabase signup/signin/recovery/preferences are implemented in the React project but do not block the public research demo.
 - **Engineering quality gates** — PR tests/build/audit, static-snapshot acceptance checks, GitHub Pages deployment and Lighthouse CI.
 
-Detailed design notes: [provenance](docs/data-provenance.md) · [scoring](docs/scoring-methodology.md) · [storage](docs/persistent-storage.md) · [scenario analysis](docs/scenario-analysis.md) · [backtesting](docs/backtesting.md) · [CI](docs/pr-ci.md).
+Detailed design notes: [provenance](docs/data-provenance.md) · [signal methods](docs/signal-methods.md) · [scoring](docs/scoring-methodology.md) · [storage](docs/persistent-storage.md) · [scenario analysis](docs/scenario-analysis.md) · [backtesting](docs/backtesting.md) · [CI](docs/pr-ci.md).
 
 ## Requirements
 
@@ -90,6 +90,7 @@ Key modules:
 - `server/backtest.js` / `src/backtestModel.js` — retrospective price-only MA5/MA10 crossover test.
 - `server/historical-reconstruction.js` — recorded-history coverage summary; no v1 reconstructions are generated.
 - `server/demo-readiness.js` — public-snapshot acceptance criteria.
+- `src/signals/registry.js` — common frontend contract for trend, momentum and volatility methods; calculations fail closed when the latest provider segment is insufficient.
 - `src/DataHealth.js` — operational/demo-readiness workspace.
 - `src/ScenarioLab.js` / `src/BacktestLab.js` — research workflows.
 
@@ -124,6 +125,8 @@ An HTTP `200` with zero usable rows is **degraded**, not `ok`. Degraded refreshe
 ## Niche signal lenses and retrospective test
 
 The Overview lets a researcher switch between **market momentum**, **company execution**, **grid demand**, and **project milestones**. Each lens shows its source, date, rule, and unavailable state. It avoids a composite buy/sell score. Company execution uses period-aware SEC revenue or diluted EPS only when an exact record link exists. Grid demand requires explicitly typed EIA actual load and complete comparable days. Project milestones require exact primary records. See [Signal lenses](docs/signal-lenses.md) and [Market signal methodology](docs/scoring-methodology.md).
+
+The frontend signal registry now exposes three conventional technical-analysis families under one result contract: moving-average trend, 14-period Wilder RSI momentum, and 20-period Bollinger volatility bands. The current Overview continues to display the trend method; the other methods are calculation-ready for the later explainer/marker UI. Each method returns dated evidence, requirements, state changes and interpretation limits without a buy/sell verdict. See [Technical signal methods](docs/signal-methods.md).
 
 The MA5/MA10 backtest uses only dated closes, enters at the next observed session close and evaluates ten observed sessions later. It is a retrospective descriptive calculation with no transaction costs or claim of predictive skill. See [Backtesting](docs/backtesting.md).
 
