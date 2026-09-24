@@ -38,6 +38,7 @@ test('main dashboard shows loading state while the snapshot request is pending',
 test('snapshot failure is retryable and replaces the error state after success', async () => {
   global.fetch = jest.fn()
     .mockResolvedValueOnce({ ok: false })
+    .mockResolvedValueOnce({ ok: false })
     .mockResolvedValueOnce({ ok: true, json: async () => loadedSnapshot })
     .mockResolvedValueOnce({ ok: false });
 
