@@ -47,9 +47,11 @@ test('signal explorer switches between established technical methods without buy
 
 test('about drawer explains method, evidence, settings and limitations', () => {
   render(<Harness />);
-  fireEvent.click(screen.getByRole('button', { name: 'About this signal →' }));
+  const opener = screen.getByRole('button', { name: 'About this signal →' });
+  fireEvent.click(opener);
 
   const dialog = screen.getByRole('dialog');
+  expect(screen.getByRole('button', { name: 'Close signal details' })).toHaveFocus();
   expect(dialog).toHaveTextContent('Moving-average trend');
   expect(dialog).toHaveTextContent('What it measures');
   expect(dialog).toHaveTextContent('Trend identification and crossover analysis.');
@@ -57,10 +59,19 @@ test('about drawer explains method, evidence, settings and limitations', () => {
   expect(dialog).toHaveTextContent('Fixture provider');
   expect(dialog).toHaveTextContent('30');
   expect(dialog).toHaveTextContent('10 sourced closes');
+  expect(dialog).toHaveTextContent('1 day before snapshot');
   expect(screen.getByRole('link', { name: 'Open price source ↗' })).toHaveAttribute('href', 'https://example.com/nbis-history');
 
   fireEvent.keyDown(window, { key: 'Escape' });
   expect(screen.queryByRole('dialog')).not.toBeInTheDocument();
+  expect(opener).toHaveFocus();
+});
+
+test('signal card exposes observation recency beside evidence', () => {
+  render(<Harness />);
+
+  expect(screen.getByText('Recency')).toBeInTheDocument();
+  expect(screen.getByText('1 day before snapshot')).toBeInTheDocument();
 });
 
 test('signal explorer and drawer render Traditional Chinese copy', () => {
