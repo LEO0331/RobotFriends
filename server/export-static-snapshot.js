@@ -4,6 +4,7 @@ const config = require('./config');
 const { createService } = require('./service');
 const { mergeCompanyHistory } = require('./company-history');
 const { mergeSnapshotObservations, mergeSnapshotHealth } = require('./snapshot-merge');
+const { buildSnapshotChanges } = require('./snapshot-changes');
 const { evaluateDemoReadiness } = require('./demo-readiness');
 const {
   reconstructionSummary,
@@ -59,9 +60,11 @@ async function main() {
     methodologies: { companyScore: companyScoreVersion },
     companyHistory,
     backtestCoverage,
-    note: 'Static dashboard snapshot. Successful sources replace their prior static data; degraded sources retain last-known-good observations and last-success metadata. Market signals use cited daily closes and the published MA5/MA10 formula. Fundamental, exposure, emotion, confidence, and expectations-gap scores are unavailable pending sourced methodology. No historical scores are reconstructed. Not investment advice.',
+    note: 'Static dashboard snapshot. Successful sources replace their prior static data; degraded sources retain last-known-good observations and last-success metadata. Market signals use cited daily closes and the published MA5/MA10 formula. Fundamental, exposure, emotion, confidence, and expectations-gap scores are unavailable pending sourced methodology. No historical scores are reconstructed. Snapshot changes compare only material customer-facing fields against the immediately preceding committed snapshot. Not investment advice.',
   };
-  const readiness = evaluateDemoReadiness(snapshot, { tickers: config.tickers, now: generatedAt });
+  const trackedTickers = config.tickers || companies.map(company => company.ticker);
+  snapshot.snapshotChanges = buildSnapshotChanges(previous, snapshot, { tickers: trackedTickers });
+  const readiness = evaluateDemoReadiness(snapshot, { tickers: trackedTickers, now: generatedAt });
   snapshot.demoReadiness = {
     status: readiness.status,
     ready: readiness.ready,
@@ -77,6 +80,12 @@ async function main() {
     reconstructedRecords: backtestCoverage.reconstructed,
     backtestCoverage,
     methodology: companyScoreVersion,
+    snapshotChanges: {
+      available: snapshot.snapshotChanges.available,
+      from: snapshot.snapshotChanges.from,
+      total: snapshot.snapshotChanges.summary.total,
+      summary: snapshot.snapshotChanges.summary,
+    },
     sources: outcomes.map(item => ({ source: item.source, status: item.status, attempts: item.attempts, recordCount: item.recordCount ?? null, message: item.message })),
   }, null, 2));
 }
