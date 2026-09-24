@@ -20,6 +20,7 @@ afterEach(() => {
 test('Traditional Chinese survives navigation away from and back to the dashboard', async () => {
   render(<ResearchExperience />);
   expect(screen.getByRole('button', { name: '總覽' })).toBeInTheDocument();
+  await screen.findByText('無法載入儀表板快照');
   act(() => { window.location.hash = '#regime'; window.dispatchEvent(new HashChangeEvent('hashchange')); });
   expect(screen.getByText('訊號總覽')).toBeInTheDocument();
   act(() => { window.location.hash = '#scenario'; window.dispatchEvent(new HashChangeEvent('hashchange')); });
