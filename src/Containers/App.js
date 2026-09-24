@@ -2,6 +2,7 @@ import React, { useEffect, useMemo, useState } from 'react';
 import './App.css';
 import Account from '../Components/Account';
 import SignalExplainer from '../Components/SignalExplainer';
+import PriceChart from '../Components/PriceChart';
 import companyList from '../data/companyExposure.json';
 import { summarizeSnapshot } from '../snapshotMeta';
 import { CURRENT_EVENT_DAYS, EVENT_TYPES, infrastructureEvents } from '../eventModel';
@@ -95,6 +96,7 @@ export default function App({ snapshot = {}, language = 'en', onLanguageChange =
       <section className="drivers">{EVENT_TYPES.map(type => <article key={type}><p className="label">{categoryLabel(type, zh)}</p><strong>{currentEvents.filter(item => item.category === type).length}</strong><small>{t('current verified records', '筆近期已驗證紀錄')}</small></article>)}</section>
       <section className="section company-title"><div><p className="eyebrow">{t('TRACKED MARKET PRICES', '追蹤市場價格')}</p><h3>{t('Latest dated closes', '最近有日期的收盤價')}</h3></div></section>
       <section className="companies">{companyList.map(company => { const data = market[company.ticker]; return <button key={company.ticker} className={`company ${ticker === company.ticker ? 'selected-card' : ''}`} onClick={() => setTicker(company.ticker)}><div className="company-top"><div><b>{company.ticker}</b><small>{company.name}</small></div><span className={data?.changePercent < 0 ? 'negative' : 'positive'}>{percent(data?.changePercent)}</span></div><strong className="price">{formatUsd(data?.close)}</strong><div className="stat"><span>{t('OBSERVED', '觀察日期')}<b>{dateLabel(data?.observedAt)}</b></span><span>{t('TREND', '趨勢')}<b>{trendLabel(data?.trend, zh)}</b></span></div><div className="gap"><span>{t('SOURCE', '來源')}</span><b>{data?.provider || t('Unavailable', '未提供')}</b></div></button>; })}</section>
+      <PriceChart snapshot={snapshot} ticker={ticker} language={language} />
       <section className="bottom"><SignalExplainer snapshot={snapshot} ticker={ticker} language={language} methodId={signalMethodId} onMethodChange={setSignalMethodId} /><article className="ledger"><div className="panel-title"><div><p className="eyebrow">{t('EVENT LEDGER', '事件帳本')}</p><h3>{t('Recent verified records', '近期已驗證紀錄')}</h3></div></div>{currentEvents.length ? currentEvents.slice(0, 4).map(item => <div className="event" key={item.id}><span className="impact neutral">•</span><div><p><b>{categoryLabel(item.category, zh)}</b> · {dateLabel(item.publishedAt)}</p><h4>{item.title}</h4><small>{regionLabel(item.region, zh)} · {item.source}</small></div><a className="quality" href={item.url} target="_blank" rel="noopener noreferrer">{t('RECORD ↗', '紀錄 ↗')}</a></div>) : <p className="event-empty">{t('No verified current events in this snapshot.', '此快照沒有近期已驗證事件。')}</p>}</article></section>
     </>}
 
