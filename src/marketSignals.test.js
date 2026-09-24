@@ -19,6 +19,12 @@ test('MA5 and MA10 use only dated price observations at the snapshot cutoff', ()
   expect(result.trend).toBe('above');
   expect(result.observationIds).toHaveLength(10);
   expect(result.sourceUrl).toBe('https://example.com/price');
+  expect(result.signalMethodId).toBe('trend-moving-average');
+  expect(result.signalMethod).toMatchObject({
+    family: 'trend',
+    state: 'upward',
+    requirements: { met: true },
+  });
 });
 
 test('missing or short price history cannot create a trend', () => {
