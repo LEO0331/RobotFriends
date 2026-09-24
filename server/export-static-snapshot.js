@@ -5,6 +5,7 @@ const { createService } = require('./service');
 const { mergeCompanyHistory } = require('./company-history');
 const { mergeSnapshotObservations, mergeSnapshotHealth } = require('./snapshot-merge');
 const { buildSnapshotChanges } = require('./snapshot-changes');
+const { buildRuntimeSnapshot } = require('./runtime-snapshot');
 const { evaluateDemoReadiness } = require('./demo-readiness');
 const {
   reconstructionSummary,
@@ -13,6 +14,7 @@ const { scoreCompanies, VERSION: companyScoreVersion } = require('./scoring/engi
 const companies = require('../src/data/companyExposure.json');
 
 const output = path.resolve(__dirname, '..', 'public', 'data', 'dashboard-snapshot.json');
+const runtimeOutput = path.resolve(__dirname, '..', 'public', 'data', 'dashboard-overview.json');
 const delay = milliseconds => new Promise(resolve => setTimeout(resolve, milliseconds));
 async function readPrevious() { try { return JSON.parse(await fs.readFile(output, 'utf8')); } catch { return { observations: [], sourceHealth: {}, companyHistory: [], scores: [] }; } }
 async function refreshWithRetry(service, source, attempts = 3) {
@@ -72,7 +74,13 @@ async function main() {
     warningCount: readiness.warningCount,
     priceCoverage: readiness.priceCoverage,
   };
-  await fs.mkdir(path.dirname(output), { recursive: true }); await fs.writeFile(output, `${JSON.stringify(snapshot, null, 2)}\n`);
+  const runtimeSnapshot = buildRuntimeSnapshot(snapshot);
+  const runtimeJson = `${JSON.stringify(runtimeSnapshot)}\n`;
+  await fs.mkdir(path.dirname(output), { recursive: true });
+  await Promise.all([
+    fs.writeFile(output, `${JSON.stringify(snapshot, null, 2)}\n`),
+    fs.writeFile(runtimeOutput, runtimeJson),
+  ]);
   console.log(JSON.stringify({
     freshness: snapshot.freshness,
     demoReadiness: snapshot.demoReadiness,
@@ -80,6 +88,11 @@ async function main() {
     reconstructedRecords: backtestCoverage.reconstructed,
     backtestCoverage,
     methodology: companyScoreVersion,
+    runtimeSnapshot: {
+      profile: runtimeSnapshot.runtimeProfile,
+      observationCount: runtimeSnapshot.observations.length,
+      bytes: Buffer.byteLength(runtimeJson),
+    },
     snapshotChanges: {
       available: snapshot.snapshotChanges.available,
       from: snapshot.snapshotChanges.from,
