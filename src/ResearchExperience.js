@@ -4,28 +4,23 @@ import ScenarioLab from './ScenarioLab';
 import BacktestLab from './BacktestLab';
 import DataHealth from './DataHealth';
 import { researchLabCopy } from './researchLabI18n';
+import { persistLanguage, readPreferredLanguage } from './i18n';
 import './ResearchExperience.css';
 
-const LANGUAGE_KEY = 'gridline-language';
 const currentHash = () => window.location.hash || '#overview';
 const routeFromHash = hash => (String(hash).replace(/^#/, '').split('?')[0] || 'overview').toLowerCase();
 const go = route => { window.location.hash = route; window.scrollTo(0, 0); };
-const readLanguage = () => {
-  try { return window.localStorage.getItem(LANGUAGE_KEY) === 'zh-TW' ? 'zh-TW' : 'en'; }
-  catch { return 'en'; }
-};
 
 export default function ResearchExperience() {
   const [locationHash, setLocationHash] = useState(currentHash);
-  const [language, setLanguage] = useState(readLanguage);
+  const [language, setLanguage] = useState(readPreferredLanguage);
   const route = routeFromHash(locationHash);
   const copy = researchLabCopy(language);
   const healthButton = language === 'zh-TW' ? '資料狀態 →' : 'Data status →';
 
   const setResearchLanguage = next => {
-    const normalized = next === 'zh-TW' ? 'zh-TW' : 'en';
+    const normalized = persistLanguage(next);
     setLanguage(normalized);
-    try { window.localStorage.setItem(LANGUAGE_KEY, normalized); } catch {}
   };
 
   useEffect(() => {
