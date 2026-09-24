@@ -51,7 +51,7 @@ test('technical method selection updates the selected market-signal lens', () =>
   expect(screen.getByRole('heading', { level: 2, name: 'RSI above upper reference range' })).toBeInTheDocument();
   expect(screen.getByText('RSI 100.0')).toBeInTheDocument();
   expect(screen.getByText('Momentum · Relative Strength Index')).toBeInTheDocument();
-  expect(screen.getByText(/state changes in this range/)).toBeInTheDocument();
+  expect(screen.getByText('No state changes for the selected method in this range.')).toBeInTheDocument();
 });
 
 test('saved local language is not overwritten when account preferences reload after navigation', () => {
