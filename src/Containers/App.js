@@ -99,6 +99,7 @@ export default function App({ snapshot = {}, snapshotState = 'ready', onRetrySna
 
     {route.view === 'Overview' && <>
       <section className="hero"><div><p className="eyebrow">{t('DATA-CENTER BUILDOUT RESEARCH', '資料中心建設研究')}</p><h1>{t('Signals with sources,', '聚焦建設訊號，')}<br/><em>{t('and clear limits.', '看得見來源與限制。')}</em></h1><p className="copy">{t('Explore market context, company disclosures, grid demand and project milestones. Each available signal links to a dated source; missing evidence stays unavailable.', '從市場、公司揭露、電網需求及專案里程碑檢視建設週期。可用訊號附有日期與來源，證據不足時則顯示無資料。')}</p></div><div className="asof"><span>{t('MARKET SNAPSHOT · LOCAL TIME', '市場快照 · 本地時間')}</span><b>{snapshotMeta.generatedLabel}</b><small>{snapshotMeta.totalSources ? t(`${snapshotMeta.healthySources}/${snapshotMeta.totalSources} sources refreshed · ${snapshotMeta.freshness === 'fresh' ? 'current' : snapshotMeta.freshness === 'partial' ? 'partial' : 'outdated'}`, `${snapshotMeta.healthySources}/${snapshotMeta.totalSources} 個來源已更新 · ${snapshotMeta.freshness === 'fresh' ? '最新快照' : snapshotMeta.freshness === 'partial' ? '部分更新' : '待更新'}`) : t('Provider status unavailable', '來源狀態未提供')}</small></div></section>
+      {snapshotState === 'ready' && hasObservations && <>
       <section className="lens-picker" aria-label={t('Select signal lens', '選擇訊號視角')}>
         {SIGNAL_LENSES.map(option => <button key={option.id} onClick={() => setLensId(option.id)} className={lensId === option.id ? 'active-filter' : ''} aria-pressed={lensId === option.id}>{zh ? option.nameZh : option.name}</button>)}
       </section>
@@ -110,6 +111,7 @@ export default function App({ snapshot = {}, snapshotState = 'ready', onRetrySna
       <PriceChart snapshot={snapshot} ticker={ticker} language={language} methodId={signalMethodId} />
       <SnapshotChanges snapshot={snapshot} ticker={ticker} language={language} />
       <section className="bottom"><SignalExplainer snapshot={snapshot} ticker={ticker} language={language} methodId={signalMethodId} onMethodChange={setSignalMethodId} /><article className="ledger"><div className="panel-title"><div><p className="eyebrow">{t('EVENT LEDGER', '事件帳本')}</p><h3>{t('Recent verified records', '近期已驗證紀錄')}</h3></div></div>{currentEvents.length ? currentEvents.slice(0, 4).map(item => <div className="event" key={item.id}><span className="impact neutral">•</span><div><p><b>{categoryLabel(item.category, zh)}</b> · {dateLabel(item.publishedAt)}</p><h4>{item.title}</h4><small>{regionLabel(item.region, zh)} · {item.source}</small></div><a className="quality" href={item.url} target="_blank" rel="noopener noreferrer">{t('RECORD ↗', '紀錄 ↗')}</a></div>) : <p className="event-empty">{t('No verified current events in this snapshot.', '此快照沒有近期已驗證事件。')}</p>}</article></section>
+      </>}
     </>}
 
     {route.view === 'Infrastructure' && <InfrastructureView region={route.region} events={events} navigate={navigate} zh={zh} />}
