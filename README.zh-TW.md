@@ -11,6 +11,7 @@ Gridline 是雙語決策輔助與研究驗證儀表板，將 AI／資料中心�
 
 - **基礎設施情報**：區域導覽及有一級來源的里程碑；無來源的容量與階段數值不顯示。
 - **價格回溯**：30D / 90D / 1Y 已觀察收盤價；資料不足時明確顯示 unavailable。
+- **輕量價格圖表**：原生 SVG 提供 30 / 60 / 90 個交易觀察值區間，使用同一份具日期收盤價、維持單一連續 provider 區段並連回價格來源，不額外加入圖表套件。
 - **可稽核 provenance**：deterministic observation ID、provider/source metadata、觀察與擷取日期、來源 URL 與 lineage。
 - **可擴充技術訊號**：以共同 registry 支援趨勢／移動平均、RSI 動能與布林通道波動度；保留日期、provider 連續性檢查，並只輸出描述性狀態，不產生買賣結論。
 - **持久化歷史**：Node API profile 以 SQLite/WAL 保存不可變觀察值、來源健康狀態、分數快照、情境分析與回測執行紀錄。
@@ -91,6 +92,7 @@ provider refresh → schema-v4 snapshot → demo readiness gate
 - `server/historical-reconstruction.js`：實際紀錄歷史涵蓋摘要；不再產生 v1 重建。
 - `server/demo-readiness.js`：公開 snapshot 的驗收條件。
 - `src/signals/registry.js`：前端趨勢、動能、波動度方法的共同 contract；最新 provider 資料區段不足時採 fail-closed。
+- `src/Components/PriceChart.js` / `src/Components/priceChartModel.js`：不依賴第三方圖表套件的 SVG 價格歷史，與訊號層共用正規化且來源連續的收盤價觀察值。
 - `src/DataHealth.js`：營運／示範準備度 workspace。
 - `src/ScenarioLab.js` / `src/BacktestLab.js`：研究工作區。
 
