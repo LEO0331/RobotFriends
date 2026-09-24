@@ -60,7 +60,13 @@ test('about drawer explains method, evidence, settings and limitations', () => {
   expect(dialog).toHaveTextContent('30');
   expect(dialog).toHaveTextContent('10 sourced closes');
   expect(dialog).toHaveTextContent('1 day before snapshot');
-  expect(screen.getByRole('link', { name: 'Open price source ↗' })).toHaveAttribute('href', 'https://example.com/nbis-history');
+  const sourceLink = screen.getByRole('link', { name: 'Open price source ↗' });
+  expect(sourceLink).toHaveAttribute('href', 'https://example.com/nbis-history');
+
+  fireEvent.keyDown(window, { key: 'Tab', shiftKey: true });
+  expect(sourceLink).toHaveFocus();
+  fireEvent.keyDown(window, { key: 'Tab' });
+  expect(screen.getByRole('button', { name: 'Close signal details' })).toHaveFocus();
 
   fireEvent.keyDown(window, { key: 'Escape' });
   expect(screen.queryByRole('dialog')).not.toBeInTheDocument();
