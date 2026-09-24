@@ -80,10 +80,10 @@ export function signalLens(snapshot, ticker, lensId, now = new Date()) {
   if (lensId === 'momentum') {
     const signal = marketSignals(snapshot, ticker);
     return signal?.trend !== 'unavailable' && signal?.sourceUrl
-      ? { available: true, label: signal.trend === 'above' ? 'Short-term price trend positive' : signal.trend === 'below' ? 'Short-term price trend negative' : 'Short-term price trend mixed',
-        labelZh: signal.trend === 'above' ? '短期價格趨勢偏強' : signal.trend === 'below' ? '短期價格趨勢偏弱' : '短期價格趨勢分歧',
-        method: 'Based on recent sourced closing-price trends. This describes historical prices, not future returns; calculation details are in Methodology.',
-        methodZh: '依據具來源的近期收盤價趨勢；此訊號描述歷史價格，不預測未來報酬。詳細計算方式見方法說明。',
+      ? { available: true, label: signal.trend === 'above' ? 'Short-term price trend: upward' : signal.trend === 'below' ? 'Short-term price trend: downward' : 'Short-term price trend: mixed',
+        labelZh: signal.trend === 'above' ? '短期價格趨勢向上' : signal.trend === 'below' ? '短期價格趨勢向下' : '短期價格趨勢混合',
+        method: 'Classified from recent sourced closing-price history. This is a descriptive trend signal, not a forecast of future returns.',
+        methodZh: '依據具來源的近期收盤價歷史進行分類。此為描述性趨勢訊號，不代表未來報酬預測。',
         observedAt: signal.observedAt, sourceUrl: signal.sourceUrl, scope: ticker, scopeZh: ticker }
       : { available: false, label: 'Market momentum unavailable', labelZh: '暫無市場動能訊號', method: 'Requires 10 distinct dated closes from one linked provider.', methodZh: '須有同一資料來源連結提供的 10 個不同交易日收盤價。', scope: ticker, scopeZh: ticker };
   }
