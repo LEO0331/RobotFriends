@@ -63,6 +63,7 @@ export default function SignalExplainer({
   const [open, setOpen] = useState(false);
   const openerRef = useRef(null);
   const closeRef = useRef(null);
+  const drawerRef = useRef(null);
   const copy = copyFor(language);
   const method = SIGNAL_METHODS.find(item => item.id === methodId) || SIGNAL_METHODS[0];
   const result = useMemo(
@@ -83,14 +84,28 @@ export default function SignalExplainer({
   useEffect(() => {
     if (!open) return undefined;
     closeRef.current?.focus();
-    const closeOnEscape = event => {
+    const handleDrawerKeys = event => {
       if (event.key === 'Escape') {
         setOpen(false);
         openerRef.current?.focus();
+        return;
+      }
+      if (event.key !== 'Tab' || !drawerRef.current) return;
+      const focusable = [...drawerRef.current.querySelectorAll('button, a[href]')]
+        .filter(element => !element.hasAttribute('disabled'));
+      if (!focusable.length) return;
+      const first = focusable[0];
+      const last = focusable[focusable.length - 1];
+      if (event.shiftKey && document.activeElement === first) {
+        event.preventDefault();
+        last.focus();
+      } else if (!event.shiftKey && document.activeElement === last) {
+        event.preventDefault();
+        first.focus();
       }
     };
-    window.addEventListener('keydown', closeOnEscape);
-    return () => window.removeEventListener('keydown', closeOnEscape);
+    window.addEventListener('keydown', handleDrawerKeys);
+    return () => window.removeEventListener('keydown', handleDrawerKeys);
   }, [open]);
 
   return <>
@@ -140,7 +155,7 @@ export default function SignalExplainer({
     {open && <div className="signal-drawer-backdrop" onMouseDown={event => {
       if (event.target === event.currentTarget) closeDrawer();
     }}>
-      <aside className="signal-drawer" role="dialog" aria-modal="true" aria-labelledby="signal-drawer-title" aria-describedby="signal-drawer-boundary">
+      <aside ref={drawerRef} className="signal-drawer" role="dialog" aria-modal="true" aria-labelledby="signal-drawer-title" aria-describedby="signal-drawer-boundary">
         <header>
           <div>
             <p className="eyebrow">{copy.drawerEyebrow}</p>
