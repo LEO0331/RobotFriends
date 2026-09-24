@@ -10,6 +10,19 @@ const normalizeRange = value => PRICE_CHART_RANGES.includes(Number(value))
 
 export function buildPriceChartModel(snapshot = {}, ticker, requestedSessions = DEFAULT_PRICE_CHART_RANGE) {
   const sessions = normalizeRange(requestedSessions);
+  if (!Number.isFinite(Date.parse(snapshot.generatedAt || ''))) {
+    return {
+      available: false,
+      reason: 'price-history-missing',
+      ticker,
+      sessions,
+      availableSessions: 0,
+      rangeAvailability: Object.fromEntries(PRICE_CHART_RANGES.map(range => [range, false])),
+      points: [],
+      provider: null,
+      sourceUrl: null,
+    };
+  }
   const rows = normalizePriceObservations(
     snapshot.observations || [],
     ticker,
