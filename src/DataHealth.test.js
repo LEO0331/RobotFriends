@@ -36,6 +36,22 @@ afterEach(() => {
   jest.restoreAllMocks();
 });
 
+test('data health shows explicit loading state before snapshot readiness is calculated', () => {
+  global.fetch = jest.fn(() => new Promise(() => {}));
+  render(<DataHealth language="en" onBack={() => {}} />);
+
+  expect(screen.getByRole('status')).toHaveTextContent('Loading snapshot…');
+  expect(screen.queryByText('PRICE DATA AVAILABLE')).not.toBeInTheDocument();
+});
+
+test('data health exposes load errors as alerts while keeping refresh available', async () => {
+  global.fetch = jest.fn(() => Promise.resolve({ ok: false }));
+  render(<DataHealth language="en" onBack={() => {}} />);
+
+  expect(await screen.findByRole('alert')).toHaveTextContent('Snapshot could not be loaded.');
+  expect(screen.getByRole('button', { name: 'Refresh status' })).toBeEnabled();
+});
+
 test('data health renders demo readiness and source/price coverage in English', async () => {
   render(<DataHealth language="en" onBack={() => {}} />);
   await waitFor(() => expect(screen.getByText('PRICE DATA AVAILABLE · SOURCE GAPS')).toBeInTheDocument());
