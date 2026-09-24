@@ -7,6 +7,7 @@ import {
 import { buildChartSignalMarkers } from './chartSignalMarkers';
 import { DEFAULT_SIGNAL_METHOD_ID, getSignalMethod } from '../signals/registry';
 import { signalEventLabel, signalFamilyLabel } from '../signals/presentation';
+import { observationRecency, observationRecencyLabel } from '../freshness';
 import './PriceChart.css';
 
 const WIDTH = 780;
@@ -34,6 +35,7 @@ function labels(language) {
     observed: t('Observed', '觀察日期'),
     source: t('Price source ↗', '價格來源 ↗'),
     provider: t('Provider', '資料來源'),
+    recency: t('Recency', '資料時效'),
     continuity: t(
       'Chart uses one continuous provider segment; observations are not stitched across providers.',
       '圖表只使用同一連續資料來源區段，不跨不同 provider 拼接觀察值。'
@@ -51,6 +53,7 @@ function labels(language) {
       'Markers show dated state changes from the selected technical method; they are descriptive, not trade instructions.',
       '標記顯示所選技術方法具日期的狀態變化；僅供描述，不代表交易指示。'
     ),
+    keyboard: t('Keyboard: focus chart and use left/right arrows to inspect closes.', '鍵盤：聚焦圖表後可用左右方向鍵逐筆查看收盤價。'),
   };
 }
 
@@ -112,6 +115,9 @@ export default function PriceChart({
   const hovered = chart && hoverIndex !== null ? chart.plotted[hoverIndex] : null;
   const hoveredMarker = hoverIndex !== null ? markerByIndex.get(hoverIndex) || null : null;
   const midpoint = model.available ? model.points[Math.floor((model.points.length - 1) / 2)] : null;
+  const recency = observationRecency(model.endDate, snapshot?.generatedAt);
+  const recencyLabel = observationRecencyLabel(model.endDate, snapshot?.generatedAt, language);
+  const livePointId = `price-chart-active-${ticker}`;
   const ariaLabel = model.available
     ? language === 'zh-TW'
       ? `${ticker} 收盤價圖表，${model.sessions} 個交易觀察值，從 ${dateOnly(model.startDate)} 至 ${dateOnly(model.endDate)}，最新 ${money(model.latestClose)}，區間變動 ${percent(model.changePercent)}，顯示 ${markerModel.visibleEventCount} 個訊號狀態變化。`
@@ -126,6 +132,18 @@ export default function PriceChart({
     const viewX = ((event.clientX - rect.left) / rect.width) * WIDTH;
     const ratio = Math.max(0, Math.min(1, (viewX - PADDING.left) / PLOT_WIDTH));
     setHoverIndex(Math.round(ratio * (chart.plotted.length - 1)));
+  };
+
+  const inspectWithKeyboard = event => {
+    if (!chart || !['ArrowLeft', 'ArrowRight', 'Home', 'End'].includes(event.key)) return;
+    event.preventDefault();
+    setHoverIndex(current => {
+      const last = chart.plotted.length - 1;
+      if (event.key === 'Home') return 0;
+      if (event.key === 'End') return last;
+      const index = current === null ? last : current;
+      return event.key === 'ArrowLeft' ? Math.max(0, index - 1) : Math.min(last, index + 1);
+    });
   };
 
   return <article className="price-chart-panel">
@@ -175,6 +193,7 @@ export default function PriceChart({
         <div><span>{copy.change}</span><strong className={model.changePercent < 0 ? 'negative' : 'positive'}>{percent(model.changePercent)}</strong></div>
         <div><span>{copy.observed}</span><strong>{dateOnly(model.endDate)}</strong></div>
         <div><span>{copy.provider}</span><strong>{model.provider || '—'}</strong></div>
+        <div><span>{copy.recency}</span><strong className={recency.status === 'stale' ? 'stale-recency' : ''}>{recencyLabel}</strong></div>
       </div>
 
       <div className="price-chart-canvas">
@@ -182,6 +201,10 @@ export default function PriceChart({
           viewBox={`0 0 ${WIDTH} ${HEIGHT}`}
           role="img"
           aria-label={ariaLabel}
+          aria-describedby={livePointId}
+          tabIndex="0"
+          onFocus={() => { if (chart) setHoverIndex(chart.plotted.length - 1); }}
+          onKeyDown={inspectWithKeyboard}
           onMouseMove={move}
           onMouseLeave={() => setHoverIndex(null)}
         >
@@ -223,10 +246,13 @@ export default function PriceChart({
             </g>
           </g>}
         </svg>
+        <span id={livePointId} className="sr-only" aria-live="polite">
+          {hovered ? `${hovered.date}, ${money(hovered.value)}${hoveredMarker ? `, ${signalEventLabel(markerModel.methodId, hoveredMarker.state, language)}` : ''}` : ariaLabel}
+        </span>
       </div>
 
       <div className="price-chart-footer">
-        <span>{model.sessions} {copy.sessions} · {dateOnly(model.startDate)} → {dateOnly(model.endDate)}</span>
+        <span>{model.sessions} {copy.sessions} · {dateOnly(model.startDate)} → {dateOnly(model.endDate)} · {copy.keyboard}</span>
         {model.sourceUrl && <a href={model.sourceUrl} target="_blank" rel="noopener noreferrer">{copy.source}</a>}
       </div>
     </> : <div className="price-chart-empty" role="status">
