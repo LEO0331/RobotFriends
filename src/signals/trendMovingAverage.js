@@ -59,7 +59,7 @@ export const trendMovingAverageMethod = {
         'A trend classification does not establish future returns.',
       ],
     },
-    zhTW: {
+    'zh-TW': {
       whatItMeasures: '比較較短期與較長期的收盤價平均，用來描述目前價格趨勢。',
       commonUse: '常用於趨勢辨識與均線交叉分析。',
       limitations: [
