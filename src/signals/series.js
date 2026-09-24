@@ -20,7 +20,10 @@ const retrievalTime = row => {
 };
 
 export function normalizePriceObservations(observations = [], ticker, cutoff) {
-  const cutoffTime = Number.isFinite(Date.parse(cutoff || '')) ? Date.parse(cutoff) : Infinity;
+  const hasCutoff = cutoff !== undefined && cutoff !== null;
+  const parsedCutoff = hasCutoff ? Date.parse(cutoff) : Infinity;
+  if (hasCutoff && !Number.isFinite(parsedCutoff)) return [];
+  const cutoffTime = parsedCutoff;
   const candidates = (observations || [])
     .filter(row => row?.source === 'prices' && row?.type === 'close' && row?.ticker === ticker &&
       Number.isFinite(Number(row.value)) && Number(row.value) > 0 &&
