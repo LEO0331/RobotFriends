@@ -12,7 +12,8 @@ const legacyTrend = state => ({
 })[state] || 'unavailable';
 
 export function marketSignals(snapshot, ticker) {
-  const rows = normalizePriceObservations(snapshot?.observations || [], ticker, snapshot?.generatedAt);
+  if (!Number.isFinite(Date.parse(snapshot?.generatedAt || ''))) return null;
+  const rows = normalizePriceObservations(snapshot?.observations || [], ticker, snapshot.generatedAt);
   const latest = rows[rows.length - 1];
   if (!latest) return null;
 
