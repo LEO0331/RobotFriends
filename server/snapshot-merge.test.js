@@ -58,11 +58,12 @@ test('degraded health retains prior last-success timestamp and reports retained 
 
 test('healthy refresh uses current health metadata without retained marker', () => {
   const health = mergeSnapshotHealth(
-    { eia: { status: 'degraded', lastSuccessAt: '2026-09-14T22:00:00.000Z' } },
+    { eia: { status: 'degraded', lastSuccessAt: '2026-09-14T22:00:00.000Z', retainedRecordCount: 24, qualityReviewedAt: '2026-09-15T00:00:00Z' } },
     { eia: { status: 'ok', lastSuccessAt: '2026-09-16T22:00:00.000Z', recordCount: 24 } },
     [],
   );
   assert.equal(health.eia.status, 'ok');
   assert.equal(health.eia.lastSuccessAt, '2026-09-16T22:00:00.000Z');
   assert.equal(health.eia.retainedRecordCount, undefined);
+  assert.equal(health.eia.qualityReviewedAt, undefined);
 });

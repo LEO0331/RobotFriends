@@ -26,10 +26,13 @@ function mergeSnapshotHealth(previous = {}, current = {}, observations = []) {
   for (const source of sources) {
     const prior = previous?.[source] || {};
     const next = current?.[source] || {};
+    const priorWithoutDegradedMarkers = { ...prior };
+    delete priorWithoutDegradedMarkers.retainedRecordCount;
+    delete priorWithoutDegradedMarkers.qualityReviewedAt;
     const retainedCount = (observations || []).filter(item => item.source === source).length;
     const degraded = next.status === 'degraded';
     merged[source] = {
-      ...prior,
+      ...priorWithoutDegradedMarkers,
       ...next,
       ...(degraded && !next.lastSuccessAt && prior.lastSuccessAt ? { lastSuccessAt: prior.lastSuccessAt } : {}),
       ...(degraded ? { retainedRecordCount: retainedCount } : {}),

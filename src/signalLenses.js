@@ -66,7 +66,9 @@ function gridDemandSignal(snapshot) {
       available: true,
       label: current > baseline ? 'PJM actual demand above prior week' : current < baseline ? 'PJM actual demand below prior week' : 'PJM actual demand unchanged from prior week',
       method: `Mean of 24 typed actual-demand hours on ${day} versus the same UTC weekday one week earlier. Regional load does not isolate data centers.`,
-      observedAt: `${day}T23:00:00Z`, sourceUrl: source.toString(), scope: 'PJM region',
+      observedAt: `${day}T23:00:00Z`,
+      sourceUrl: 'https://www.eia.gov/electricity/gridmonitor/dashboard/electric_overview/balancing_authority/PJM',
+      sourceLabel: 'EIA PJM dashboard', datasetUrl: source.toString(), scope: 'PJM region',
     };
   }
   return { available: false, label: 'Grid-demand comparison unavailable', method: 'Requires two complete 24-hour PJM actual-demand days, seven days apart, with an explicit EIA data type and one linked source. Regional load cannot establish data-center demand or secured power.', scope: 'PJM region' };

@@ -32,6 +32,8 @@ test('grid lens compares only complete typed PJM days one week apart', () => {
     observedAt: `2026-09-${String(day).padStart(2, '0')}T${String(hour).padStart(2, '0')}:00:00Z`,
     sourceUrl: 'https://api.eia.gov/v2/electricity/rto/region-data/data/',
   })));
-  expect(signalLens({ generatedAt: '2026-09-09T00:00:00Z', observations: rows }, 'NBIS', 'grid').label).toBe('PJM actual demand above prior week');
+  const signal = signalLens({ generatedAt: '2026-09-09T00:00:00Z', observations: rows }, 'NBIS', 'grid');
+  expect(signal.label).toBe('PJM actual demand above prior week');
+  expect(signal.sourceUrl).toContain('eia.gov/electricity/gridmonitor/');
   expect(signalLens({ generatedAt: '2026-09-09T00:00:00Z', observations: rows.slice(1) }, 'NBIS', 'grid').available).toBe(false);
 });

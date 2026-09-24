@@ -9,15 +9,16 @@ export async function loadDashboardSnapshot() {
     if (!reviewResponse.ok) return snapshot;
     const review = await reviewResponse.json();
     if (!Array.isArray(review.observations) || !Number.isFinite(Date.parse(review.checkedAt))) return snapshot;
+    const latestCheck = Date.parse(snapshot.sourceHealth?.events?.checkedAt || '') || 0;
+    if (Date.parse(review.checkedAt) <= latestCheck) return snapshot;
     const observations = new Map((snapshot.observations || []).map(item => [item.id, item]));
     review.observations.forEach(item => { if (item?.source === 'events' && item.id) observations.set(item.id, item); });
-    const latestCheck = Date.parse(snapshot.sourceHealth?.events?.checkedAt || '') || 0;
     return {
       ...snapshot,
       observations: [...observations.values()],
       sourceHealth: {
         ...snapshot.sourceHealth,
-        events: Date.parse(review.checkedAt) > latestCheck ? review.sourceHealth?.events : snapshot.sourceHealth?.events,
+        events: review.sourceHealth?.events,
       },
     };
   } catch { return snapshot; }

@@ -25,3 +25,15 @@ test('manual event review keeps the market snapshot date and records its own che
     expect(result.observations).toHaveLength(1);
   } finally { global.fetch = originalFetch; }
 });
+
+test('a newer automated event check supersedes older manual-review records', async () => {
+  const originalFetch = global.fetch;
+  global.fetch = jest.fn()
+    .mockResolvedValueOnce({ ok: true, json: async () => ({ generatedAt: '2026-09-24T00:04:00Z', sourceHealth: { events: { status: 'ok', checkedAt: '2026-09-24T00:04:00Z', recordCount: 1 } }, observations: [{ id: 'automated', source: 'events', type: 'infrastructureEvent' }] }) })
+    .mockResolvedValueOnce({ ok: true, json: async () => ({ checkedAt: '2026-09-23T08:25:00Z', sourceHealth: { events: { status: 'partial', checkedAt: '2026-09-23T08:25:00Z' } }, observations: [{ id: 'manual-rejected', source: 'events', type: 'infrastructureEvent' }] }) });
+  try {
+    const result = await loadDashboardSnapshot();
+    expect(result.sourceHealth.events.status).toBe('ok');
+    expect(result.observations.map(item => item.id)).toEqual(['automated']);
+  } finally { global.fetch = originalFetch; }
+});

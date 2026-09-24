@@ -9,8 +9,7 @@
       "cacheMinutes": 60,
       "recordCount": 336,
       "message": "336 EIA actual-demand records ingested",
-      "checkedAt": "2026-09-24T00:07:47.938Z",
-      "qualityReviewedAt": "2026-09-23T07:45:05.000Z"
+      "checkedAt": "2026-09-24T00:07:47.938Z"
     },
     "prices": {
       "status": "ok",
@@ -25,10 +24,8 @@
       "cacheMinutes": 60,
       "message": "4 tracked issuers ingested",
       "checkedAt": "2026-09-24T00:07:45.628Z",
-      "retainedRecordCount": 0,
       "lastSuccessAt": "2026-09-24T00:07:45.628Z",
-      "recordCount": 28,
-      "qualityReviewedAt": "2026-09-23T07:45:05.000Z"
+      "recordCount": 28
     },
     "events": {
       "status": "ok",
