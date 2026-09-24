@@ -13,6 +13,7 @@ Account setup (optional Supabase): [English](docs/accounts.en.md) · [繁體中�
 - **Price lookback** — 30D / 90D / 1Y observed closes with explicit insufficient-history states.
 - **Lightweight price chart** — native SVG 30 / 60 / 90-session views use the same dated close observations, keep one continuous provider segment, link back to the price source, and overlay dated state-change markers from the currently selected technical method.
 - **Previous-snapshot diff** — each refresh compares material customer-facing changes against the immediately preceding committed snapshot: latest closes, recorded trend-signal state, verified event additions/updates/archive transitions, and source-health status.
+- **Demo hardening** — explicit snapshot loading/error/empty states, retry, observation-recency labels, keyboard-inspectable SVG charts, modal focus handling, visible focus states, skip navigation, and mobile navigation that remains available below desktop widths.
 - **Auditable provenance** — deterministic observation IDs, provider/source metadata, observation and retrieval dates, origin URLs and lineage.
 - **Extensible technical signals** — a common registry covers trend/moving averages, RSI momentum and Bollinger volatility with dated evidence, provider continuity checks and descriptive states rather than buy/sell verdicts.
 - **Persistent history** — the Node API profile stores immutable observations, source health, score snapshots, scenario runs and backtest runs in SQLite/WAL.
@@ -24,7 +25,7 @@ Account setup (optional Supabase): [English](docs/accounts.en.md) · [繁體中�
 - **Optional accounts** — Supabase signup/signin/recovery/preferences are implemented in the React project but do not block the public research demo.
 - **Engineering quality gates** — PR tests/build/audit, static-snapshot acceptance checks, GitHub Pages deployment and Lighthouse CI.
 
-Detailed design notes: [provenance](docs/data-provenance.md) · [signal methods](docs/signal-methods.md) · [snapshot changes](docs/snapshot-changes.md) · [scoring](docs/scoring-methodology.md) · [storage](docs/persistent-storage.md) · [scenario analysis](docs/scenario-analysis.md) · [backtesting](docs/backtesting.md) · [CI](docs/pr-ci.md).
+Detailed design notes: [provenance](docs/data-provenance.md) · [signal methods](docs/signal-methods.md) · [snapshot changes](docs/snapshot-changes.md) · [demo hardening](docs/demo-hardening.md) · [scoring](docs/scoring-methodology.md) · [storage](docs/persistent-storage.md) · [scenario analysis](docs/scenario-analysis.md) · [backtesting](docs/backtesting.md) · [CI](docs/pr-ci.md).
 
 ## Requirements
 
@@ -96,6 +97,7 @@ Key modules:
 - `src/Components/PriceChart.js` / `src/Components/priceChartModel.js` — dependency-free SVG price history using the same normalized, source-continuous close observations as the signal layer.
 - `src/Components/chartSignalMarkers.js` — maps the selected registered method's dated events onto matching visible chart observations without recalculating indicator logic in the chart.
 - `server/snapshot-changes.js` / `src/Components/SnapshotChanges.js` — deterministic previous-snapshot comparison plus the bilingual Overview audit surface.
+- `src/Components/SnapshotLoadState.js` / `src/freshness.js` — explicit snapshot lifecycle states and shared market-observation recency presentation.
 - `src/DataHealth.js` — operational/demo-readiness workspace.
 - `src/ScenarioLab.js` / `src/BacktestLab.js` — research workflows.
 
