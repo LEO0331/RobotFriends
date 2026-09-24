@@ -139,7 +139,7 @@ export default function SnapshotChanges({ snapshot = {}, ticker, language = 'en'
   }, [diff, ticker]);
 
   if (!diff?.available) {
-    return <article className="snapshot-changes-panel snapshot-changes-unavailable">
+    return <article className="snapshot-changes-panel snapshot-changes-unavailable" role="status" aria-live="polite">
       <div>
         <p className="eyebrow">{copy.eyebrow}</p>
         <h3>{copy.unavailable}</h3>
@@ -157,11 +157,11 @@ export default function SnapshotChanges({ snapshot = {}, ticker, language = 'en'
     [copy.health, summary.sourceHealth],
   ].filter(([, count]) => Number(count) > 0);
 
-  return <article className="snapshot-changes-panel">
+  return <article className="snapshot-changes-panel" role="region" aria-labelledby="snapshot-changes-title">
     <div className="snapshot-changes-header">
       <div>
         <p className="eyebrow">{copy.eyebrow}</p>
-        <h3>{copy.title}</h3>
+        <h3 id="snapshot-changes-title">{copy.title}</h3>
         <p>{copy.scope}</p>
         <small>{copy.selectedFirst}</small>
       </div>
