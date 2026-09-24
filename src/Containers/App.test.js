@@ -33,6 +33,30 @@ beforeEach(() => {
   window.history.pushState({}, '', '#overview');
 });
 
+test('dashboard exposes skip navigation, active route state, and retryable snapshot errors', () => {
+  const retry = jest.fn();
+  render(<App
+    snapshot={{}}
+    snapshotState="error"
+    onRetrySnapshot={retry}
+  />);
+
+  expect(screen.getByRole('link', { name: 'Skip to dashboard content' })).toHaveAttribute('href', '#dashboard-content');
+  expect(screen.getByRole('button', { name: 'Overview' })).toHaveAttribute('aria-current', 'page');
+  expect(screen.getByRole('alert')).toHaveTextContent('Dashboard snapshot could not be loaded');
+
+  fireEvent.click(screen.getByRole('button', { name: 'Retry snapshot' }));
+  expect(retry).toHaveBeenCalledTimes(1);
+});
+
+test('tracked company cards expose selection state to assistive technology', () => {
+  render(<App snapshot={richSnapshot} />);
+
+  expect(screen.getByRole('button', { name: /Select NBIS/ })).toHaveAttribute('aria-pressed', 'true');
+  fireEvent.click(screen.getByRole('button', { name: /Select ORCL/ }));
+  expect(screen.getByRole('button', { name: /Select ORCL/ })).toHaveAttribute('aria-pressed', 'true');
+});
+
 test('overview switches research lenses without presenting unsourced earnings values', () => {
   render(<App snapshot={snapshot} />);
   expect(screen.getByRole('heading', { level: 2, name: 'Short-term price trend: upward' })).toBeInTheDocument();
