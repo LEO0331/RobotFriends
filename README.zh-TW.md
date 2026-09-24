@@ -12,7 +12,7 @@ Gridline 是雙語決策輔助與研究驗證儀表板，將 AI／資料中心�
 - **基礎設施情報**：區域導覽及有一級來源的里程碑；無來源的容量與階段數值不顯示。
 - **價格回溯**：30D / 90D / 1Y 已觀察收盤價；資料不足時明確顯示 unavailable。
 - **可稽核 provenance**：deterministic observation ID、provider/source metadata、觀察與擷取日期、來源 URL 與 lineage。
-- **版本化訊號**：有來源的 MA5/MA10 價格趨勢與明確的時點截止時間。
+- **可擴充技術訊號**：以共同 registry 支援趨勢／移動平均、RSI 動能與布林通道波動度；保留日期、provider 連續性檢查，並只輸出描述性狀態，不產生買賣結論。
 - **持久化歷史**：Node API profile 以 SQLite/WAL 保存不可變觀察值、來源健康狀態、分數快照、情境分析與回測執行紀錄。
 - **Scenario Lab**：記錄供電、需求、CAPEX、法規的使用者假設，不產生未校準預測。
 - **回溯價格測試**：MA5/MA10 交叉後以下一筆交易日及十筆交易日後收盤價評估，揭露待完成結果與禁止前視偏誤規則。
@@ -22,7 +22,7 @@ Gridline 是雙語決策輔助與研究驗證儀表板，將 AI／資料中心�
 - **選用帳戶**：Supabase 註冊、登入、密碼恢復與偏好設定已完成 React 專案端實作，但不會阻擋公開研究 demo。
 - **工程品質 Gate**：PR 測試／build／audit、snapshot acceptance gate、GitHub Pages 部署與 Lighthouse CI。
 
-設計文件：[資料血緣](docs/data-provenance.md) · [Scoring](docs/scoring-methodology.md) · [持久化儲存](docs/persistent-storage.md) · [情境分析](docs/scenario-analysis.md) · [回測](docs/backtesting.md) · [PR CI](docs/pr-ci.md)。
+設計文件：[資料血緣](docs/data-provenance.md) · [技術訊號方法](docs/signal-methods.md) · [Scoring](docs/scoring-methodology.md) · [持久化儲存](docs/persistent-storage.md) · [情境分析](docs/scenario-analysis.md) · [回測](docs/backtesting.md) · [PR CI](docs/pr-ci.md)。
 
 ## 系統需求
 
@@ -90,6 +90,7 @@ provider refresh → schema-v4 snapshot → demo readiness gate
 - `server/backtest.js` / `src/backtestModel.js`：純價格 MA5/MA10 回溯交叉測試。
 - `server/historical-reconstruction.js`：實際紀錄歷史涵蓋摘要；不再產生 v1 重建。
 - `server/demo-readiness.js`：公開 snapshot 的驗收條件。
+- `src/signals/registry.js`：前端趨勢、動能、波動度方法的共同 contract；最新 provider 資料區段不足時採 fail-closed。
 - `src/DataHealth.js`：營運／示範準備度 workspace。
 - `src/ScenarioLab.js` / `src/BacktestLab.js`：研究工作區。
 
@@ -124,6 +125,8 @@ HTTP `200` 但 0 筆可用資料會標成 **degraded**，不會標 `ok`。降級
 ## 專題訊號視角與回溯測試
 
 總覽可切換**市場動能、公司執行、電網需求、專案里程碑**。各視角說明來源、日期、規則及無資料原因，不合成買賣分數。公司執行需具期間資訊與精確連結的 SEC 營收或稀釋 EPS；電網需求需明確類型的 EIA 實際負載及完整可比較日期；專案里程碑需特定一級來源紀錄。詳見 [訊號視角](docs/signal-lenses.md) 與 [市場訊號方法](docs/scoring-methodology.zh-TW.md)。
+
+前端 signal registry 目前以同一份結果 contract 支援三種常見技術分析類型：移動平均趨勢、14 期 Wilder RSI 動能，以及 20 期布林通道波動度。現階段總覽仍顯示趨勢方法；其餘方法已具備計算能力，供後續 explainer／chart marker UI 使用。每個方法都回傳有日期的證據、資料需求、狀態變化及解讀限制，不產生買進／賣出結論。詳見 [技術訊號方法](docs/signal-methods.md)。
 
 MA5/MA10 回測只用有日期的收盤價，於下一筆觀察交易日收盤價進場，十筆交易日後評估。此為不含交易成本的描述性回溯計算，不證明預測能力。詳見 [回測說明](docs/backtesting.md)。
 
