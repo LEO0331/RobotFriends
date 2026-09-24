@@ -77,7 +77,7 @@ export const volatilityBollingerMethod = {
         'Band position does not establish future returns.',
       ],
     },
-    zhTW: {
+    'zh-TW': {
       whatItMeasures: '以近期收盤價平均為中心，依價格離散程度建立上下通道。',
       commonUse: '常用於觀察波動度，以及價格是否落在近期統計通道之外。',
       limitations: [
