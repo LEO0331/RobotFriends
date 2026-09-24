@@ -61,6 +61,7 @@ test('explains a ten-close moving-average signal with observed values', () => {
   expect(view.ma5).toBe(107);
   expect(view.ma10).toBe(104.5);
   expect(view.marketSignal).toBe('upward');
+  expect(view.signalMethodId).toBe('trend-moving-average');
   const copy = setupCopy(view, '30D', (english) => english);
   expect(copy.marketSignal).toBe('Short-term price trend: upward');
   expect(copy.body).not.toContain('fundamentals');
