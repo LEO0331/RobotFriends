@@ -153,7 +153,7 @@ export default function PriceChart({
         <h3>{ticker} · {copy.title}</h3>
         <small>{copy.continuity}</small>
       </div>
-      <div className="price-chart-range" aria-label={copy.range}>
+      <div className="price-chart-range" role="group" aria-label={copy.range}>
         {PRICE_CHART_RANGES.map(range => {
           const enabled = Boolean(model.rangeAvailability?.[range]);
           return <button
@@ -204,6 +204,7 @@ export default function PriceChart({
           aria-describedby={livePointId}
           tabIndex="0"
           onFocus={() => { if (chart) setHoverIndex(chart.plotted.length - 1); }}
+          onBlur={() => setHoverIndex(null)}
           onKeyDown={inspectWithKeyboard}
           onMouseMove={move}
           onMouseLeave={() => setHoverIndex(null)}
