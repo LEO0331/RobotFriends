@@ -88,7 +88,7 @@ export const momentumRsiMethod = {
         'Momentum readings do not establish future returns.',
       ],
     },
-    zhTW: {
+    'zh-TW': {
       whatItMeasures: '將近期上漲與下跌幅度整理成 0–100 的動能尺度。',
       commonUse: '常用於動能分析，以及觀察約 30 與 70 的參考區間。',
       limitations: [
