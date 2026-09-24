@@ -1,8 +1,13 @@
 import { infrastructureEvents } from './eventModel';
-import { marketSignals } from './marketSignals';
+import {
+  DEFAULT_SIGNAL_METHOD_ID,
+  evaluateSnapshotSignalMethod,
+  getSignalMethod,
+} from './signals/registry';
+import { signalStateLabel } from './signals/presentation';
 
 export const SIGNAL_LENSES = [
-  { id: 'momentum', name: 'Market momentum', nameZh: '市場動能' },
+  { id: 'momentum', name: 'Market signals', nameZh: '市場訊號' },
   { id: 'execution', name: 'Company financials', nameZh: '公司財務' },
   { id: 'grid', name: 'Grid demand', nameZh: '電網需求' },
   { id: 'milestones', name: 'Project milestones', nameZh: '專案里程碑' },
@@ -76,17 +81,32 @@ function gridDemandSignal(snapshot) {
   return { available: false, label: 'Grid-demand comparison unavailable', labelZh: '暫無可比較的電網需求資料', method: 'Requires two complete 24-hour PJM actual-demand days, seven days apart, with an explicit EIA data type and one linked source. Regional load cannot establish data-center demand or secured power.', methodZh: '須有相隔七天、各涵蓋完整 24 小時的 PJM 實際需求資料，並標明 EIA 資料類型及來源連結。區域用電量無法證明資料中心需求或已取得電力。', scope: 'PJM region', scopeZh: 'PJM 區域' };
 }
 
-export function signalLens(snapshot, ticker, lensId, now = new Date()) {
+export function signalLens(snapshot, ticker, lensId, now = new Date(), signalMethodId = DEFAULT_SIGNAL_METHOD_ID) {
   if (lensId === 'momentum') {
-    const signal = marketSignals(snapshot, ticker);
-    return signal?.trend !== 'unavailable' && signal?.sourceUrl
-      ? { available: true, label: signal.trend === 'above' ? 'Short-term price trend: upward' : signal.trend === 'below' ? 'Short-term price trend: downward' : 'Short-term price trend: mixed',
-        labelZh: signal.trend === 'above' ? '短期價格趨勢向上' : signal.trend === 'below' ? '短期價格趨勢向下' : '短期價格趨勢混合',
-        method: 'Classified from recent sourced closing-price history. This is a descriptive trend signal, not a forecast of future returns.',
-        methodZh: '依據具來源的近期收盤價歷史進行分類。此為描述性趨勢訊號，不代表未來報酬預測。',
-        observedAt: signal.observedAt, sourceUrl: signal.sourceUrl, scope: ticker, scopeZh: ticker,
-        signalMethodId: signal.signalMethodId, signalMethod: signal.signalMethod }
-      : { available: false, label: 'Market momentum unavailable', labelZh: '暫無市場動能訊號', method: 'Requires 10 distinct dated closes from one linked provider.', methodZh: '須有同一資料來源連結提供的 10 個不同交易日收盤價。', scope: ticker, scopeZh: ticker };
+    const method = getSignalMethod(signalMethodId) || getSignalMethod(DEFAULT_SIGNAL_METHOD_ID);
+    const signal = evaluateSnapshotSignalMethod(method.id, snapshot, ticker);
+    const available = signal.state !== 'unavailable' && Boolean(signal.evidence.sourceUrl);
+    const methodEn = method.copy.en;
+    const methodZh = method.copy['zh-TW'];
+    return {
+      available,
+      label: signalStateLabel(method.id, signal.state, 'en'),
+      labelZh: signalStateLabel(method.id, signal.state, 'zh-TW'),
+      method: available
+        ? `${methodEn.whatItMeasures} This descriptive signal does not establish future returns.`
+        : `Requires at least ${signal.requirements.minimumObservations} dated closes from one continuous provider segment.`,
+      methodZh: available
+        ? `${methodZh.whatItMeasures} 此描述性訊號不能證明未來報酬。`
+        : `至少需要同一連續資料來源區段的 ${signal.requirements.minimumObservations} 筆有日期收盤價。`,
+      observedAt: signal.observedAt,
+      sourceUrl: signal.evidence.sourceUrl,
+      sourceLabel: signal.evidence.provider || null,
+      sourceLabelZh: signal.evidence.provider || null,
+      scope: ticker,
+      scopeZh: ticker,
+      signalMethodId: method.id,
+      signalMethod: signal,
+    };
   }
   if (lensId === 'execution') {
     const eps = recentFact(snapshot, ticker, 'dilutedEps');
