@@ -54,7 +54,7 @@ test('range controls update the chart without fetching another data source', () 
 
   expect(screen.getByRole('button', { name: '30' })).toHaveAttribute('aria-pressed', 'true');
   expect(screen.getByRole('img')).toHaveAttribute('aria-label', expect.stringContaining('30 sessions'));
-  expect(screen.getByText(/30 sessions/)).toBeInTheDocument();
+  expect(screen.getByText(/30 sessions · 2026-03-02/)).toBeInTheDocument();
 });
 
 test('range control is disabled when the current provider segment lacks enough closes', () => {
