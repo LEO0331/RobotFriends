@@ -2,7 +2,7 @@
 
 Gridline keeps technical indicators behind a common, descriptive signal contract. The signal engine does **not** emit buy/sell recommendations. It reports what a method observed, the evidence window used, method-specific values, dated state changes, data requirements, and interpretation limits.
 
-The Overview now exposes all three methods through the technical-signal explorer. The selected method also drives the Market signals research lens. An “About this signal” drawer shows the method description, conventional use, current observation, settings, provider evidence, minimum data requirement and interpretation limits. The dated event stream remains available for the planned chart-marker work.
+The Overview now exposes all three methods through the technical-signal explorer. The selected method also drives the Market signals research lens. An “About this signal” drawer shows the method description, conventional use, current observation, settings, provider evidence, minimum data requirement and interpretation limits. A lightweight SVG price chart now renders the same normalized provider-continuous closing-price history; the dated signal event stream remains available for the planned chart-marker work.
 
 ## Registry
 
@@ -102,10 +102,10 @@ sourced price observations
   └───────┼─────────┘
           ↓
  common signal result
-     ┌────┴────┐
-     ↓         ↓
- explainer   chart markers
-   (live)      (planned)
+     ┌────┼───────────┐
+     ↓    ↓           ↓
+ explainer price chart chart markers
+   (live)    (live)      (planned)
 ```
 
 This separation keeps calculation, evidence, explanation, and presentation independently testable.
