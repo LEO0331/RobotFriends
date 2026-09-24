@@ -43,14 +43,17 @@ export function evaluateSignalMethods(rows = []) {
   return Object.fromEntries(methods.map(method => [method.id, method.evaluate(rows)]));
 }
 
+function snapshotRows(snapshot = {}, ticker) {
+  if (!Number.isFinite(Date.parse(snapshot.generatedAt || ''))) return [];
+  return normalizePriceObservations(snapshot.observations || [], ticker, snapshot.generatedAt);
+}
+
 export function evaluateSnapshotSignalMethod(methodId, snapshot = {}, ticker) {
-  const rows = normalizePriceObservations(snapshot.observations || [], ticker, snapshot.generatedAt);
-  return evaluateSignalMethod(methodId, rows);
+  return evaluateSignalMethod(methodId, snapshotRows(snapshot, ticker));
 }
 
 export function evaluateSnapshotSignalMethods(snapshot = {}, ticker) {
-  const rows = normalizePriceObservations(snapshot.observations || [], ticker, snapshot.generatedAt);
-  return evaluateSignalMethods(rows);
+  return evaluateSignalMethods(snapshotRows(snapshot, ticker));
 }
 
 export { normalizePriceObservations } from './series';
