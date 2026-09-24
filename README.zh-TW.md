@@ -12,6 +12,7 @@ Gridline 是雙語決策輔助與研究驗證儀表板，將 AI／資料中心�
 - **基礎設施情報**：區域導覽及有一級來源的里程碑；無來源的容量與階段數值不顯示。
 - **價格回溯**：30D / 90D / 1Y 已觀察收盤價；資料不足時明確顯示 unavailable。
 - **輕量價格圖表**：原生 SVG 提供 30 / 60 / 90 個交易觀察值區間，使用同一份具日期收盤價、維持單一連續 provider 區段並連回價格來源，同時疊加目前所選技術方法的具日期狀態變化標記。
+- **前後快照差異**：每次更新都與前一份已提交快照比較重要的使用者可見變化，包括最新收盤價、已記錄趨勢訊號狀態、已驗證事件新增／更新／封存轉換，以及來源健康狀態。
 - **可稽核 provenance**：deterministic observation ID、provider/source metadata、觀察與擷取日期、來源 URL 與 lineage。
 - **可擴充技術訊號**：以共同 registry 支援趨勢／移動平均、RSI 動能與布林通道波動度；保留日期、provider 連續性檢查，並只輸出描述性狀態，不產生買賣結論。
 - **持久化歷史**：Node API profile 以 SQLite/WAL 保存不可變觀察值、來源健康狀態、分數快照、情境分析與回測執行紀錄。
@@ -23,7 +24,7 @@ Gridline 是雙語決策輔助與研究驗證儀表板，將 AI／資料中心�
 - **選用帳戶**：Supabase 註冊、登入、密碼恢復與偏好設定已完成 React 專案端實作，但不會阻擋公開研究 demo。
 - **工程品質 Gate**：PR 測試／build／audit、snapshot acceptance gate、GitHub Pages 部署與 Lighthouse CI。
 
-設計文件：[資料血緣](docs/data-provenance.md) · [技術訊號方法](docs/signal-methods.md) · [Scoring](docs/scoring-methodology.md) · [持久化儲存](docs/persistent-storage.md) · [情境分析](docs/scenario-analysis.md) · [回測](docs/backtesting.md) · [PR CI](docs/pr-ci.md)。
+設計文件：[資料血緣](docs/data-provenance.md) · [技術訊號方法](docs/signal-methods.md) · [快照差異](docs/snapshot-changes.md) · [Scoring](docs/scoring-methodology.md) · [持久化儲存](docs/persistent-storage.md) · [情境分析](docs/scenario-analysis.md) · [回測](docs/backtesting.md) · [PR CI](docs/pr-ci.md)。
 
 ## 系統需求
 
@@ -94,6 +95,7 @@ provider refresh → schema-v4 snapshot → demo readiness gate
 - `src/signals/registry.js`：前端趨勢、動能、波動度方法的共同 contract；最新 provider 資料區段不足時採 fail-closed。
 - `src/Components/PriceChart.js` / `src/Components/priceChartModel.js`：不依賴第三方圖表套件的 SVG 價格歷史，與訊號層共用正規化且來源連續的收盤價觀察值。
 - `src/Components/chartSignalMarkers.js`：將目前選定的 registered method 具日期事件對應到圖表中同日期的可見觀察值，不在 chart 元件內重算技術指標。
+- `server/snapshot-changes.js` / `src/Components/SnapshotChanges.js`：產生 deterministic 前後快照差異，並在總覽提供雙語稽核介面。
 - `src/DataHealth.js`：營運／示範準備度 workspace。
 - `src/ScenarioLab.js` / `src/BacktestLab.js`：研究工作區。
 
