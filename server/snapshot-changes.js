@@ -56,7 +56,7 @@ function eventMap(snapshot = {}) {
   for (const row of snapshot.observations || []) {
     if (row?.source !== 'events' || row?.type !== 'infrastructureEvent') continue;
     const event = row.value;
-    if (!event?.url || !validTime(event.publishedAt)) continue;
+    if (!event?.url || validTime(event.publishedAt) === null) continue;
     let url;
     try {
       url = new URL(event.url).protocol === 'https:' ? event.url : null;
@@ -96,7 +96,7 @@ function signalValue(score) {
   return {
     available: signal.available === true,
     state: signal.available === true ? signal.trend || null : null,
-    sourceUrl: sourceUrl(signal) || signal.sourceUrl || null,
+    sourceUrl: sourceUrl(signal),
     observedAt: signal.observedAt || null,
     methodologyVersion: score.methodologyVersion || null,
   };
