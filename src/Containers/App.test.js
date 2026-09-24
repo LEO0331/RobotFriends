@@ -18,8 +18,8 @@ const snapshot = {
 test('overview switches research lenses without presenting unsourced earnings values', () => {
   window.history.pushState({}, '', '#overview');
   render(<App snapshot={snapshot} />);
-  expect(screen.getByText('Price trend above MA5/MA10')).toBeInTheDocument();
-  fireEvent.click(screen.getByRole('button', { name: 'Company execution' }));
+  expect(screen.getByRole('heading', { level: 2, name: 'Short-term price trend positive' })).toBeInTheDocument();
+  fireEvent.click(screen.getByRole('button', { name: 'Company financials' }));
   expect(screen.getByText('Company execution evidence unavailable')).toBeInTheDocument();
   expect(screen.queryByText('86%')).not.toBeInTheDocument();
 });

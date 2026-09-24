@@ -3,7 +3,7 @@ import { marketSignals } from './marketSignals';
 
 export const SIGNAL_LENSES = [
   { id: 'momentum', name: 'Market momentum', nameZh: '市場動能' },
-  { id: 'execution', name: 'Company execution', nameZh: '公司執行' },
+  { id: 'execution', name: 'Company financials', nameZh: '公司財務' },
   { id: 'grid', name: 'Grid demand', nameZh: '電網需求' },
   { id: 'milestones', name: 'Project milestones', nameZh: '專案里程碑' },
 ];
@@ -65,45 +65,57 @@ function gridDemandSignal(snapshot) {
     return {
       available: true,
       label: current > baseline ? 'PJM actual demand above prior week' : current < baseline ? 'PJM actual demand below prior week' : 'PJM actual demand unchanged from prior week',
-      method: `Mean of 24 typed actual-demand hours on ${day} versus the same UTC weekday one week earlier. Regional load does not isolate data centers.`,
+      labelZh: current > baseline ? 'PJM 實際用電需求高於前一週' : current < baseline ? 'PJM 實際用電需求低於前一週' : 'PJM 實際用電需求與前一週持平',
+      method: `Compared PJM's reported actual demand on ${day} with the same weekday a week earlier. Regional load does not isolate data centers.`,
+      methodZh: `比較 ${day} 與前一週同日的 PJM 實際用電量。區域用電量無法單獨辨識資料中心需求。`,
       observedAt: `${day}T23:00:00Z`,
       sourceUrl: 'https://www.eia.gov/electricity/gridmonitor/dashboard/electric_overview/balancing_authority/PJM',
-      sourceLabel: 'EIA PJM dashboard', datasetUrl: source.toString(), scope: 'PJM region',
+      sourceLabel: 'EIA PJM dashboard', sourceLabelZh: 'EIA PJM 電網儀表板', datasetUrl: source.toString(), scope: 'PJM region', scopeZh: 'PJM 區域',
     };
   }
-  return { available: false, label: 'Grid-demand comparison unavailable', method: 'Requires two complete 24-hour PJM actual-demand days, seven days apart, with an explicit EIA data type and one linked source. Regional load cannot establish data-center demand or secured power.', scope: 'PJM region' };
+  return { available: false, label: 'Grid-demand comparison unavailable', labelZh: '暫無可比較的電網需求資料', method: 'Requires two complete 24-hour PJM actual-demand days, seven days apart, with an explicit EIA data type and one linked source. Regional load cannot establish data-center demand or secured power.', methodZh: '須有相隔七天、各涵蓋完整 24 小時的 PJM 實際需求資料，並標明 EIA 資料類型及來源連結。區域用電量無法證明資料中心需求或已取得電力。', scope: 'PJM region', scopeZh: 'PJM 區域' };
 }
 
 export function signalLens(snapshot, ticker, lensId, now = new Date()) {
   if (lensId === 'momentum') {
     const signal = marketSignals(snapshot, ticker);
     return signal?.trend !== 'unavailable' && signal?.sourceUrl
-      ? { available: true, label: signal.trend === 'above' ? 'Price trend above MA5/MA10' : signal.trend === 'below' ? 'Price trend below MA5/MA10' : 'Mixed price trend',
-        method: 'Latest close compared with arithmetic means of the last 5 and 10 distinct sourced trading closes.', observedAt: signal.observedAt, sourceUrl: signal.sourceUrl, scope: ticker }
-      : { available: false, label: 'Market momentum unavailable', method: 'Requires 10 distinct dated closes from one linked provider.', scope: ticker };
+      ? { available: true, label: signal.trend === 'above' ? 'Short-term price trend positive' : signal.trend === 'below' ? 'Short-term price trend negative' : 'Short-term price trend mixed',
+        labelZh: signal.trend === 'above' ? '短期價格趨勢偏強' : signal.trend === 'below' ? '短期價格趨勢偏弱' : '短期價格趨勢分歧',
+        method: 'Based on recent sourced closing-price trends. This describes historical prices, not future returns; calculation details are in Methodology.',
+        methodZh: '依據具來源的近期收盤價趨勢；此訊號描述歷史價格，不預測未來報酬。詳細計算方式見方法說明。',
+        observedAt: signal.observedAt, sourceUrl: signal.sourceUrl, scope: ticker, scopeZh: ticker }
+      : { available: false, label: 'Market momentum unavailable', labelZh: '暫無市場動能訊號', method: 'Requires 10 distinct dated closes from one linked provider.', methodZh: '須有同一資料來源連結提供的 10 個不同交易日收盤價。', scope: ticker, scopeZh: ticker };
   }
   if (lensId === 'execution') {
     const eps = recentFact(snapshot, ticker, 'dilutedEps');
     const revenue = recentFact(snapshot, ticker, 'revenue');
     const epsPrior = recentFact(snapshot, ticker, 'dilutedEpsPrior');
     const revenuePrior = recentFact(snapshot, ticker, 'revenuePrior');
-    if (!eps && !revenue) return { available: false, label: 'Company execution evidence unavailable', method: 'Requires a recent period-aware SEC revenue or diluted EPS fact with an exact source link. No growth claim is made without a comparable prior period.', scope: ticker };
+    if (!eps && !revenue) return { available: false, label: 'Company execution evidence unavailable', labelZh: '暫無可用的公司財務揭露資料', method: 'Requires a recent period-aware SEC revenue or diluted EPS fact with an exact source link. No growth claim is made without a comparable prior period.', methodZh: '須有近期、標明報告期間且附有原始連結的 SEC 營收或稀釋每股盈餘資料。缺少可比較的去年同期資料時，不判定成長。', scope: ticker, scopeZh: ticker };
     const pair = comparable(eps, epsPrior) ? [eps, epsPrior, 'Diluted EPS'] : comparable(revenue, revenuePrior) ? [revenue, revenuePrior, 'Revenue'] : null;
     if (pair) {
       const [current, prior, name] = pair;
       const direction = Number(current.value) > Number(prior.value) ? 'increased' : Number(current.value) < Number(prior.value) ? 'decreased' : 'was unchanged';
+      const nameZh = name === 'Diluted EPS' ? '稀釋每股盈餘' : '營收';
+      const directionZh = Number(current.value) > Number(prior.value) ? '增加' : Number(current.value) < Number(prior.value) ? '減少' : '持平';
       return { available: true, label: `${name} ${direction} versus comparable prior-year quarter`,
+        labelZh: `${nameZh}較去年同期${directionZh}`,
         method: `Matched ${current.periodStart}–${current.periodEnd} with ${prior.periodStart}–${prior.periodEnd}; same unit, comparable quarter duration and filing-linked records. No earnings-quality or valuation claim is inferred.`,
+        methodZh: `比較 ${current.periodStart} 至 ${current.periodEnd} 與 ${prior.periodStart} 至 ${prior.periodEnd} 的申報資料；兩期單位相同、季度長度相近。此比較不代表獲利品質或估值判斷。`,
         observedAt: current.filedAt, sourceUrl: current.sourceUrl || current.provenance?.originUrl,
-        additionalSourceUrl: prior.sourceUrl || prior.provenance?.originUrl, scope: ticker };
+        additionalSourceUrl: prior.sourceUrl || prior.provenance?.originUrl, scope: ticker, scopeZh: ticker };
     }
     const fact = eps || revenue;
-    return { available: true, label: eps ? 'Diluted EPS disclosed' : 'Revenue disclosed', method: `Reported ${fact.form || 'filing'} fact for period ending ${fact.periodEnd}; this is a disclosure reference, not an earnings-growth verdict.`, observedAt: fact.filedAt, sourceUrl: fact.sourceUrl || fact.provenance?.originUrl, scope: ticker };
+    return { available: true, label: eps ? 'Diluted EPS disclosed' : 'Revenue disclosed', labelZh: eps ? '已揭露稀釋每股盈餘' : '已揭露營收', method: `Reported ${fact.form || 'filing'} fact for period ending ${fact.periodEnd}; this is a disclosure reference, not an earnings-growth verdict.`, methodZh: `${fact.form || '申報文件'} 揭露截至 ${fact.periodEnd} 的資料；僅供查閱，不代表獲利成長判斷。`, observedAt: fact.filedAt, sourceUrl: fact.sourceUrl || fact.provenance?.originUrl, scope: ticker, scopeZh: ticker };
   }
   if (lensId === 'grid') {
     return gridDemandSignal(snapshot);
   }
   const latest = infrastructureEvents(snapshot, now).filter(item => !item.archived)[0];
-  return latest ? { available: true, label: latest.title, method: `${latest.category} primary record for ${latest.region}; no numeric impact or company attribution is inferred.`, observedAt: latest.publishedAt, sourceUrl: latest.url, scope: latest.region }
-    : { available: false, label: 'No verified current project milestone', method: 'Requires an accessible primary-source record with a matching title, publication date and supporting passage.', scope: 'Sector' };
+  return latest ? { available: true, label: latest.title, labelZh: latest.title,
+      method: `${({ power: 'Power', grid: 'Grid', permit: 'Permit', capex: 'Capital spending' })[String(latest.category).toLowerCase()] || 'Infrastructure'} primary-source record for ${latest.region}; no quantified impact or company attribution is inferred.`,
+      methodZh: `${latest.region} 的${({ power: '電力', grid: '電網', permit: '許可', capex: '資本支出' })[String(latest.category).toLowerCase()] || '基礎設施'}原始紀錄；不據此推估量化影響或歸因於個別公司。`,
+      observedAt: latest.publishedAt, sourceUrl: latest.url, scope: latest.region, scopeZh: latest.region }
+    : { available: false, label: 'No verified current project milestone', labelZh: '目前沒有已核實的專案里程碑', method: 'Requires an accessible primary-source record with a matching title, publication date and supporting passage.', methodZh: '須有可存取的原始來源，且標題、發布日期及內文段落與事件相符。', scope: 'Sector', scopeZh: '產業' };
 }

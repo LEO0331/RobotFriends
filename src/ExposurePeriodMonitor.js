@@ -1,7 +1,7 @@
 import React, { useEffect, useMemo, useState } from 'react';
 import ReactDOM from 'react-dom';
 import companies from './data/companyExposure.json';
-import { buildCompanyPeriodView, formatPercent, setupCopy } from './exposureHistory';
+import { buildCompanyPeriodView, formatPercent, marketSignalLabel, setupCopy } from './exposureHistory';
 import './ExposurePeriodMonitor.css';
 
 const emptySnapshot = { observations: [], companyHistory: [], generatedAt: null };
@@ -100,11 +100,11 @@ function ExposureMonitor({ snapshot, language }) {
     <div className="period-aware-monitor">
       <section className="section company-title period-company-title">
         <div>
-          <p className="eyebrow">{t('PRICE MONITOR', '價格監測')}</p>
-          <h3>{t('Observed market prices', '已觀察的市場價格')}</h3>
-          <p className="period-coverage">{coverageText} {t('MA5/MA10 uses the latest 10 dated closes when available.', 'MA5/MA10 在資料足夠時使用最近 10 筆有日期的收盤價。')}</p>
+          <p className="eyebrow">{t('MARKET CONTEXT', '市場脈絡')}</p>
+          <h3>{t('Observed price trends', '已觀察的價格趨勢')}</h3>
+          <p className="period-coverage">{coverageText} {t('The trend view requires 10 dated closes.', '趨勢檢視需 10 筆有日期的收盤價。')}</p>
         </div>
-        <div className="segmented" aria-label={t('Exposure lookback period', '曝險回溯期間')}>
+        <div className="segmented" aria-label={t('Price lookback period', '價格回溯期間')}>
           {['30D', '90D', '1Y'].map(value => <button key={value} onClick={() => setPeriod(value)} className={period === value ? 'selected' : ''}>{value}</button>)}
         </div>
       </section>
@@ -121,7 +121,7 @@ function ExposureMonitor({ snapshot, language }) {
               <strong className="price" title={company.priceToDate || undefined}>{company.currentPrice === null ? t('Unavailable', '無資料') : `$${company.currentPrice.toFixed(2)}`}</strong>
               <div className="stat">
                 <span>{t('CLOSE DATE', '收盤日期')} <b>{company.priceToDate ? company.priceToDate.slice(0, 10) : '—'}</b></span>
-                <span>{t('PRICE TREND', '價格趨勢')} <b>{company.marketSignal || '—'}</b></span>
+                <span>{t('PRICE TREND', '價格趨勢')} <b>{marketSignalLabel(company.marketSignal, t)}</b></span>
               </div>
             </button>
           );
@@ -139,14 +139,14 @@ function ExposureMonitor({ snapshot, language }) {
               <p>{copy.body}</p>
               <div className="period-window-meta">
                 <span>{t('PERIOD RETURN', '期間報酬')} <b className={active.periodReturn < 0 ? 'negative' : 'positive'}>{formatPercent(active.periodReturn)}</b></span>
-                <span>{t('PRICE WINDOW', '價格期間')} <b>{active.priceHistoryAvailable ? `${active.priceCoverageDays}d` : '—'}</b></span>
+                <span>{t('PRICE WINDOW', '價格期間')} <b>{active.priceHistoryAvailable ? `${active.priceCoverageDays}${zh ? ' 天' : ' days'}` : '—'}</b></span>
                 <span>{t('LATEST CLOSE', '最近收盤價')} <b>{active.currentPrice === null ? '—' : `$${active.currentPrice.toFixed(2)}`}</b></span>
                 <span>{t('PRICE SOURCE', '價格來源')} <b>{active.priceSourceUrl ? <a href={active.priceSourceUrl} target="_blank" rel="noopener noreferrer">{active.priceProvider || t('Open source', '開啟來源')} ↗</a> : t('Unavailable', '無資料')}</b></span>
               </div>
             </div>
           </div>
           <div className="signals">
-            <span>{t('MA5 / MA10', '五日 / 十日均價')} <b>{copy.marketSignal}</b></span>
+            <span>{t('PRICE TREND', '價格趨勢')} <b>{copy.marketSignal}</b></span>
           </div>
         </article>
       </section>

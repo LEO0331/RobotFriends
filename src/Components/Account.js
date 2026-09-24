@@ -7,10 +7,10 @@ const WATCHLIST_SYMBOLS = ['NBIS', 'CRWV', 'ORCL', 'AVGO'];
 function authMessage(error, mode, t) {
   const message = String(error?.message || '').toLowerCase();
   if (message.includes('rate limit') || message.includes('too many')) return t('Too many attempts. Please wait before trying again.', '嘗試次數過多，請稍候再試。');
-  if (mode === 'signin') return t('Unable to sign in with those credentials.', '無法使用這組認證資料登入。');
-  if (mode === 'signup') return t('Unable to create the account. Check the information and try again.', '無法建立帳戶，請檢查資料後重試。');
-  if (mode === 'reset') return t('Unable to request a reset email right now. Please try later.', '目前無法要求重設郵件，請稍後再試。');
-  return t('The authentication request could not be completed. Please retry.', '無法完成帳戶操作，請重試。');
+  if (mode === 'signin') return t('Unable to sign in. Check your email and password.', '無法登入，請檢查電子郵件及密碼。');
+  if (mode === 'signup') return t('Unable to create your account. Check your details and try again.', '無法建立帳戶，請檢查資料後再試一次。');
+  if (mode === 'reset') return t('Unable to send a password reset email right now. Please try again later.', '目前無法寄送密碼重設郵件，請稍後再試。');
+  return t('Unable to complete this account request. Please try again.', '無法完成帳戶操作，請再試一次。');
 }
 
 export default function Account({ language, weight, onPreferences }) {
@@ -161,8 +161,8 @@ export default function Account({ language, weight, onPreferences }) {
 
       if (mode === 'reset') {
         setMessage(t(
-          'If an account is eligible, a password-reset email will arrive shortly.',
-          '若此帳戶符合條件，系統將很快寄出密碼重設郵件。'
+          'If this email is linked to an account, you will receive password reset instructions shortly.',
+          '若此電子郵件已連結帳戶，您稍後會收到密碼重設說明。'
         ));
       } else if (mode === 'signup' && !result.data?.session) {
         setPendingEmail(email);
@@ -216,8 +216,8 @@ export default function Account({ language, weight, onPreferences }) {
       setMessage(t('Preferences saved to your account.', '偏好設定已儲存至您的帳戶。'));
     } catch {
       setMessage(t(
-        'Unable to save. Your current dashboard settings are still available locally.',
-        '無法儲存；目前的儀表板設定仍保留在此瀏覽器。'
+        'Unable to save your preferences. Your current settings remain available in this session.',
+        '無法儲存偏好設定。您目前的設定在本次使用期間仍可使用。'
       ));
     } finally {
       setBusy(false);
@@ -271,13 +271,9 @@ export default function Account({ language, weight, onPreferences }) {
 
       {!supabase ? <div className="account-notice">
         <p>{t(
-          'Accounts are not enabled on this deployment yet. The public dashboard remains fully available.',
-          '此部署尚未啟用帳戶功能，公開儀表板仍可正常使用。'
+          'Account features are currently unavailable. You can continue using the public dashboard.',
+          '帳戶功能目前無法使用，您仍可瀏覽公開儀表板。'
         )}</p>
-        <small>{t(
-          'Add the Supabase project URL and browser-safe publishable key at build time to enable authentication.',
-          '建置時加入 Supabase 專案 URL 與可公開的 publishable key，即可啟用帳戶功能。'
-        )}</small>
       </div> : account ? <>
         <p className="account-email">{user.email}</p>
         <p className="account-session">{t('Signed in on this browser', '已在此瀏覽器登入')}</p>
@@ -285,8 +281,8 @@ export default function Account({ language, weight, onPreferences }) {
         {preferenceState === 'loading' && <p>{t('Loading saved preferences…', '正在載入已儲存的偏好設定…')}</p>}
         {preferenceState === 'error' && <div className="account-notice error">
           <p>{t(
-            'Saved preferences could not be loaded. Authentication is active, but the preferences table or policy may not be ready yet.',
-            '無法載入已儲存的偏好。登入功能已啟用，但偏好資料表或權限政策可能尚未完成設定。'
+            'We could not load your saved preferences. Please try again.',
+            '無法載入您儲存的偏好設定，請再試一次。'
           )}</p>
           <button disabled={busy} onClick={() => setPreferenceReload(value => value + 1)}>{t('Retry', '重試')}</button>
         </div>}
@@ -305,7 +301,6 @@ export default function Account({ language, weight, onPreferences }) {
           </label>)}
         </fieldset>
 
-        <p>{t('Current language / capacity weight', '目前語言 / 容量權重')}: {language} / {weight}%</p>
         <div className="account-actions">
           <button className="primary-action" disabled={busy || preferenceState !== 'ready'} onClick={save}>{t('Save preferences', '儲存偏好設定')}</button>
           <button disabled={busy} onClick={() => { setMode('change'); setMessage(''); }}>{t('Change password', '變更密碼')}</button>
@@ -313,11 +308,11 @@ export default function Account({ language, weight, onPreferences }) {
         </div>
       </> : <form onSubmit={submit} key={mode}>
         {mode === 'reset' ? <p>{t(
-          'Enter your email. For privacy, the response is the same whether or not an account exists.',
-          '輸入電子郵件。為保護隱私，不論帳戶是否存在，畫面都會顯示相同結果。'
+          'Enter your email to request password reset instructions. For privacy, we show the same response whether an account exists or not.',
+          '輸入電子郵件以索取密碼重設說明。為保護隱私，不論帳戶是否存在，畫面都會顯示相同回覆。'
         )}</p> : mode === 'password' ? <p>{t(
-          'Your recovery link was accepted. Choose a new password to finish recovery.',
-          '密碼重設連結已接受，請設定新密碼以完成復原。'
+          'Set a new password to complete your password reset.',
+          '請設定新密碼，完成密碼重設。'
         )}</p> : mode === 'change' ? <p>{t(
           'Confirm your current password, then choose a new password.',
           '先確認目前密碼，再設定新密碼。'

@@ -49,7 +49,7 @@ export default function ScenarioLab({ onBack, language = 'en', onLanguageChange 
     <main className="scenario-shell" lang={language}>
       <header className="scenario-header">
         <button className="scenario-brand" onClick={onBack}><b>GRIDLINE</b><small>{s.lab}</small></button>
-        <div><span>{result.methodologyVersion}</span><button onClick={() => onLanguageChange(language === 'zh-TW' ? 'en' : 'zh-TW')}>{copy.languageToggle}</button><button onClick={onBack}>{s.back}</button></div>
+        <div><button onClick={() => onLanguageChange(language === 'zh-TW' ? 'en' : 'zh-TW')}>{copy.languageToggle}</button><button onClick={onBack}>{s.back}</button></div>
       </header>
       <section className="scenario-hero">
         <div><p>{s.kicker}</p><h1>{s.titleLead} <em>{s.titleEmphasis}</em></h1><span>{w.intro}</span></div>

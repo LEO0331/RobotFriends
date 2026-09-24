@@ -60,9 +60,9 @@ test('explains a ten-close moving-average signal with observed values', () => {
   const view = buildCompanyPeriodView(company, observations, '30D');
   expect(view.ma5).toBe(107);
   expect(view.ma10).toBe(104.5);
-  expect(view.marketSignal).toBe('MA5 > MA10');
+  expect(view.marketSignal).toBe('upward');
   const copy = setupCopy(view, '30D', (english) => english);
-  expect(copy.marketSignal).toContain('MA5 $107.00 > MA10 $104.50');
+  expect(copy.marketSignal).toBe('Short-term price trend positive');
   expect(copy.body).not.toContain('fundamentals');
 });
 

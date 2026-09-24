@@ -20,7 +20,7 @@ export default function ResearchExperience() {
   const [language, setLanguage] = useState(readLanguage);
   const route = routeFromHash(locationHash);
   const copy = researchLabCopy(language);
-  const healthButton = language === 'zh-TW' ? '資料健康 →' : 'Data health →';
+  const healthButton = language === 'zh-TW' ? '資料狀態 →' : 'Data status →';
 
   const setResearchLanguage = next => {
     const normalized = next === 'zh-TW' ? 'zh-TW' : 'en';
@@ -41,24 +41,12 @@ export default function ResearchExperience() {
     };
   }, []);
 
-  useEffect(() => {
-    const syncLanguageFromDashboard = () => {
-      const visibleApp = document.querySelector('main.shell[lang], main.regime-detail-shell[lang]');
-      const next = visibleApp?.getAttribute('lang');
-      if (next === 'en' || next === 'zh-TW') setResearchLanguage(next);
-    };
-    syncLanguageFromDashboard();
-    const observer = new MutationObserver(syncLanguageFromDashboard);
-    observer.observe(document.body, { subtree: true, childList: true, attributes: true, attributeFilter: ['lang'] });
-    return () => observer.disconnect();
-  }, []);
-
-  if (route === 'scenario') return <ScenarioLab language={language} onLanguageChange={setResearchLanguage} onBack={() => go('regime')} />;
-  if (route === 'backtest') return <BacktestLab language={language} onLanguageChange={setResearchLanguage} onBack={() => go('regime')} />;
-  if (route === 'health') return <DataHealth language={language} onLanguageChange={setResearchLanguage} onBack={() => go('regime')} />;
+  if (route === 'scenario') return <ScenarioLab language={language} onLanguageChange={setResearchLanguage} onBack={() => go('overview')} />;
+  if (route === 'backtest') return <BacktestLab language={language} onLanguageChange={setResearchLanguage} onBack={() => go('overview')} />;
+  if (route === 'health') return <DataHealth language={language} onLanguageChange={setResearchLanguage} onBack={() => go('overview')} />;
 
   return <>
-    <RegimeExperience />
+    <RegimeExperience language={language} onLanguageChange={setResearchLanguage} />
     <div className="research-dock"><span>{copy.dockLabel}</span><button onClick={() => go('scenario')}>{copy.scenarioButton}</button><button onClick={() => go('backtest')}>{copy.backtestButton}</button><button className="ops" onClick={() => go('health')}>{healthButton}</button></div>
   </>;
 }

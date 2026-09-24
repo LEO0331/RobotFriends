@@ -73,7 +73,7 @@ test('failed login displays a generic error without closing the dialog', async (
   fireEvent.change(screen.getByLabelText('Password'), { target: { value: 'wrongpass' } });
   fireEvent.submit(screen.getByLabelText('Email').closest('form'));
 
-  await waitFor(() => expect(screen.getByRole('status')).toHaveTextContent('Unable to sign in'));
+  await waitFor(() => expect(screen.getByRole('status')).toHaveTextContent('Unable to sign in. Check your email and password.'));
   expect(screen.getByRole('dialog')).toBeVisible();
 });
 
@@ -122,7 +122,7 @@ test('password reset keeps the response generic and uses the configured redirect
   fireEvent.change(screen.getByLabelText('Email'), { target: { value: 'unknown@example.com' } });
   fireEvent.submit(screen.getByLabelText('Email').closest('form'));
 
-  await waitFor(() => expect(screen.getByRole('status')).toHaveTextContent('If an account is eligible'));
+  await waitFor(() => expect(screen.getByRole('status')).toHaveTextContent('If this email is linked to an account'));
   expect(supabase.auth.resetPasswordForEmail).toHaveBeenCalledWith(
     'unknown@example.com',
     { redirectTo: 'http://localhost/RobotFriends' }
@@ -168,6 +168,7 @@ test('restored sessions load preferences and allow explicit save and sign out', 
 
   fireEvent.click(avatar);
   await waitFor(() => expect(screen.getByRole('button', { name: 'Save preferences' })).toBeEnabled());
+  expect(screen.queryByText(/capacity weight/i)).not.toBeInTheDocument();
   fireEvent.click(screen.getByRole('button', { name: 'Save preferences' }));
 
   await waitFor(() => expect(__query.upsert).toHaveBeenCalledWith(
@@ -178,4 +179,19 @@ test('restored sessions load preferences and allow explicit save and sign out', 
   await waitFor(() => expect(screen.getByRole('button', { name: 'Sign out' })).toBeEnabled());
   fireEvent.click(screen.getByRole('button', { name: 'Sign out' }));
   await waitFor(() => expect(supabase.auth.signOut).toHaveBeenCalledWith({ scope: 'local' }));
+});
+
+test('Chinese account error uses customer-facing wording and offers retry', async () => {
+  supabase.auth.getSession.mockResolvedValue({
+    data: { session: { user: { id: 'u1', email: 'test@example.com' } } },
+    error: null
+  });
+  __query.maybeSingle.mockResolvedValue({ data: null, error: { message: 'policy denied' } });
+
+  render(<Account language="zh-TW" weight={100} onPreferences={() => {}} />);
+  fireEvent.click(await screen.findByRole('button', { name: '帳戶選項' }));
+
+  expect(await screen.findByText('無法載入您儲存的偏好設定，請再試一次。')).toBeInTheDocument();
+  expect(screen.getByRole('button', { name: '重試' })).toBeEnabled();
+  expect(screen.queryByText(/資料表|權限政策|容量權重/)).not.toBeInTheDocument();
 });

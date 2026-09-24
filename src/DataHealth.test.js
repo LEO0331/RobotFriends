@@ -38,7 +38,7 @@ afterEach(() => {
 
 test('data health renders demo readiness and source/price coverage in English', async () => {
   render(<DataHealth language="en" onBack={() => {}} />);
-  await waitFor(() => expect(screen.getByText('READY WITH WARNINGS')).toBeInTheDocument());
+  await waitFor(() => expect(screen.getByText('PRICE DATA AVAILABLE · SOURCE GAPS')).toBeInTheDocument());
   expect(screen.getByText('MARKET PRICE COVERAGE')).toBeInTheDocument();
   expect(screen.getByText('Reviewed event records')).toBeInTheDocument();
   expect(screen.getAllByText('Fixture provider')).toHaveLength(4);
@@ -46,7 +46,7 @@ test('data health renders demo readiness and source/price coverage in English', 
 
 test('data health renders Traditional Chinese labels', async () => {
   render(<DataHealth language="zh-TW" onBack={() => {}} />);
-  await waitFor(() => expect(screen.getByText('可展示，但有警示')).toBeInTheDocument());
+  await waitFor(() => expect(screen.getByText('價格可用，部分來源未更新')).toBeInTheDocument());
   expect(screen.getByText('市場價格涵蓋')).toBeInTheDocument();
   expect(screen.getByText('已審查事件紀錄')).toBeInTheDocument();
   expect(screen.getByText('市場價格')).toBeInTheDocument();

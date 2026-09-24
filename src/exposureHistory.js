@@ -94,7 +94,7 @@ export function buildCompanyPeriodView(company, observations, period) {
     baselinePrice: price.baselinePrice || null,
     ma5,
     ma10,
-    marketSignal: ma10 === null ? null : ma5 > ma10 ? 'MA5 > MA10' : ma5 < ma10 ? 'MA5 < MA10' : 'MA5 = MA10',
+    marketSignal: ma10 === null ? null : ma5 > ma10 ? 'upward' : ma5 < ma10 ? 'downward' : 'mixed',
   };
 }
 
@@ -103,10 +103,15 @@ export function formatPercent(value) {
   return `${value >= 0 ? '+' : ''}${value.toFixed(1)}%`;
 }
 
+export function marketSignalLabel(signal, t) {
+  if (signal === 'upward') return t('Short-term price trend positive', '短期價格趨勢偏正向');
+  if (signal === 'downward') return t('Short-term price trend negative', '短期價格趨勢偏負向');
+  if (signal === 'mixed') return t('Price trend mixed', '價格趨勢混合');
+  return t('Unavailable · requires 10 dated closes', '無資料 · 需 10 筆有日期的收盤價');
+}
+
 export function setupCopy(view, period, t) {
-  const marketSignal = view.marketSignal === null
-    ? t('Unavailable · requires 10 dated closes', '無資料 · 需 10 筆有日期的收盤價')
-    : `${view.marketSignal.replace('MA5', `MA5 $${view.ma5.toFixed(2)}`).replace('MA10', `MA10 $${view.ma10.toFixed(2)}`)}`;
+  const marketSignal = marketSignalLabel(view.marketSignal, t);
   if (view.currentPrice === null) {
     return {
       title: t('Observed price unavailable', '無可用的已觀察價格'),
