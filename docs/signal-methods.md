@@ -2,7 +2,7 @@
 
 Gridline keeps technical indicators behind a common, descriptive signal contract. The signal engine does **not** emit buy/sell recommendations. It reports what a method observed, the evidence window used, method-specific values, dated state changes, data requirements, and interpretation limits.
 
-The current dashboard continues to use the moving-average trend method for its existing market-trend cards. RSI and Bollinger Bands are available through the registry for the upcoming signal explainer and chart-marker work.
+The Overview now exposes all three methods through the technical-signal explorer. The selected method also drives the Market signals research lens. An “About this signal” drawer shows the method description, conventional use, current observation, settings, provider evidence, minimum data requirement and interpretation limits. The dated event stream remains available for the planned chart-marker work.
 
 ## Registry
 
@@ -43,7 +43,7 @@ Every method returns the same top-level structure:
 - `events` contains dated state/crossover changes that can later be rendered as chart markers.
 - `evidence` identifies the provider segment and observation IDs supporting the result.
 - `requirements` states the minimum observation count and whether the current data satisfies it.
-- `limitations` provides method boundaries for the future customer-facing explainer.
+- `limitations` provides method boundaries for the customer-facing explainer.
 
 ## Data handling
 
@@ -88,9 +88,9 @@ Gridline uses a 20-period simple mean with upper and lower bands at two populati
 
 The state only reports the latest price location relative to those bands. A price outside a band is not treated as a prediction of reversal or continuation.
 
-## Intended UI use
+## UI use
 
-The next layers can consume the registry without embedding indicator logic in components:
+The customer-facing explainer consumes the registry without embedding indicator logic in components:
 
 ```text
 sourced price observations
@@ -105,6 +105,7 @@ sourced price observations
      ┌────┴────┐
      ↓         ↓
  explainer   chart markers
+   (live)      (planned)
 ```
 
 This separation keeps calculation, evidence, explanation, and presentation independently testable.
