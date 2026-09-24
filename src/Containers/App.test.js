@@ -54,6 +54,33 @@ test('technical method selection updates the selected market-signal lens', () =>
   expect(screen.getByText('No state changes for the selected method in this range.')).toBeInTheDocument();
 });
 
+test('overview renders the previous-snapshot change summary', () => {
+  const snapshotWithChanges = {
+    ...richSnapshot,
+    snapshotChanges: {
+      available: true,
+      from: '2026-11-21T22:00:00.000Z',
+      to: richSnapshot.generatedAt,
+      summary: { total: 1, price: 1, signal: 0, event: 0, sourceHealth: 0 },
+      changes: [{
+        id: 'price-nbis',
+        type: 'price',
+        ticker: 'NBIS',
+        before: 188,
+        after: 189,
+        observedAt: richSnapshot.generatedAt,
+        provider: 'Fixture',
+        sourceUrl: 'https://example.com/prices',
+      }],
+    },
+  };
+
+  render(<App snapshot={snapshotWithChanges} />);
+
+  expect(screen.getByRole('heading', { level: 3, name: 'Changes since previous snapshot' })).toBeInTheDocument();
+  expect(screen.getByText('$188.00 → $189.00')).toBeInTheDocument();
+});
+
 test('saved local language is not overwritten when account preferences reload after navigation', () => {
   window.localStorage.setItem('gridline-language', 'zh-TW');
   const onLanguageChange = jest.fn();
