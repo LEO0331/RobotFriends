@@ -1,9 +1,22 @@
 export const emptySnapshot = { generatedAt: null, freshness: 'unknown', sourceHealth: {}, outcomes: [] };
 
+async function fetchDashboardSnapshot() {
+  const paths = ['dashboard-overview.json', 'dashboard-snapshot.json'];
+  let lastError = null;
+  for (const file of paths) {
+    try {
+      const response = await fetch(`${process.env.PUBLIC_URL}/data/${file}`, { cache: 'no-store' });
+      if (!response.ok) throw new Error(`${file} unavailable`);
+      return await response.json();
+    } catch (error) {
+      lastError = error;
+    }
+  }
+  throw lastError || new Error('Snapshot unavailable');
+}
+
 export async function loadDashboardSnapshot() {
-  const response = await fetch(`${process.env.PUBLIC_URL}/data/dashboard-snapshot.json`, { cache: 'no-store' });
-  if (!response.ok) throw new Error('Snapshot unavailable');
-  const snapshot = { ...emptySnapshot, ...await response.json() };
+  const snapshot = { ...emptySnapshot, ...await fetchDashboardSnapshot() };
   try {
     const reviewResponse = await fetch(`${process.env.PUBLIC_URL}/data/event-review.json`, { cache: 'no-store' });
     if (!reviewResponse.ok) return snapshot;
