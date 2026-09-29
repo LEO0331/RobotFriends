@@ -63,6 +63,6 @@ EIA data is scoped to Gridline’s research and decision-support use only. Do no
 
 ## Scheduling
 
-With `SCHEDULE_ENABLED=true`, the local API scheduler checks once per minute and may trigger one refresh at or after **4:15 PM America/New_York**, Monday through Friday. The GitHub Pages snapshot workflow separately runs at `22:00 UTC` on weekdays and also supports manual dispatch. Market holidays are handled by the historical-price validation/tolerance rules rather than by inventing a price for a closed session.
+With `SCHEDULE_ENABLED=true`, the local API scheduler checks once per minute and runs once daily at or after **4:15 PM America/New_York**. The GitHub Pages snapshot workflow runs daily at `22:17 UTC` (after the regular U.S. close in both daylight and standard time) and supports manual dispatch. SEC, EIA and event sources may refresh every day; market prices are fetched only on a published NYSE trading session. The 2026–2028 holiday dates come from the [NYSE calendar](https://www.nyse.com/trade/hours-calendars) and require review when new dates or exceptional closures are announced. Outside the published years, price ingestion relies on the provider's dated-row validation rather than silently suppressing updates. The dashboard's event-check freshness uses the New York calendar date.
 
 For a demo, this is deliberately a low-frequency model rather than continuous polling. Production provider licensing, SLAs, historical-vintage availability and redistribution rights remain deployment responsibilities outside this repository's demo configuration.

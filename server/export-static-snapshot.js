@@ -7,6 +7,7 @@ const { mergeSnapshotObservations, mergeSnapshotHealth } = require('./snapshot-m
 const { buildSnapshotChanges } = require('./snapshot-changes');
 const { buildRuntimeSnapshot } = require('./runtime-snapshot');
 const { evaluateDemoReadiness } = require('./demo-readiness');
+const { easternParts, isNyseTradingDay } = require('./us-market-calendar');
 const {
   reconstructionSummary,
 } = require('./historical-reconstruction');
@@ -28,7 +29,11 @@ async function refreshWithRetry(service, source, attempts = 3) {
 }
 async function main() {
   const service = createService(config); const previous = await readPrevious(); const outcomes = [];
-  for (const source of config.scheduleSources) outcomes.push(await refreshWithRetry(service, source));
+  const marketSession = isNyseTradingDay(easternParts());
+  for (const source of config.scheduleSources) {
+    if (source === 'prices' && !marketSession) continue;
+    outcomes.push(await refreshWithRetry(service, source));
+  }
   const fresh = await service.observations();
   const currentHealth = await service.health();
   const successful = new Set(outcomes.filter(item => item.status === 'ok').map(item => item.source));
@@ -100,6 +105,7 @@ async function main() {
       summary: snapshot.snapshotChanges.summary,
     },
     sources: outcomes.map(item => ({ source: item.source, status: item.status, attempts: item.attempts, recordCount: item.recordCount ?? null, message: item.message })),
+    marketSession,
   }, null, 2));
 }
 main().catch(error => { console.error(error); process.exit(1); });

@@ -61,8 +61,11 @@ export default function App({ snapshot = {}, snapshotState = 'ready', onRetrySna
     ? t('SNAPSHOT UNAVAILABLE', '快照無法取得')
     : snapshotMeta.generatedLabel;
   const eventHealth = snapshot.sourceHealth?.events;
-  const yesterday = new Date(Date.now() - 86400000).toLocaleDateString('sv-SE', { timeZone: 'Asia/Taipei' });
-  const eventCheckStale = Boolean(eventHealth?.coverageThrough && eventHealth.coverageThrough < yesterday);
+  const easternToday = new Date().toLocaleDateString('sv-SE', { timeZone: 'America/New_York' });
+  const yesterday = new Date(`${easternToday}T00:00:00Z`);
+  yesterday.setUTCDate(yesterday.getUTCDate() - 1);
+  const priorEasternDate = yesterday.toISOString().slice(0, 10);
+  const eventCheckStale = Boolean(eventHealth?.coverageThrough && eventHealth.coverageThrough < priorEasternDate);
 
   const navigate = (view, options = {}) => {
     const region = options.region || (view === 'Infrastructure' || view === 'Events' ? route.region : ALL);

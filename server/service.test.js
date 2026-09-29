@@ -49,10 +49,13 @@ test('zero-observation provider response is degraded and existing price history 
     await fs.rm(directory, { recursive: true, force: true });
   }
 });
-test('post-close scheduler excludes weekends and runs after 4:15pm ET', () => {
+test('post-close scheduler checks other sources daily and prices on NYSE sessions', () => {
   assert.equal(dueAfterClose(new Date('2026-09-14T20:14:00Z')).due, false);
   assert.equal(dueAfterClose(new Date('2026-09-14T20:15:00Z')).due, true);
-  assert.equal(dueAfterClose(new Date('2026-09-13T20:16:00Z')).due, false);
+  assert.equal(dueAfterClose(new Date('2026-09-13T20:16:00Z')).due, true);
+  assert.equal(dueAfterClose(new Date('2026-09-13T20:16:00Z')).marketSession, false);
+  assert.equal(dueAfterClose(new Date('2026-07-03T20:16:00Z')).marketSession, false);
+  assert.equal(dueAfterClose(new Date('2026-09-14T20:15:00Z')).marketSession, true);
 });
 test('observation queries apply bounded pagination', async () => {
   const directory = await fs.mkdtemp(path.join(os.tmpdir(), 'gridline-page-test-')); const store = createStore(directory);

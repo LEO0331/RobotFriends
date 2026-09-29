@@ -63,6 +63,6 @@ EIA 資料僅限 Gridline 的研究與決策輔助用途。不得傳送至不相
 
 ## 排程
 
-當 `SCHEDULE_ENABLED=true` 時，本機 API scheduler 會每分鐘檢查一次，並可能在每週一至週五 **America/New_York 16:15** 之後執行一次更新。GitHub Pages 的 snapshot workflow 則另外在工作日 `22:00 UTC` 執行，也支援手動 dispatch。市場假日不會虛構價格，而是由歷史價格驗證與 tolerance 規則處理。
+當 `SCHEDULE_ENABLED=true` 時，本機 API 排程器會每分鐘檢查一次，並在每日 **America/New_York 16:15** 之後執行一次更新。GitHub Pages 的快照工作流程每日於 `22:17 UTC` 執行（美東夏令與標準時間皆在正常收盤後），也支援手動執行。SEC、EIA 與事件來源可每日更新；市場價格只在紐約證交所交易日抓取。2026 至 2028 年的休市日期依據[紐約證交所行事曆](https://www.nyse.com/trade/hours-calendars)；若公布新年度日期或臨時休市，須重新檢查。超出已公布年度時，價格仍由供應商資料的日期驗證把關，不會直接停止更新。事件檢查是否過期以紐約當地日期判定。
 
 示範環境刻意採低頻更新，而不是持續 polling。正式部署時，provider licensing、SLA、historical-vintage availability 與 redistribution rights 仍需由實際部署環境負責。

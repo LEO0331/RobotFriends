@@ -2,8 +2,9 @@ name: Refresh daily dashboard snapshot
 
 on:
   schedule:
-    # 22:00 UTC is after the regular US market close in both EST and EDT.
-    - cron: '0 22 * * 1-5'
+    # 22:17 UTC is after 4 PM ET in both EST and EDT. Non-price sources
+    # refresh daily; price ingestion checks the NYSE trading calendar.
+    - cron: '17 22 * * *'
   workflow_dispatch:
 
 permissions:
