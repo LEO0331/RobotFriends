@@ -1,4 +1,5 @@
 import React, { useMemo, useState } from 'react';
+import { eventTitle } from '../eventModel';
 import './SnapshotChanges.css';
 
 const DEFAULT_VISIBLE = 6;
@@ -108,7 +109,7 @@ function ChangeRow({ change, language, copy }) {
     value = `${healthState(change.before, language, copy.unavailableState)} → ${healthState(change.after, language, copy.unavailableState)}`;
     meta = change.checkedAt ? `${copy.observed}: ${dateOnly(change.checkedAt)}` : null;
   } else {
-    title = change.title || typeLabel(change, copy, language);
+    title = change.title ? eventTitle({ title: change.title, url: change.sourceUrl, category: change.category, source: change.source }, language) : typeLabel(change, copy, language);
     value = typeLabel(change, copy, language);
     const category = zh ? categoryZh[change.category] || change.category : change.category;
     const region = zh ? regionZh[change.region] || change.region : change.region;
@@ -123,6 +124,7 @@ function ChangeRow({ change, language, copy }) {
       <h4>{title}</h4>
       <strong>{value}</strong>
       {meta && <small>{meta}</small>}
+      {zh && change.type.startsWith('event') && change.title && <small>原始標題：{change.title}</small>}
     </div>
     {change.sourceUrl && <a href={change.sourceUrl} target="_blank" rel="noopener noreferrer">{copy.source}</a>}
   </article>;

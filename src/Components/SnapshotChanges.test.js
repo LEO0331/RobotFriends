@@ -139,6 +139,17 @@ test('renders Traditional Chinese snapshot-change copy', () => {
   expect(screen.getByText('電網 · 德州 · 發布日期: 2026-09-24')).toBeInTheDocument();
 });
 
+test('Chinese event updates show the reviewed headline and retain the original title', () => {
+  const title = 'Board Approves Process that Could Pause Legislative Data Center & Substation Applications';
+  render(<SnapshotChanges snapshot={{ snapshotChanges: {
+    available: true, from: '2026-09-28T22:00:00Z', to: '2026-09-29T22:00:00Z',
+    changes: [{ id: 'loudoun-update', type: 'event-updated', title, category: 'PERMIT', region: 'Northern Virginia', source: 'Loudoun', sourceUrl: 'https://www.loudoun.gov/m/newsflash/home/detail/10874' }],
+    summary: { total: 1, event: 1 },
+  } }} language="zh-TW" />);
+  expect(screen.getByRole('heading', { level: 4, name: '勞登郡董事會同意考慮暫緩部分資料中心與變電站申請的決議案' })).toBeInTheDocument();
+  expect(screen.getByText(`原始標題：${title}`)).toBeInTheDocument();
+});
+
 test('shows a transparent unavailable state before a valid comparison baseline exists', () => {
   render(<SnapshotChanges snapshot={{}} ticker="NBIS" />);
 
