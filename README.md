@@ -1,11 +1,24 @@
 # Gridline — Data Center Infrastructure Intelligence
 
-Gridline is a bilingual decision-support and research-validation dashboard that connects physical AI/data-center buildout, power constraints, regulatory events and market expectations. It is a **production-style research-platform demo**: not an automated trading system, not a production market-data terminal, and not investment advice.
+Gridline is a bilingual, focused research workflow for one question: **Is the data-center buildout showing up in grid demand, project decisions, company disclosures, and market prices?** It brings dated evidence and its original sources together so a researcher can examine those four views without treating correlation as causation.
 
-Public demo: `https://leo0331.github.io/RobotFriends/`
+Broker platforms support trading, while [Yahoo Finance](https://finance.yahoo.com/portfolios) already provides watchlists, market data, news, charts and research. Gridline's contribution is a narrower, source-first investigation: show what each record supports, when it was last checked, and where evidence is missing. It does not have exclusive market data or demonstrated predictive skill, and it is not an automated trading system or investment advice.
+
+Public demo: [Gridline](https://leo0331.github.io/RobotFriends/)
 
 Demo readiness: [English](docs/demo-readiness.en.md) · [繁體中文](docs/demo-readiness.zh-TW.md)  
 Account setup (optional Supabase): [English](docs/accounts.en.md) · [繁體中文](docs/accounts.zh-TW.md)
+
+## The research workflow
+
+| Question | Current evidence | What it cannot establish alone |
+| --- | --- | --- |
+| Is grid demand changing? | Complete, comparable days of EIA-reported actual PJM load. | Regional load does not isolate data centers or prove that a project secured power. |
+| Are projects moving forward or meeting constraints? | Dated, verified primary-source permitting, grid and company records, with each record's last successful check date. | A milestone does not quantify capacity or establish an effect on a tracked company without a documented link. |
+| What did companies disclose? | Period-aware SEC revenue and diluted EPS facts linked to filings. | A disclosure alone does not establish earnings quality, valuation or buildout attribution. |
+| How have market prices behaved? | Dated closes, descriptive trend/momentum/volatility methods and a separate retrospective price test. | Price behavior does not explain its cause or prove future returns. |
+
+Start with a company or region, inspect the four evidence views, open the underlying records, and check source dates and gaps in Data Health. The researcher makes the synthesis; the dashboard does not combine these views into a buy/sell score. A new feature belongs in the primary workflow only if it answers one of these questions with a dated source, an explicit rule and a clear evidence boundary.
 
 ## What the demo demonstrates
 
@@ -17,8 +30,8 @@ Account setup (optional Supabase): [English](docs/accounts.en.md) · [繁體中�
 - **Auditable provenance** — deterministic observation IDs, provider/source metadata, observation and retrieval dates, origin URLs and lineage.
 - **Extensible technical signals** — a common registry covers trend/moving averages, RSI momentum and Bollinger volatility with dated evidence, provider continuity checks and descriptive states rather than buy/sell verdicts.
 - **Persistent history** — the Node API profile stores immutable observations, source health, score snapshots, scenario runs and backtest runs in SQLite/WAL.
-- **Scenario Lab** — records bounded user assumptions for power, demand, CAPEX and regulation without an uncalibrated forecast.
-- **Retrospective price test** — MA5/MA10 crossover outcomes using the next observed session and a ten-session exit, with pending windows and no-look-ahead rules.
+- **Scenario Lab (supporting worksheet)** — records bounded user assumptions for power, demand, CAPEX and regulation without presenting them as observed evidence or an uncalibrated forecast.
+- **Retrospective price test (method check)** — MA5/MA10 crossover outcomes using the next observed session and a ten-session exit, with pending windows and no-look-ahead rules; it does not test the whole buildout thesis.
 - **Data Health** — `#health` exposes market-snapshot freshness, source status, price coverage, and the separately dated event review.
 - **Fail-closed ingestion** — empty/invalid provider responses are degraded, not successful; last-known-good history is retained.
 - **Bilingual research UX** — core Research Lab workflows support English and Traditional Chinese.
@@ -26,6 +39,12 @@ Account setup (optional Supabase): [English](docs/accounts.en.md) · [繁體中�
 - **Engineering quality gates** — PR tests/build/audit, static-snapshot acceptance checks, GitHub Pages deployment and Lighthouse CI.
 
 Detailed design notes: [provenance](docs/data-provenance.md) · [signal methods](docs/signal-methods.md) · [snapshot changes](docs/snapshot-changes.md) · [demo hardening](docs/demo-hardening.md) · [scoring](docs/scoring-methodology.md) · [storage](docs/persistent-storage.md) · [scenario analysis](docs/scenario-analysis.md) · [backtesting](docs/backtesting.md) · [CI](docs/pr-ci.md).
+
+## Next research improvements (not yet implemented)
+
+1. **A question-level evidence summary:** show the four lanes together for a selected company or region, with supported, missing, stale or conflicting evidence and direct record links. Do not infer a single investment verdict.
+2. **Sourced company–project–grid relationships:** connect a company to a facility, permit or grid region only when an official record states that relationship. Until then, keep regional demand separate from company-specific conclusions.
+3. **Coverage and change context:** distinguish a feed check from complete coverage, surface failed or unreviewed candidate links, and explain material changes since the previous snapshot before adding more technical indicators.
 
 ## Requirements
 
@@ -51,10 +70,10 @@ Provider configuration is documented in [.env.example](.env.example) and the [in
 ## Architecture
 
 ```text
- SEC / EIA / PJM / FERC / official IR / market prices
+ SEC filings / EIA PJM load / verified events / market prices
                          │
                          ▼
-                  source adapters
+             public-demo source adapters
                          │
             validate + fail closed
                          │
@@ -70,20 +89,20 @@ Provider configuration is documented in [.env.example](.env.example) and the [in
                     research API
               ┌──────────┼──────────┐
               ▼          ▼          ▼
-        Scenario Lab  Backtest   audit queries
+        evidence views   method checks   audit queries
                          │
                          ▼
                      React UI
 
 GitHub Pages profile:
-provider refresh → schema-v4 snapshot → demo readiness gate
-                → commit to main → explicit Pages dispatch
+provider refresh → full + compact snapshots → consistency/readiness gate
+                → commit both to main → explicit Pages dispatch
                 → Pages build/deploy → Lighthouse CI
 ```
 
 Key modules:
 
-- `server/sources.js` — SEC, EIA, PJM, FERC, official company IR and market-price adapters.
+- `server/sources.js` — SEC, EIA, event and market-price adapters used by the public demo; PJM Data Miner, FERC and company IR adapters are optional API experiments and do not feed its current lenses.
 - `server/price-history.js` — validated Stooq history plus Yahoo Finance demo fallback.
 - `server/service.js` — cache/source health and zero-row fail-closed behavior.
 - `server/provenance.js` — deterministic observation identity and audit metadata.
@@ -169,9 +188,9 @@ npm run verify:demo
 
 ## Static daily snapshot and Pages deployment
 
-`Refresh daily dashboard snapshot` runs at **22:00 UTC on weekdays** and supports manual dispatch. It retries sources, preserves last-known-good data for degraded providers, generates a schemaVersion 4 snapshot with price-derived v2 signals, source health and `demoReadiness`, and then runs `npm run demo:check`.
+`Refresh daily dashboard snapshot` runs daily at **22:17 UTC** and supports manual dispatch. It checks the NYSE calendar before fetching market prices; SEC, EIA and event sources can refresh on non-trading days. It retries sources, preserves last-known-good data for degraded providers, generates a schemaVersion 4 full snapshot and compact Overview projection, then runs `npm run demo:check`.
 
-Only a snapshot that passes the demo-critical gate is committed to `main`. The refresh workflow then explicitly dispatches `Deploy to GitHub Pages`, which performs a Node 22 lockfile install, production build, Pages deployment and Lighthouse CI. This explicit dispatch is necessary because a push made by a workflow using the repository `GITHUB_TOKEN` does not itself start another push-triggered workflow.
+Both snapshot files must agree exactly and pass the demo-critical gate before they are committed to `main`. The refresh workflow then explicitly dispatches `Deploy to GitHub Pages`, which performs a Node 22 lockfile install, production build, Pages deployment and Lighthouse CI. This explicit dispatch is necessary because a push made by a workflow using the repository `GITHUB_TOKEN` does not itself start another push-triggered workflow.
 
 The gate requires usable recent price history for all four tracked tickers. Historical v1 reconstructions are no longer published or required. Optional degraded providers remain visible as warnings.
 
@@ -184,9 +203,8 @@ Open **Research Lab → Data health** or navigate to `#health` to inspect the sa
 - generation time / age;
 - source health and degradation reasons;
 - per-ticker price row count, range and provider;
-- schema/methodology version;
-- Recorded vs Reconstructed point-in-time coverage;
-- `DEMO READY`, `READY WITH WARNINGS`, or `ATTENTION REQUIRED`.
+- retained unique event-record count and source check dates;
+- `PRICE DATA AVAILABLE`, `PRICE DATA AVAILABLE · SOURCE GAPS`, or `PRICE COVERAGE INCOMPLETE`.
 
 This is an operational transparency surface, not a claim that every optional provider is currently live.
 

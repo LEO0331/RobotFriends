@@ -1,11 +1,24 @@
 # Gridline — 資料中心基礎設施情報
 
-Gridline 是雙語決策輔助與研究驗證儀表板，將 AI／資料中心實體建設、供電限制、法規事件與市場預期串連起來。它適合定位成 **production-style 研究平台示範**，不是自動交易系統、不是正式市場資料終端，也不是投資建議。
+Gridline 是雙語、聚焦特定問題的研究流程：**資料中心建設是否反映在電網需求、專案決策、公司揭露及市場價格上？** 它將具日期的證據與原始來源放在一起，協助研究者檢視四個面向，同時避免把相關性誤當因果關係。
 
-公開 Demo：`https://leo0331.github.io/RobotFriends/`
+券商平台提供交易功能，[Yahoo Finance](https://finance.yahoo.com/portfolios) 則已有股票清單、市場資料、新聞、圖表及研究資訊。Gridline 的價值在於較聚焦、以來源為先的查證流程：說明每筆紀錄能支持甚麼、上次何時檢查，以及哪些證據仍然不足。它沒有獨家市場資料，也未證明預測能力；不是自動交易系統或投資建議。
+
+公開示範：[Gridline](https://leo0331.github.io/RobotFriends/)
 
 示範準備度：[繁體中文](docs/demo-readiness.zh-TW.md) · [English](docs/demo-readiness.en.md)  
 帳戶設定（選用 Supabase）：[繁體中文](docs/accounts.zh-TW.md) · [English](docs/accounts.en.md)
+
+## 研究流程
+
+| 研究問題 | 目前的證據 | 單靠這項證據不能證明甚麼 |
+| --- | --- | --- |
+| 電網需求是否變化？ | EIA 公布、日期完整且可比較的 PJM 實際用電資料。 | 區域需求無法單獨辨識資料中心，也不能證明個別專案已取得供電。 |
+| 專案是否推進或遇到限制？ | 有日期、經驗證的一級許可、電網及公司來源紀錄，並標示每筆紀錄最近一次成功驗證日期。 | 沒有明確文件連結時，里程碑無法量化容量，也不能歸因於追蹤公司。 |
+| 公司揭露了甚麼？ | 標明報告期間、連結至申報文件的 SEC 營收與稀釋每股盈餘（EPS）資料。 | 單一揭露無法證明獲利品質、估值或資料中心建設貢獻。 |
+| 市場價格如何變動？ | 具日期的收盤價、描述性趨勢／動能／波動度方法，以及獨立的回溯價格測試。 | 價格走勢無法說明成因，也不能證明未來報酬。 |
+
+先選公司或區域，檢視四個證據面向，再開啟原始紀錄，並到「資料狀態」查看日期與缺口。綜合判斷由研究者作出；儀表板不把不同面向合成買賣分數。新功能若要進入主要流程，必須回答上述其中一個問題，並提供具日期的來源、明確規則及證據界線。
 
 ## 這個 Demo 展示什麼
 
@@ -17,8 +30,8 @@ Gridline 是雙語決策輔助與研究驗證儀表板，將 AI／資料中心�
 - **可稽核 provenance**：deterministic observation ID、provider/source metadata、觀察與擷取日期、來源 URL 與 lineage。
 - **可擴充技術訊號**：以共同 registry 支援趨勢／移動平均、RSI 動能與布林通道波動度；保留日期、provider 連續性檢查，並只輸出描述性狀態，不產生買賣結論。
 - **持久化歷史**：Node API profile 以 SQLite/WAL 保存不可變觀察值、來源健康狀態、分數快照、情境分析與回測執行紀錄。
-- **Scenario Lab**：記錄供電、需求、CAPEX、法規的使用者假設，不產生未校準預測。
-- **回溯價格測試**：MA5/MA10 交叉後以下一筆交易日及十筆交易日後收盤價評估，揭露待完成結果與禁止前視偏誤規則。
+- **情境假設（輔助工作表）**：記錄供電、需求、CAPEX、法規的使用者假設，不將假設當成觀察證據或未校準預測。
+- **回溯價格測試（方法檢查）**：MA5/MA10 交叉後以下一筆交易日及十筆交易日後收盤價評估，揭露待完成結果與禁止前視偏誤規則；它不是對整體建設論點的回測。
 - **資料健康**：`#health` 顯示市場快照新鮮度、來源狀態、價格涵蓋及獨立日期的事件審查。
 - **Fail-closed ingestion**：空白／無效 provider 回應標為 degraded，不視為成功；保留 last-known-good 歷史。
 - **雙語研究 UX**：Research Lab 的主要流程支援 English / 繁中。
@@ -26,6 +39,12 @@ Gridline 是雙語決策輔助與研究驗證儀表板，將 AI／資料中心�
 - **工程品質 Gate**：PR 測試／build／audit、snapshot acceptance gate、GitHub Pages 部署與 Lighthouse CI。
 
 設計文件：[資料血緣](docs/data-provenance.md) · [技術訊號方法](docs/signal-methods.md) · [快照差異](docs/snapshot-changes.md) · [Demo hardening](docs/demo-hardening.md) · [Scoring](docs/scoring-methodology.md) · [持久化儲存](docs/persistent-storage.md) · [情境分析](docs/scenario-analysis.md) · [回測](docs/backtesting.md) · [PR CI](docs/pr-ci.md)。
+
+## 後續研究改善方向（尚未實作）
+
+1. **按研究問題彙整證據**：針對所選公司或區域，並列四個面向的支持、缺漏、過期或互相矛盾的證據及原始連結；不推導單一投資結論。
+2. **以來源證明公司、專案與電網關係**：只有官方紀錄明確載明關係時，才把公司連到設施、許可或電網區域；在此之前，區域需求須與公司結論分開。
+3. **呈現涵蓋範圍與變化原因**：區分「檢查過來源」與「完整涵蓋」，揭露未通過或尚未審查的候選連結，並先解釋相對前一份快照的重要變化，再考慮增加技術指標。
 
 ## 系統需求
 
@@ -51,10 +70,10 @@ Provider 設定請參考 [.env.example](.env.example) 與 [資料擷取 API 說�
 ## 架構
 
 ```text
- SEC / EIA / PJM / FERC / 官方 IR / 市場價格
+ SEC 申報 / EIA PJM 用電 / 已驗證事件 / 市場價格
                          │
                          ▼
-                    source adapters
+                 公開示範來源 adapter
                          │
                  validate + fail closed
                          │
@@ -70,20 +89,20 @@ Provider 設定請參考 [.env.example](.env.example) 與 [資料擷取 API 說�
                     research API
               ┌──────────┼──────────┐
               ▼          ▼          ▼
-        Scenario Lab  Backtest   audit queries
+        證據視角       方法檢查      稽核查詢
                          │
                          ▼
                      React UI
 
 GitHub Pages profile：
-provider refresh → schema-v4 snapshot → demo readiness gate
-                → commit main → 明確 dispatch Pages workflow
+provider refresh → 完整版及精簡版快照 → 一致性與準備度 gate
+                → 兩份檔案提交 main → 明確 dispatch Pages workflow
                 → Pages build/deploy → Lighthouse CI
 ```
 
 主要模組：
 
-- `server/sources.js`：SEC、EIA、PJM、FERC、官方 company IR 與市場價格 adapter。
+- `server/sources.js`：公開示範使用 SEC、EIA、事件及市場價格 adapter；PJM Data Miner、FERC 與公司投資人關係 adapter 只屬選用 API 實驗，目前不供應主要研究視角。
 - `server/price-history.js`：驗證 Stooq 歷史資料，失敗時使用 Yahoo Finance demo fallback。
 - `server/service.js`：cache/source health 與 zero-row fail-closed 行為。
 - `server/provenance.js`：deterministic observation identity 與 audit metadata。
@@ -169,9 +188,9 @@ npm run verify:demo
 
 ## 靜態每日 Snapshot 與 Pages 部署
 
-`Refresh daily dashboard snapshot` 於工作日 **22:00 UTC** 執行，也支援手動 dispatch。它會重試各來源、對 degraded provider 保留 last-known-good 資料、產生 schemaVersion 4 快照與有來源的 MA5/MA10 訊號，然後執行 `npm run demo:check`。
+`Refresh daily dashboard snapshot` 每日於 **22:17 UTC** 執行，也支援手動 dispatch。市場價格只在紐約證交所交易日抓取；SEC、EIA 及事件來源可在非交易日更新。工作流程會重試各來源、對降級來源保留上次成功資料、產生 schemaVersion 4 完整版快照與總覽精簡版，然後執行 `npm run demo:check`。
 
-只有通過示範關鍵 gate 的 snapshot 才會提交到 `main`。接著 refresh workflow 會明確 dispatch `Deploy to GitHub Pages`，再執行 Node 22 lockfile install、production build、Pages deploy 與 Lighthouse CI。這個明確 dispatch 是必要的，因為使用 repository `GITHUB_TOKEN` 產生的 push 不會再觸發另一個以 `push` 為條件的 workflow。
+兩份快照須完全一致並通過示範關鍵 gate，才會一併提交到 `main`。接著更新工作流程會明確 dispatch `Deploy to GitHub Pages`，再執行 Node 22 lockfile install、production build、Pages deploy 與 Lighthouse CI。這個明確 dispatch 是必要的，因為使用 repository `GITHUB_TOKEN` 產生的 push 不會再觸發另一個以 `push` 為條件的 workflow。
 
 Gate 的關鍵條件包含四個追蹤 ticker 均有近期可用價格歷史。舊版 v1 歷史重建不再公布或要求；選用來源降級會顯示警示。
 
@@ -184,9 +203,8 @@ Gate 的關鍵條件包含四個追蹤 ticker 均有近期可用價格歷史。�
 - 產生時間／資料年齡；
 - source health 與 degraded 原因；
 - 每個 ticker 的價格筆數、期間與 provider；
-- schema／方法論版本；
-- 實際記錄 vs 歷史重建涵蓋；
-- `示範就緒`、`可展示，但有警示`、`需要處理`。
+- 保留的不同事件紀錄筆數與來源檢查日期；
+- `價格資料可用`、`價格可用，部分來源未更新`或`價格資料涵蓋不足`。
 
 這是營運透明度畫面，不表示所有選用 provider 都必須即時在線。
 
