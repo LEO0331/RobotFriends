@@ -134,7 +134,7 @@ function InfrastructureView({ region, events, navigate, zh }) {
 }
 
 const EVENT_SUMMARY_ZH = {
-  'https://www.loudoun.gov/m/newsflash/home/detail/10874': '郡議會通過一項計畫，對部分資料中心及變電站申請的最終決議暫緩最多一年。',
+  'https://www.loudoun.gov/m/newsflash/home/detail/10874': '郡議會同意日後審議一項決議案；若獲通過，部分資料中心與變電站申請的最終決議可能暫緩最多一年。',
   'https://www.loudoun.gov/m/newsflash/Home/Detail/10876': '郡議會表達反對擬議輸電線路，並否決杜勒斯機場附近變電站的土地使用申請。',
   'https://investor.oracle.com/investor-news/news-details/2026/Oracle-Announces-Q1-Results-Driven-by-Triple-Digit-Growth-in-Cloud-Infrastructure-Revenues/default.aspx': 'Oracle 公布季度業績，內容包括資本支出及新增資料中心容量交付。',
 };

@@ -1,6 +1,7 @@
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { buildDataHealth } from './dataHealthModel';
 import { loadDashboardSnapshot } from './snapshotMeta';
+import { infrastructureEvents } from './eventModel';
 import './DataHealth.css';
 
 const emptySnapshot = { observations: [], sourceHealth: {}, outcomes: [] };
@@ -126,7 +127,7 @@ export default function DataHealth({ onBack, language = 'en', onLanguageChange =
         <Metric label={copy.generated} value={health.generatedAt ? health.generatedAt.replace('T', ' ').slice(0, 16) + ' UTC' : '—'} />
         <Metric label={copy.age} value={health.ageHours === null ? '—' : `${health.ageHours} ${copy.hours}`} />
         <Metric label={copy.priceCoverage} value={`${readyPrices}/${health.priceCoverage.length}`} />
-        <Metric label={copy.reconstructions} value={snapshot.observations?.filter(item => item.source === 'events').length || 0} />
+        <Metric label={copy.reconstructions} value={infrastructureEvents(snapshot).length} />
       </section>
 
       <section className="health-grid">

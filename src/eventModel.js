@@ -9,7 +9,7 @@ export const REGION_ZH = {
 const TITLE_ZH = {
   'https://insidelines.pjm.com/reliability-standards-to-manage-large-load-disconnection-events-proposed-by-pjm/': ['PJM Proposes Reliability Standards to Manage Large Load Disconnection Events', 'PJM 提議大型用電負載斷線事件的可靠性標準'],
   'https://insidelines.pjm.com/pjm-issues-maximum-generation-alert-for-sept-17/': ['PJM Issues Maximum Generation Alert for Sept. 17', 'PJM 就 9 月 17 日發布最大發電量警報'],
-  'https://www.loudoun.gov/m/newsflash/home/detail/10874': ['Board Approves Plan to Temporarily Pause Legislative Data Center and Substation Applications', '勞登郡董事會通過暫緩審議部分資料中心與變電站申請的計畫'],
+  'https://www.loudoun.gov/m/newsflash/home/detail/10874': ['Board Approves Process that Could Pause Legislative Data Center & Substation Applications', '勞登郡董事會同意考慮暫緩部分資料中心與變電站申請的決議案'],
   'https://www.loudoun.gov/m/newsflash/Home/Detail/10876': ['Loudoun Board Opposes Valley North Transmission Line, Denies Substation Near Dulles Airport', '勞登郡董事會反對 Valley North 輸電線，否決杜勒斯機場附近的變電站申請'],
   'https://investor.oracle.com/investor-news/news-details/2026/Oracle-Announces-Q1-Results-Driven-by-Triple-Digit-Growth-in-Cloud-Infrastructure-Revenues/default.aspx': ['Oracle Announces Q1 Results Driven by Triple Digit Growth in Cloud Infrastructure Revenues', 'Oracle 公布第一季業績，雲端基礎設施營收呈三位數成長'],
 };

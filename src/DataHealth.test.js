@@ -72,3 +72,15 @@ test('data health renders Traditional Chinese labels', async () => {
   expect(screen.queryByText('公司投資人關係')).not.toBeInTheDocument();
   expect(screen.getByRole('button', { name: 'EN' })).toBeInTheDocument();
 });
+
+test('retained event count treats source revisions as one record', async () => {
+  const url = 'https://www.loudoun.gov/m/newsflash/home/detail/10874';
+  const observations = [
+    { id: 'old-event', source: 'events', type: 'infrastructureEvent', retrievedAt: '2026-09-24T00:00:00Z', value: { title: 'Earlier headline', url, category: 'PERMIT', publishedAt: new Date(Date.now() - DAY_MS).toISOString() } },
+    { id: 'new-event', source: 'events', type: 'infrastructureEvent', retrievedAt: '2026-09-29T00:00:00Z', value: { title: 'Revised headline', url, category: 'PERMIT', publishedAt: new Date(Date.now() - DAY_MS).toISOString() } },
+  ];
+  global.fetch = jest.fn(() => Promise.resolve({ ok: true, json: () => Promise.resolve({ ...fixture, observations: [...fixture.observations, ...observations] }) }));
+  render(<DataHealth language="en" onBack={() => {}} />);
+  await waitFor(() => expect(screen.getByText('Retained event records')).toBeInTheDocument());
+  expect(screen.getByText('Retained event records').parentElement).toHaveTextContent('1');
+});

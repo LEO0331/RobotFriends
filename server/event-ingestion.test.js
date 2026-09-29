@@ -27,6 +27,18 @@ test('curated candidates carry specific primary-source URLs and publication date
   for (const item of candidates) assert.equal(validCandidate(item, new Date('2026-09-23T00:00:00Z')), true);
 });
 
+test('revised Loudoun candidate requires the current conditional headline and supporting text', async () => {
+  const candidate = candidates.find(item => item.url.endsWith('/10874'));
+  const result = await ingestEvents({}, {
+    now: new Date('2026-09-29T00:00:00Z'),
+    readFile: async () => JSON.stringify([candidate]),
+    getText: async url => url === PJM_FEED ? '<rss><channel></channel></rss>'
+      : `<h1>${candidate.title}</h1><time>${candidate.dateText}</time><p>${candidate.evidenceText}</p>`,
+  });
+  assert.equal(result.observations.length, 1);
+  assert.match(result.observations[0].value.summary, /if approved, could pause/);
+});
+
 test('ingestion publishes only a reachable article whose heading matches the feed title', async () => {
   const result = await ingestEvents({}, {
     now: new Date('2026-09-23T00:00:00Z'),
