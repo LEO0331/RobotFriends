@@ -94,6 +94,14 @@ async function ingestEvents(config = {}, dependencies = {}) {
   if (feedError && !unique.length) throw new Error(`PJM event feed unavailable and no curated records passed validation: ${feedError}`);
   return {
     payload: { discovered: discovered.length, curated: curated.length, accepted: unique.length, rejected, feedError },
+    coverage: {
+      scope: feedError ? 'curated-candidates-only' : 'pjm-feed-and-curated-candidates',
+      feedStatus: feedError ? 'unavailable' : 'checked',
+      candidateCount: discovered.length + curated.length,
+      acceptedCount: unique.length,
+      excludedCount: rejected.length,
+      excluded: rejected.slice(0, 20),
+    },
     observations: unique.map(item => ({ source: 'events', type: 'infrastructureEvent', value: item, observedAt: item.publishedAt, retrievedAt: now.toISOString(), sourceUrl: item.url, region: item.region })),
     message: `${unique.length} verified infrastructure event records; ${rejected.length} rejected${feedError ? '; PJM feed unavailable' : ''}`,
   };

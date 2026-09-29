@@ -76,12 +76,12 @@ function evaluateDemoReadiness(snapshot, {
         source === 'events' ? 'An empty verified event feed is allowed.' : `${source} is not labelled healthy with zero records.`,
         { status: health.status, recordCount: health.recordCount ?? null },
       ));
-    } else if (health?.status === 'degraded') {
+    } else if (health?.status === 'degraded' || health?.status === 'partial') {
       checks.push(check(
         `degraded-source-${source}`,
         'warning',
         false,
-        `${source} is degraded; the demo should disclose last-known-good or unavailable data.`,
+        `${source} is ${health.status}; the demo should disclose the limited or unavailable source scope.`,
         { message: health.message || null },
       ));
     }

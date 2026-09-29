@@ -5,6 +5,7 @@ import SignalExplainer from '../Components/SignalExplainer';
 import PriceChart from '../Components/PriceChart';
 import SnapshotChanges from '../Components/SnapshotChanges';
 import SnapshotLoadState from '../Components/SnapshotLoadState';
+import ResearchBrief from '../Components/ResearchBrief';
 import companyList from '../data/companyExposure.json';
 import { summarizeSnapshot } from '../snapshotMeta';
 import { CURRENT_EVENT_DAYS, EVENT_TYPES, infrastructureEvents, eventTitle, REGION_ZH, CATEGORY_ZH } from '../eventModel';
@@ -45,6 +46,7 @@ const trendLabel = (trend, zh) => ({
 export default function App({ snapshot = {}, snapshotState = 'ready', onRetrySnapshot = () => {}, language = 'en', onLanguageChange = () => {} }) {
   const [route, setRoute] = useState(readRoute);
   const [ticker, setTicker] = useState(companyList[0]?.ticker || 'NBIS');
+  const [briefRegion, setBriefRegion] = useState(ALL);
   const [lensId, setLensId] = useState('momentum');
   const [signalMethodId, setSignalMethodId] = useState(DEFAULT_SIGNAL_METHOD_ID);
   const zh = language === 'zh-TW';
@@ -84,7 +86,7 @@ export default function App({ snapshot = {}, snapshotState = 'ready', onRetrySna
   const eventStatus = !eventHealth ? t('Event feed not checked', '事件來源尚未檢查')
     : eventCheckStale ? t('Event check is stale', '事件檢查已過期')
       : eventHealth.status === 'partial' ? t('Curated records checked', '人工候選紀錄已檢查')
-        : eventHealth.status === 'ok' ? t('Event feed checked', '事件來源已檢查')
+        : eventHealth.status === 'ok' ? t('Configured event sources checked', '已檢查設定的事件來源')
           : t('Event source check needed', '事件來源需檢查');
   return <main className="shell" lang={language}>
     <a className="skip-link" href="#dashboard-content">{t('Skip to dashboard content', '跳至儀表板內容')}</a>
@@ -104,6 +106,7 @@ export default function App({ snapshot = {}, snapshotState = 'ready', onRetrySna
     {route.view === 'Overview' && <>
       <section className="hero"><div><p className="eyebrow">{t('DATA-CENTER BUILDOUT RESEARCH', '資料中心建設研究')}</p><h1>{t('Signals with sources,', '聚焦建設訊號，')}<br/><em>{t('and clear limits.', '看得見來源與限制。')}</em></h1><p className="copy">{t('Explore market context, company disclosures, grid demand and project milestones. Each available signal links to a dated source; missing evidence stays unavailable.', '從市場、公司揭露、電網需求及專案里程碑檢視建設週期。可用訊號附有日期與來源，證據不足時則顯示無資料。')}</p></div><div className="asof"><span>{t('MARKET SNAPSHOT · LOCAL TIME', '市場快照 · 本地時間')}</span><b>{snapshotDisplayLabel}</b><small>{snapshotMeta.totalSources ? t(`${snapshotMeta.healthySources}/${snapshotMeta.totalSources} sources refreshed · ${snapshotMeta.freshness === 'fresh' ? 'current' : snapshotMeta.freshness === 'partial' ? 'partial' : 'outdated'}`, `${snapshotMeta.healthySources}/${snapshotMeta.totalSources} 個來源已更新 · ${snapshotMeta.freshness === 'fresh' ? '最新快照' : snapshotMeta.freshness === 'partial' ? '部分更新' : '待更新'}`) : t('Provider status unavailable', '來源狀態未提供')}</small></div></section>
       {snapshotState === 'ready' && hasObservations && <>
+      <ResearchBrief snapshot={snapshot} ticker={ticker} region={briefRegion} regions={[ALL, ...REGIONS.map(item => item.name)]} language={language} onTickerChange={setTicker} onRegionChange={setBriefRegion} />
       <section className="lens-picker" aria-label={t('Select signal lens', '選擇訊號視角')}>
         {SIGNAL_LENSES.map(option => <button key={option.id} onClick={() => setLensId(option.id)} className={lensId === option.id ? 'active-filter' : ''} aria-pressed={lensId === option.id}>{zh ? option.nameZh : option.name}</button>)}
       </section>
@@ -144,7 +147,7 @@ function EventsView({ events, health, region, filter, navigate, zh }) {
   const t = (en, tw) => zh ? tw : en;
   const list = events.filter(item => (archive ? item.archived : !item.archived) && (region === ALL || item.region === region) && (filter === ALL_EVIDENCE || item.category === filter));
   const status = !health ? t('No source check recorded', '尚無來源檢查紀錄')
-    : health.status === 'ok' ? t('Source check completed', '來源檢查已完成')
+    : health.status === 'ok' ? t('Configured sources checked', '已檢查設定來源')
       : health.status === 'partial' ? t('Limited source review', '部分來源已檢查')
         : t('Source refresh needs attention', '來源更新需檢查');
   return <section className="view-page">
@@ -153,6 +156,11 @@ function EventsView({ events, health, region, filter, navigate, zh }) {
     <p className="copy">{t(`Recent shows records published within ${CURRENT_EVENT_DAYS} days. Older validated records appear in Archive while retained in the snapshot.`, `近期顯示最近 ${CURRENT_EVENT_DAYS} 天發布的紀錄；較舊且仍保留於快照中的已驗證紀錄可在封存查看。`)}</p>
     <p className="copy">{status}{health?.checkedAt ? ` · ${dateLabel(health.checkedAt)}` : ''}{health?.coverageThrough ? t(` · curated sources through ${health.coverageThrough}`, ` · 人工維護來源涵蓋至 ${health.coverageThrough}`) : ''}{health?.recordCount !== undefined ? t(` · ${health.recordCount} verified in this check`, ` · 本次確認 ${health.recordCount} 筆`) : ''}{zh ? '。' : '.'}</p>
     <p className="copy">{t('Older records remain visible with their own last-verification dates.', '較早的紀錄仍可查看；每筆均標示最近一次驗證日期。')}</p>
+    {health?.coverage && <section className="event-coverage" aria-label={t('Event source coverage', '事件來源涵蓋範圍')}>
+      <b>{t('SOURCE COVERAGE', '來源涵蓋範圍')}</b>
+      <p>{health.coverage.feedStatus === 'unavailable' ? t('PJM feed unavailable; curated candidates were checked.', 'PJM 動態來源無法取得；已檢查人工候選紀錄。') : t('PJM feed and curated candidates checked.', '已檢查 PJM 動態來源與人工候選紀錄。')} {t(`${health.coverage.candidateCount} candidates · ${health.coverage.acceptedCount} accepted · ${health.coverage.excludedCount} excluded. This is the configured source scope, not all U.S. infrastructure events.`, `候選 ${health.coverage.candidateCount} 筆 · 通過 ${health.coverage.acceptedCount} 筆 · 排除 ${health.coverage.excludedCount} 筆。此為設定來源的涵蓋範圍，並非全美所有基礎設施事件。`)}</p>
+      {health.coverage.excludedCount > 0 && <details><summary>{t(`Review excluded candidates (${health.coverage.excludedCount})`, `查看排除的候選紀錄（${health.coverage.excludedCount}）`)}</summary><ul>{(health.coverage.excluded || []).map((item, index) => <li key={`${item.title}-${index}`}><strong>{item.title || t('Untitled candidate', '未命名候選紀錄')}</strong> · {zh ? exclusionReasonZh(item.reason) : item.reason}</li>)}</ul></details>}
+    </section>}
     {zh && <p className="copy">中文標題供快速閱讀；原始標題及連結保留供核對。</p>}
     <div className="event-toolbar"><div>
       <button onClick={() => setArchive(false)} className={!archive ? 'active-filter' : ''} aria-pressed={!archive}>{t('Recent', '近期')}</button>
@@ -167,6 +175,11 @@ function EventsView({ events, health, region, filter, navigate, zh }) {
       <div className="event-meta"><b>{t('ORIGINAL SOURCE', '原始資料來源')}</b><span>{item.source}</span><span>{t('Last verified', '最近驗證')}：{dateLabel(item.retrievedAt)}</span><a className="text" href={item.url} target="_blank" rel="noopener noreferrer">{t('Open record ↗', '開啟原始紀錄 ↗')}</a></div>
     </article>) : <p className="event-empty">{t('No verified records match this view.', '目前沒有符合條件的已驗證紀錄。')}</p>}</div>
   </section>;
+}
+
+function exclusionReasonZh(reason = '') {
+  if (reason.startsWith('record inaccessible')) return '來源頁面無法存取';
+  return ({ 'invalid metadata or non-primary URL': '資料欄位或原始網址不符合規則', 'record title mismatch': '頁面標題不相符', 'supporting text missing': '頁面缺少支持內容', 'publication date missing': '頁面缺少發布日期' })[reason] || '未通過來源驗證';
 }
 
 function MethodologyView({ zh }) {

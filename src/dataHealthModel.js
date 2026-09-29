@@ -43,6 +43,7 @@ export function buildDataHealth(snapshot = {}, now = new Date()) {
       lastSuccessAt: state.lastSuccessAt || null,
       checkedAt: state.checkedAt || null,
       message: state.message || outcome?.message || null,
+      coverage: state.coverage || null,
       attempts: outcome?.attempts || null,
     };
   });

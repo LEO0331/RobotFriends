@@ -18,6 +18,9 @@ const sourceLabel = (source, language) => {
 };
 const sourceDetail = (item, language) => {
   const zh = language === 'zh-TW';
+  if (item.source === 'events' && item.coverage) return zh
+    ? `本次通過 ${item.coverage.acceptedCount} 筆、排除 ${item.coverage.excludedCount} 筆；${item.coverage.feedStatus === 'unavailable' ? 'PJM 動態來源無法取得。' : '僅涵蓋設定來源。'}`
+    : `${item.coverage.acceptedCount} accepted, ${item.coverage.excludedCount} excluded; ${item.coverage.feedStatus === 'unavailable' ? 'PJM feed unavailable.' : 'configured sources only.'}`;
   if (item.status === 'ok') return zh ? `已確認 ${item.recordCount} 筆資料。` : `${item.recordCount} records checked.`;
   if (item.status === 'partial') return zh ? '僅涵蓋已列明的部分來源。' : 'Check covers the stated source scope only.';
   if (item.status === 'degraded') return zh ? '最近更新未完成；請留意最近成功日期。' : 'Latest refresh incomplete; check the last successful date.';

@@ -48,6 +48,8 @@ test('ingestion publishes only a reachable article whose heading matches the fee
   assert.equal(result.observations.length, 1);
   assert.equal(result.observations[0].sourceUrl, articleUrl);
   assert.equal(result.observations[0].value.title, 'PJM Updates Large Load Interconnection Process');
+  assert.equal(result.coverage.scope, 'pjm-feed-and-curated-candidates');
+  assert.deepEqual([result.coverage.candidateCount, result.coverage.acceptedCount, result.coverage.excludedCount], [1, 1, 0]);
 });
 
 test('inaccessible candidate is withheld', async () => {
@@ -58,4 +60,5 @@ test('inaccessible candidate is withheld', async () => {
   });
   assert.equal(result.observations.length, 0);
   assert.match(result.payload.rejected[0].reason, /inaccessible/);
+  assert.equal(result.coverage.excludedCount, 1);
 });

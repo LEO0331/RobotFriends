@@ -1,0 +1,16 @@
+[
+  {
+    "id": "orcl-abilene-ercot-2026-09-15",
+    "ticker": "ORCL",
+    "facility": "Abilene data center",
+    "facilityZh": "阿比林資料中心",
+    "region": "Texas",
+    "grid": "ERCOT",
+    "relationship": "Oracle identifies its Abilene facility as powered by the ERCOT grid.",
+    "relationshipZh": "Oracle 指出其阿比林設施由 ERCOT 電網供電。",
+    "publishedAt": "2026-09-15",
+    "reviewedAt": "2026-09-29",
+    "sourceTitle": "Oracle Invests in More Than 1.7 GW of Carbon-Free Electricity to Support AI Growth and Strengthen the Texas Grid",
+    "sourceUrl": "https://www.oracle.com/news/announcement/oracle-invests-in-more-than-1.7-gw-of-carbon-free-electricity-to-support-ai-growth-and-strengthen-the-texas-grid-2026-08-15/"
+  }
+]
