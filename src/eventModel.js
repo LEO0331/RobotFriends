@@ -14,7 +14,7 @@ const TITLE_ZH = {
   'https://investor.oracle.com/investor-news/news-details/2026/Oracle-Announces-Q1-Results-Driven-by-Triple-Digit-Growth-in-Cloud-Infrastructure-Revenues/default.aspx': ['Oracle Announces Q1 Results Driven by Triple Digit Growth in Cloud Infrastructure Revenues', 'Oracle 公布第一季業績，雲端基礎設施營收呈三位數成長'],
 };
 
-const CATEGORY_ZH = { POWER: '供電', GRID: '電網', PERMIT: '許可', CAPEX: '資本支出' };
+export const CATEGORY_ZH = { POWER: '供電', GRID: '電網', PERMIT: '許可', CAPEX: '資本支出' };
 
 export function eventTitle(event, language = 'en') {
   if (language !== 'zh-TW') return event.title;

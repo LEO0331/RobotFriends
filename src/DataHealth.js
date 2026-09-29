@@ -53,7 +53,7 @@ function copyFor(language) {
     generated: t('Snapshot generated', '快照產生時間'),
     age: t('Snapshot age', '快照距今'),
     priceCoverage: t('Price coverage', '價格涵蓋'),
-    reconstructions: t('Reviewed event records', '已審查事件紀錄'),
+    reconstructions: t('Retained event records', '保留的事件紀錄'),
     hours: t('hours', '小時'),
     sourceHealth: t('SOURCE STATUS', '來源狀態'),
     source: t('Source', '來源'),

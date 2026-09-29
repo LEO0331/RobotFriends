@@ -2,6 +2,7 @@
 const fs = require('fs');
 const path = require('path');
 const { evaluateDemoReadiness } = require('../server/demo-readiness');
+const { runtimeSnapshotMatches } = require('../server/snapshot-artifacts');
 
 const target = process.argv[2] || path.resolve(__dirname, '..', 'public', 'data', 'dashboard-snapshot.json');
 let snapshot;
@@ -13,6 +14,11 @@ try {
 }
 
 const result = evaluateDemoReadiness(snapshot);
+const runtimeFile = path.join(path.dirname(target), 'dashboard-overview.json');
+let runtimeValid = false;
+try {
+  runtimeValid = runtimeSnapshotMatches(snapshot, JSON.parse(fs.readFileSync(runtimeFile, 'utf8')));
+} catch { runtimeValid = false; }
 const reviewFile = path.resolve(__dirname, '..', 'public', 'data', 'event-review.json');
 let reviewValid = true;
 if (fs.existsSync(reviewFile)) {
@@ -36,4 +42,5 @@ for (const item of result.checks) {
 }
 console.log(`\nBlockers: ${result.blockerCount} | Warnings: ${result.warningCount}`);
 console.log(`${reviewValid ? 'PASS' : 'FAIL'}  dated-event-review             Manual event review has dated scope and HTTPS primary URLs.`);
-if (!result.ready || !reviewValid) process.exit(1);
+console.log(`${runtimeValid ? 'PASS' : 'FAIL'}  runtime-snapshot-match         Compact dashboard matches the full snapshot.`);
+if (!result.ready || !reviewValid || !runtimeValid) process.exit(1);

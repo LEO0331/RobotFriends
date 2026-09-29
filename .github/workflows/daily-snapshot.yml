@@ -45,7 +45,7 @@ jobs:
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git add public/data/dashboard-snapshot.json
+          git add public/data/dashboard-snapshot.json public/data/dashboard-overview.json
           if git diff --cached --quiet; then
             echo "changed=false" >> "$GITHUB_OUTPUT"
             echo "Snapshot is unchanged; no Pages deployment is required."

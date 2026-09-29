@@ -138,4 +138,6 @@ test('Chinese milestone shows a translated headline, translated region and origi
   expect(screen.getByRole('heading', { level: 2, name: '勞登郡董事會反對 Valley North 輸電線，否決杜勒斯機場附近的變電站申請' })).toBeInTheDocument();
   expect(screen.getByText(/北維吉尼亞 的許可原始紀錄/)).toBeInTheDocument();
   expect(screen.getByText(`原始標題：${title}`)).toBeInTheDocument();
+  fireEvent.click(screen.getByRole('button', { name: '事件' }));
+  expect(screen.getByText('最近驗證：2026-09-20')).toBeInTheDocument();
 });

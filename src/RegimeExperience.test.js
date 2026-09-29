@@ -52,3 +52,22 @@ test('snapshot failure is retryable and replaces the error state after success',
     expect(screen.getByText('Snapshot 2026-09-24')).toBeInTheDocument();
   });
 });
+
+test('Chinese price-trend detail localizes event titles and shows last verification date', async () => {
+  const title = 'Loudoun Board Opposes Valley North Transmission Line, Denies Substation Near Dulles Airport';
+  const url = 'https://www.loudoun.gov/m/newsflash/Home/Detail/10876';
+  const eventSnapshot = { ...loadedSnapshot, observations: [...loadedSnapshot.observations, {
+    id: 'event-1', source: 'events', type: 'infrastructureEvent', retrievedAt: '2026-09-26T00:17:00Z',
+    value: { title, url, category: 'PERMIT', region: 'Northern Virginia', source: 'Loudoun', publishedAt: new Date(Date.now() - 86400000).toISOString() },
+  }] };
+  window.history.pushState({}, '', '#regime');
+  global.fetch = jest.fn()
+    .mockResolvedValueOnce({ ok: true, json: async () => eventSnapshot })
+    .mockResolvedValueOnce({ ok: false });
+
+  render(<RegimeExperience language="zh-TW" />);
+
+  expect(await screen.findByText('勞登郡董事會反對 Valley North 輸電線，否決杜勒斯機場附近的變電站申請')).toBeInTheDocument();
+  expect(screen.getByText(`${eventSnapshot.observations.at(-1).value.publishedAt.slice(0, 10)} · 許可`)).toBeInTheDocument();
+  expect(screen.getByText('Loudoun · 最近驗證 2026-09-26')).toBeInTheDocument();
+});

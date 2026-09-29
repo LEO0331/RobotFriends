@@ -7,7 +7,7 @@ import SnapshotChanges from '../Components/SnapshotChanges';
 import SnapshotLoadState from '../Components/SnapshotLoadState';
 import companyList from '../data/companyExposure.json';
 import { summarizeSnapshot } from '../snapshotMeta';
-import { CURRENT_EVENT_DAYS, EVENT_TYPES, infrastructureEvents, eventTitle, REGION_ZH } from '../eventModel';
+import { CURRENT_EVENT_DAYS, EVENT_TYPES, infrastructureEvents, eventTitle, REGION_ZH, CATEGORY_ZH } from '../eventModel';
 import { formatUsd, marketSignals } from '../marketSignals';
 import { SIGNAL_LENSES, signalLens } from '../signalLenses';
 import { shouldApplyAccountLanguage } from '../i18n';
@@ -21,7 +21,6 @@ const REGIONS = [
 ];
 const ALL = 'All regions';
 const ALL_EVIDENCE = 'All evidence';
-const CATEGORY_ZH = { POWER: '供電', GRID: '電網', PERMIT: '許可', CAPEX: '資本支出' };
 const categoryLabel = (type, zh) => zh ? CATEGORY_ZH[type] || type : type;
 const regionLabel = (region, zh) => zh ? REGION_ZH[region] || region : region;
 const routes = { overview: 'Overview', infrastructure: 'Infrastructure', events: 'Events', methodology: 'Methodology' };
@@ -115,7 +114,7 @@ export default function App({ snapshot = {}, snapshotState = 'ready', onRetrySna
       <section className="companies" aria-label={t('Tracked companies', '追蹤公司')}>{companyList.map(company => { const data = market[company.ticker]; return <button key={company.ticker} className={`company ${ticker === company.ticker ? 'selected-card' : ''}`} onClick={() => setTicker(company.ticker)} aria-pressed={ticker === company.ticker} aria-label={t(`Select ${company.ticker} ${company.name}`, `選擇 ${company.ticker} ${company.name}`)}><div className="company-top"><div><b>{company.ticker}</b><small>{company.name}</small></div><span className={data?.changePercent < 0 ? 'negative' : 'positive'}>{percent(data?.changePercent)}</span></div><strong className="price">{formatUsd(data?.close)}</strong><div className="stat"><span>{t('OBSERVED', '觀察日期')}<b>{dateLabel(data?.observedAt)}</b></span><span>{t('TREND', '趨勢')}<b>{trendLabel(data?.trend, zh)}</b></span></div><div className="gap"><span>{t('SOURCE', '來源')}</span><b>{data?.provider || t('Unavailable', '未提供')}</b></div></button>; })}</section>
       <PriceChart snapshot={snapshot} ticker={ticker} language={language} methodId={signalMethodId} />
       <SnapshotChanges snapshot={snapshot} ticker={ticker} language={language} />
-      <section className="bottom"><SignalExplainer snapshot={snapshot} ticker={ticker} language={language} methodId={signalMethodId} onMethodChange={setSignalMethodId} /><article className="ledger"><div className="panel-title"><div><p className="eyebrow">{t('EVENT LEDGER', '事件帳本')}</p><h3>{t('Recent verified records', '近期已驗證紀錄')}</h3></div></div>{currentEvents.length ? currentEvents.slice(0, 4).map(item => <div className="event" key={item.id}><span className="impact neutral">•</span><div><p><b>{categoryLabel(item.category, zh)}</b> · {dateLabel(item.publishedAt)}</p><h4>{eventTitle(item, language)}</h4><small>{regionLabel(item.region, zh)} · {item.source}</small></div><a className="quality" href={item.url} target="_blank" rel="noopener noreferrer">{t('RECORD ↗', '紀錄 ↗')}</a></div>) : <p className="event-empty">{t('No verified current events in this snapshot.', '此快照沒有近期已驗證事件。')}</p>}</article></section>
+      <section className="bottom"><SignalExplainer snapshot={snapshot} ticker={ticker} language={language} methodId={signalMethodId} onMethodChange={setSignalMethodId} /><article className="ledger"><div className="panel-title"><div><p className="eyebrow">{t('EVENT LEDGER', '事件帳本')}</p><h3>{t('Recent verified records', '近期已驗證紀錄')}</h3></div></div>{currentEvents.length ? currentEvents.slice(0, 4).map(item => <div className="event" key={item.id}><span className="impact neutral">•</span><div><p><b>{categoryLabel(item.category, zh)}</b> · {dateLabel(item.publishedAt)}</p><h4>{eventTitle(item, language)}</h4><small>{regionLabel(item.region, zh)} · {item.source} · {t('Last verified', '最近驗證')} {dateLabel(item.retrievedAt)}</small></div><a className="quality" href={item.url} target="_blank" rel="noopener noreferrer">{t('RECORD ↗', '紀錄 ↗')}</a></div>) : <p className="event-empty">{t('No verified current events in this snapshot.', '此快照沒有近期已驗證事件。')}</p>}</article></section>
       </>}
     </>}
 
@@ -153,6 +152,7 @@ function EventsView({ events, health, region, filter, navigate, zh }) {
     <h1>{t('Infrastructure developments', '基礎設施進展')}<br/><em>{t('with original sources.', '附上原始來源。')}</em></h1>
     <p className="copy">{t(`Recent shows records published within ${CURRENT_EVENT_DAYS} days. Older validated records appear in Archive while retained in the snapshot.`, `近期顯示最近 ${CURRENT_EVENT_DAYS} 天發布的紀錄；較舊且仍保留於快照中的已驗證紀錄可在封存查看。`)}</p>
     <p className="copy">{status}{health?.checkedAt ? ` · ${dateLabel(health.checkedAt)}` : ''}{health?.coverageThrough ? t(` · curated sources through ${health.coverageThrough}`, ` · 人工維護來源涵蓋至 ${health.coverageThrough}`) : ''}{health?.recordCount !== undefined ? t(` · ${health.recordCount} verified in this check`, ` · 本次確認 ${health.recordCount} 筆`) : ''}{zh ? '。' : '.'}</p>
+    <p className="copy">{t('Older records remain visible with their own last-verification dates.', '較早的紀錄仍可查看；每筆均標示最近一次驗證日期。')}</p>
     {zh && <p className="copy">中文標題供快速閱讀；原始標題及連結保留供核對。</p>}
     <div className="event-toolbar"><div>
       <button onClick={() => setArchive(false)} className={!archive ? 'active-filter' : ''} aria-pressed={!archive}>{t('Recent', '近期')}</button>
@@ -164,7 +164,7 @@ function EventsView({ events, health, region, filter, navigate, zh }) {
     <div className="event-table">{list.length ? list.map(item => <article key={item.id}>
       <span className="impact neutral">•</span>
       <div><p className="eyebrow">{categoryLabel(item.category, zh)} · {dateLabel(item.publishedAt)} · {regionLabel(item.region, zh)}</p><h3>{eventTitle(item, zh ? 'zh-TW' : 'en')}</h3>{zh && <small className="source-language">原始標題：{item.title}</small>}{(zh ? EVENT_SUMMARY_ZH[item.url] : item.summary) && <p>{zh ? EVENT_SUMMARY_ZH[item.url] : item.summary}</p>}</div>
-      <div className="event-meta"><b>{t('ORIGINAL SOURCE', '原始資料來源')}</b><span>{item.source}</span><a className="text" href={item.url} target="_blank" rel="noopener noreferrer">{t('Open record ↗', '開啟原始紀錄 ↗')}</a></div>
+      <div className="event-meta"><b>{t('ORIGINAL SOURCE', '原始資料來源')}</b><span>{item.source}</span><span>{t('Last verified', '最近驗證')}：{dateLabel(item.retrievedAt)}</span><a className="text" href={item.url} target="_blank" rel="noopener noreferrer">{t('Open record ↗', '開啟原始紀錄 ↗')}</a></div>
     </article>) : <p className="event-empty">{t('No verified records match this view.', '目前沒有符合條件的已驗證紀錄。')}</p>}</div>
   </section>;
 }
