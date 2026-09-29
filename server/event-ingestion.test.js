@@ -61,4 +61,5 @@ test('inaccessible candidate is withheld', async () => {
   assert.equal(result.observations.length, 0);
   assert.match(result.payload.rejected[0].reason, /inaccessible/);
   assert.equal(result.coverage.excludedCount, 1);
+  assert.equal(result.coverage.excluded[0].url, articleUrl);
 });

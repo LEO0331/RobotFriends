@@ -39,6 +39,8 @@ The actual provider and origin URL used for each price observation are carried i
 
 An HTTP `200` does not imply a healthy data refresh. After adapter execution, normalized price, SEC and grid observations must contain usable records. Empty results are marked `degraded`. The event adapter may validly return zero verified events; it records a dated check and retains prior event history.
 
+Event health records the configured check scope, candidate and accepted counts, excluded candidate reasons, and whether the PJM feed was available. If the feed fails but curated records pass, the check is `partial`; an excluded candidate is not published as a verified event. The Events page exposes these exceptions and links for audit, while previously accepted events keep their own last-verification dates. A configured-source check is not a claim to cover every U.S. infrastructure event.
+
 For the static snapshot, a degraded source retains last-known-good data. For the SQLite profile, immutable historical observations remain present. This is particularly important for price history because 30D/90D lookbacks and point-in-time backtests depend on continuity.
 
 No missing response is converted to zero.

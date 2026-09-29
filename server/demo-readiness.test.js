@@ -84,6 +84,13 @@ test('schema is required for the finished demo gate', () => {
   assert.ok(result.checks.some(item => item.id === 'schema-v4' && !item.ok));
   assert.ok(!result.checks.some(item => item.id === 'reconstructed-history'));
 });
+test('partial event coverage is disclosed as a warning', () => {
+  const snapshot = readySnapshot();
+  snapshot.sourceHealth.events = { status: 'partial', recordCount: 1, coverage: { feedStatus: 'unavailable' } };
+  const result = evaluateDemoReadiness(snapshot, { now: snapshot.generatedAt });
+  assert.equal(result.ready, true);
+  assert.ok(result.checks.some(item => item.id === 'degraded-source-events' && !item.ok));
+});
 
 test('verified price history is sufficient without reconstructed score history', () => {
   const snapshot = readySnapshot();

@@ -4,8 +4,8 @@ const snapshot = { generatedAt: '2026-09-29T01:00:00Z', observations: [], source
 
 test('relationship register accepts only dated HTTPS evidence for the selected company and region', () => {
   const records = [
-    { ticker: 'ORCL', facility: 'Abilene', grid: 'ERCOT', region: 'Texas', publishedAt: '2026-09-15', reviewedAt: '2026-09-29', sourceUrl: 'https://www.oracle.com/news/announcement/example' },
-    { ticker: 'ORCL', facility: 'Unverified', grid: 'ERCOT', region: 'Texas', publishedAt: '2026-09-15', reviewedAt: '2026-09-29', sourceUrl: 'http://example.com/story' },
+    { ticker: 'ORCL', facility: 'Abilene', grid: 'ERCOT', region: 'Texas', relationship: 'Oracle identifies its facility.', relationshipZh: 'Oracle 確認其設施。', sourceTitle: 'Official Oracle release', publishedAt: '2026-09-15', reviewedAt: '2026-09-29', sourceUrl: 'https://www.oracle.com/news/announcement/example' },
+    { ticker: 'ORCL', facility: 'Unverified', grid: 'ERCOT', region: 'Texas', relationship: 'Claim', relationshipZh: '主張', sourceTitle: 'Unofficial', publishedAt: '2026-09-15', reviewedAt: '2026-09-29', sourceUrl: 'https://example.com/story' },
   ];
   expect(documentedRelationships('ORCL', 'Texas', records)).toHaveLength(1);
   expect(documentedRelationships('ORCL', 'Northern Virginia', records)).toHaveLength(0);

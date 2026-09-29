@@ -61,7 +61,7 @@ test('overview switches research lenses without presenting unsourced earnings va
   render(<App snapshot={snapshot} />);
   expect(screen.getByRole('heading', { level: 2, name: 'Short-term price trend: upward' })).toBeInTheDocument();
   fireEvent.click(screen.getByRole('button', { name: 'Company financials' }));
-  expect(screen.getByText('Company execution evidence unavailable')).toBeInTheDocument();
+  expect(screen.getAllByText('Company execution evidence unavailable').length).toBeGreaterThan(0);
   expect(screen.queryByText('86%')).not.toBeInTheDocument();
 });
 
@@ -140,4 +140,16 @@ test('Chinese milestone shows a translated headline, translated region and origi
   expect(screen.getByText(`原始標題：${title}`)).toBeInTheDocument();
   fireEvent.click(screen.getByRole('button', { name: '事件' }));
   expect(screen.getByText('最近驗證：2026-09-20')).toBeInTheDocument();
+});
+
+test('Events page exposes configured source scope and excluded candidates', () => {
+  window.history.pushState({}, '', '#events');
+  const withCoverage = { ...snapshot, sourceHealth: { ...snapshot.sourceHealth, events: {
+    status: 'ok', checkedAt: '2026-09-29T01:00:00Z', recordCount: 1,
+    coverage: { scope: 'pjm-feed-and-curated-candidates', feedStatus: 'checked', candidateCount: 2, acceptedCount: 1, excludedCount: 1, excluded: [{ title: 'Candidate title', reason: 'record title mismatch' }] },
+  } } };
+  render(<App snapshot={withCoverage} language="zh-TW" />);
+  expect(screen.getByText(/候選 2 筆 · 通過 1 筆 · 排除 1 筆/)).toBeInTheDocument();
+  fireEvent.click(screen.getByText('查看排除的候選紀錄（1）'));
+  expect(screen.getByText('Candidate title').closest('li')).toHaveTextContent('頁面標題不相符');
 });

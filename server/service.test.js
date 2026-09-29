@@ -57,6 +57,27 @@ test('post-close scheduler checks other sources daily and prices on NYSE session
   assert.equal(dueAfterClose(new Date('2026-07-03T20:16:00Z')).marketSession, false);
   assert.equal(dueAfterClose(new Date('2026-09-14T20:15:00Z')).marketSession, true);
 });
+test('event check records limited feed coverage and excluded candidates', async () => {
+  const directory = await fs.mkdtemp(path.join(os.tmpdir(), 'gridline-event-coverage-'));
+  const original = adapters.events;
+  adapters.events = async () => ({
+    payload: {}, observations: [{ source: 'events', type: 'infrastructureEvent', observedAt: '2026-09-17T00:00:00Z', value: { title: 'Official project record', url: 'https://example.com/record', category: 'PERMIT', publishedAt: '2026-09-17T00:00:00Z' } }],
+    coverage: { scope: 'curated-candidates-only', feedStatus: 'unavailable', candidateCount: 2, acceptedCount: 1, excludedCount: 1, excluded: [{ title: 'Other record', reason: 'record title mismatch' }] },
+    message: '1 verified infrastructure event record; PJM feed unavailable',
+  });
+  const service = createService({ dataDir: directory, cacheMinutes: 1 });
+  try {
+    const result = await service.ingest('events', true);
+    const health = await service.health();
+    assert.equal(result.status, 'partial');
+    assert.equal(health.events.coverage.excludedCount, 1);
+    assert.equal(health.events.coverage.feedStatus, 'unavailable');
+  } finally {
+    adapters.events = original;
+    service.store.close();
+    await fs.rm(directory, { recursive: true, force: true });
+  }
+});
 test('observation queries apply bounded pagination', async () => {
   const directory = await fs.mkdtemp(path.join(os.tmpdir(), 'gridline-page-test-')); const store = createStore(directory);
   await store.saveObservations('prices', [

@@ -4,14 +4,15 @@ import { formatUsd, marketSignals } from './marketSignals';
 import { signalLens } from './signalLenses';
 
 const PJM_REGIONS = new Set(['All regions', 'Northern Virginia', 'Ohio', 'PJM region']);
-const supportedUrl = value => {
-  try { return new URL(value).protocol === 'https:'; } catch { return false; }
+const RELATIONSHIP_HOSTS = { ORCL: new Set(['www.oracle.com']) };
+const supportedUrl = (value, ticker) => {
+  try { const url = new URL(value); return url.protocol === 'https:' && Boolean(RELATIONSHIP_HOSTS[ticker]?.has(url.hostname)); } catch { return false; }
 };
 const dateOnly = value => value ? String(value).slice(0, 10) : null;
 
-const validRelationship = item => item.facility && item.grid &&
+const validRelationship = item => item.facility && item.grid && item.relationship && item.relationshipZh && item.sourceTitle &&
   /^\d{4}-\d{2}-\d{2}$/.test(item.publishedAt) &&
-  /^\d{4}-\d{2}-\d{2}$/.test(item.reviewedAt) && supportedUrl(item.sourceUrl);
+  /^\d{4}-\d{2}-\d{2}$/.test(item.reviewedAt) && supportedUrl(item.sourceUrl, item.ticker);
 
 export function documentedRelationships(ticker, region = 'All regions', records = relationships) {
   return records.filter(item => item.ticker === ticker &&
@@ -45,10 +46,10 @@ export function buildResearchBrief(snapshot = {}, { ticker, region = 'All region
       },
       {
         id: 'projects', available: Boolean(latestEvent),
-        title: latestEvent?.title || 'No verified project record for this selection',
-        titleZh: latestEvent ? eventTitle(latestEvent, 'zh-TW') : '所選範圍暫無已驗證的專案紀錄',
-        detail: latestEvent ? `${events.length} retained record${events.length === 1 ? '' : 's'} in this geography; no company attribution without a documented relationship.` : 'No record in this snapshot does not mean no project exists.',
-        detailZh: latestEvent ? `此地區保留 ${events.length} 筆紀錄；若無文件證明關係，不歸因於個別公司。` : '快照沒有紀錄，不代表當地沒有專案。',
+        title: latestEvent?.title || 'No verified project event for this selection',
+        titleZh: latestEvent ? eventTitle(latestEvent, 'zh-TW') : '所選範圍暫無已驗證的專案事件',
+        detail: latestEvent ? `${events.length} retained record${events.length === 1 ? '' : 's'} in this geography; no company attribution without a documented relationship.` : 'No event in this snapshot; review documented company–facility links below.',
+        detailZh: latestEvent ? `此地區保留 ${events.length} 筆紀錄；若無文件證明關係，不歸因於個別公司。` : '此快照沒有事件紀錄；下方可查看具來源的公司與設施連結。',
         observedAt: dateOnly(latestEvent?.publishedAt), sourceUrl: latestEvent?.url || null,
         lastVerifiedAt: dateOnly(latestEvent?.retrievedAt), scope: region === 'All regions' ? latestEvent?.region || 'All regions' : region,
         health: snapshot.sourceHealth?.events?.status || null,

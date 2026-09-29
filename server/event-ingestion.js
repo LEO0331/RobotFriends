@@ -84,11 +84,11 @@ async function ingestEvents(config = {}, dependencies = {}) {
     if (!validCandidate(item, now)) { rejected.push({ title: item?.title || '', reason: 'invalid metadata or non-primary URL' }); continue; }
     try {
       const html = await read(item.url, { ...headers, Accept: 'text/html' });
-      if (!pageMatchesTitle(html, item.title)) { rejected.push({ title: item.title, reason: 'record title mismatch' }); continue; }
-      if (!pageSupportsEvidence(html, item.evidenceText)) { rejected.push({ title: item.title, reason: 'supporting text missing' }); continue; }
-      if (item.dateText && !pageSupportsEvidence(html, item.dateText)) { rejected.push({ title: item.title, reason: 'publication date missing' }); continue; }
+      if (!pageMatchesTitle(html, item.title)) { rejected.push({ title: item.title, url: item.url, reason: 'record title mismatch' }); continue; }
+      if (!pageSupportsEvidence(html, item.evidenceText)) { rejected.push({ title: item.title, url: item.url, reason: 'supporting text missing' }); continue; }
+      if (item.dateText && !pageSupportsEvidence(html, item.dateText)) { rejected.push({ title: item.title, url: item.url, reason: 'publication date missing' }); continue; }
       accepted.push(item);
-    } catch (error) { rejected.push({ title: item.title, reason: `record inaccessible: ${error.message}` }); }
+    } catch (error) { rejected.push({ title: item.title, url: item.url, reason: `record inaccessible: ${error.message}` }); }
   }
   const unique = [...new Map(accepted.map(item => [item.url, item])).values()];
   if (feedError && !unique.length) throw new Error(`PJM event feed unavailable and no curated records passed validation: ${feedError}`);
@@ -100,7 +100,9 @@ async function ingestEvents(config = {}, dependencies = {}) {
       candidateCount: discovered.length + curated.length,
       acceptedCount: unique.length,
       excludedCount: rejected.length,
+      duplicateCount: accepted.length - unique.length,
       excluded: rejected.slice(0, 20),
+      excludedOmittedCount: Math.max(0, rejected.length - 20),
     },
     observations: unique.map(item => ({ source: 'events', type: 'infrastructureEvent', value: item, observedAt: item.publishedAt, retrievedAt: now.toISOString(), sourceUrl: item.url, region: item.region })),
     message: `${unique.length} verified infrastructure event records; ${rejected.length} rejected${feedError ? '; PJM feed unavailable' : ''}`,

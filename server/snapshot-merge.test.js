@@ -67,3 +67,13 @@ test('healthy refresh uses current health metadata without retained marker', () 
   assert.equal(health.eia.retainedRecordCount, undefined);
   assert.equal(health.eia.qualityReviewedAt, undefined);
 });
+
+test('failed event refresh does not present a previous candidate check as the current coverage', () => {
+  const health = mergeSnapshotHealth(
+    { events: { status: 'ok', coverage: { acceptedCount: 3, excludedCount: 1 }, lastSuccessAt: '2026-09-28T22:00:00Z' } },
+    { events: { status: 'degraded', checkedAt: '2026-09-29T22:00:00Z', message: 'feed unavailable' } },
+    [],
+  );
+  assert.equal(health.events.coverage, null);
+  assert.equal(health.events.lastSuccessAt, '2026-09-28T22:00:00Z');
+});

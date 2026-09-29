@@ -1,5 +1,5 @@
 import React from 'react';
-import { act, render, screen } from '@testing-library/react';
+import { act, fireEvent, render, screen } from '@testing-library/react';
 import '@testing-library/jest-dom';
 import ResearchExperience from './ResearchExperience';
 
@@ -33,4 +33,17 @@ test('Traditional Chinese survives navigation away from and back to the dashboar
   act(() => { window.location.hash = '#overview'; window.dispatchEvent(new HashChangeEvent('hashchange')); });
   expect(screen.getByRole('button', { name: '總覽' })).toBeInTheDocument();
   expect(window.localStorage.getItem('gridline-language')).toBe('zh-TW');
+});
+
+test('data status stays primary while assumption and backtest tools are grouped', () => {
+  render(<ResearchExperience />);
+  expect(screen.getByRole('button', { name: '資料狀態' })).toBeInTheDocument();
+  expect(screen.getByText('方法與假設')).toBeInTheDocument();
+  const methods = screen.getByText('方法與假設').closest('details');
+  expect(methods).not.toHaveAttribute('open');
+  fireEvent.click(screen.getByText('方法與假設'));
+  expect(methods).toHaveAttribute('open');
+  expect(screen.getByRole('button', { name: '情境假設 →' })).toBeInTheDocument();
+  fireEvent.click(screen.getByRole('button', { name: '資料狀態' }));
+  expect(window.location.hash).toBe('#health');
 });

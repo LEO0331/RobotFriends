@@ -2,6 +2,8 @@
 
 Gridline is a focused research workflow for the link between AI/data-center demand, company execution, electric-grid capacity, and market expectations. It deliberately avoids a single buy/sell score. Each lens states its required inputs, calculation or categorical rule, source, observation date, and reason it can be unavailable.
 
+The Overview now places these four lenses together in a research brief for the selected company and region. Regional project and PJM load records are context; they are not assigned to a company without a separately documented relationship. The [relationship register](relationship-evidence.md) records one official Oracle–Abilene–ERCOT connection and leaves other company joins unavailable.
+
 | Lens | Research question | Current rule | Evidence boundary |
 | --- | --- | --- | --- |
 | Market momentum | What is the market pricing now? | Latest close versus MA5 and MA10 from ten distinct sourced trading closes; above/below/mixed ordering. | Price behavior is not a forecast or explanation of infrastructure fundamentals. |

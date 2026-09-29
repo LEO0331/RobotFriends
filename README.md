@@ -23,6 +23,8 @@ Start with a company or region, inspect the four evidence views, open the underl
 ## What the demo demonstrates
 
 - **Infrastructure intelligence** — region navigation and verified primary-source milestones; unsourced regional capacity/stage figures are withheld.
+- **Four-lane research brief** — grid demand, project decisions, company disclosures and market prices appear together for a selected company and region, each with its date, source and evidence boundary.
+- **Documented relationship register** — one primary-source-backed Oracle–Abilene–ERCOT link is shown with publication and review dates; missing company-to-project links stay unavailable rather than inferred.
 - **Price lookback** — 30D / 90D / 1Y observed closes with explicit insufficient-history states.
 - **Lightweight price chart** — native SVG 30 / 60 / 90-session views use the same dated close observations, keep one continuous provider segment, link back to the price source, and overlay dated state-change markers from the currently selected technical method.
 - **Previous-snapshot diff** — each refresh compares material customer-facing changes against the immediately preceding committed snapshot: latest closes, recorded trend-signal state, verified event additions/updates/archive transitions, and source-health status.
@@ -33,6 +35,7 @@ Start with a company or region, inspect the four evidence views, open the underl
 - **Scenario Lab (supporting worksheet)** — records bounded user assumptions for power, demand, CAPEX and regulation without presenting them as observed evidence or an uncalibrated forecast.
 - **Retrospective price test (method check)** — MA5/MA10 crossover outcomes using the next observed session and a ten-session exit, with pending windows and no-look-ahead rules; it does not test the whole buildout thesis.
 - **Data Health** — `#health` exposes market-snapshot freshness, source status, price coverage, and the separately dated event review.
+- **Coverage exceptions** — the Events view reports the configured feed/candidate scope, accepted and excluded counts, excluded reasons, and when the PJM feed could not be checked.
 - **Fail-closed ingestion** — empty/invalid provider responses are degraded, not successful; last-known-good history is retained.
 - **Bilingual research UX** — core Research Lab workflows support English and Traditional Chinese.
 - **Optional accounts** — Supabase signup/signin/recovery/preferences are implemented in the React project but do not block the public research demo.
@@ -40,11 +43,11 @@ Start with a company or region, inspect the four evidence views, open the underl
 
 Detailed design notes: [provenance](docs/data-provenance.md) · [signal methods](docs/signal-methods.md) · [snapshot changes](docs/snapshot-changes.md) · [demo hardening](docs/demo-hardening.md) · [scoring](docs/scoring-methodology.md) · [storage](docs/persistent-storage.md) · [scenario analysis](docs/scenario-analysis.md) · [backtesting](docs/backtesting.md) · [CI](docs/pr-ci.md).
 
-## Next research improvements (not yet implemented)
+## Current evidence boundaries
 
-1. **A question-level evidence summary:** show the four lanes together for a selected company or region, with supported, missing, stale or conflicting evidence and direct record links. Do not infer a single investment verdict.
-2. **Sourced company–project–grid relationships:** connect a company to a facility, permit or grid region only when an official record states that relationship. Until then, keep regional demand separate from company-specific conclusions.
-3. **Coverage and change context:** distinguish a feed check from complete coverage, surface failed or unreviewed candidate links, and explain material changes since the previous snapshot before adding more technical indicators.
+- The documented relationship register currently contains one [Oracle Abilene–ERCOT record](docs/relationship-evidence.md). It does not establish links for the other tracked companies. EIA demand in the public snapshot covers PJM, so the Oracle–ERCOT link does **not** create an ERCOT demand measurement.
+- Event coverage includes configured sources and candidates, not every U.S. infrastructure development. An excluded candidate is not published as a verified event; older accepted records remain visible with their last successful verification date.
+- Scenario Lab and the price-only backtest remain under **Methods & assumptions**. They support research discipline and method checking; neither answers the full buildout question or provides a forecast.
 
 ## Requirements
 

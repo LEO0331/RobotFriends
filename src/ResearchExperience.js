@@ -23,7 +23,6 @@ export default function ResearchExperience() {
   const [language, setLanguage] = useState(readPreferredLanguage);
   const route = routeFromHash(locationHash);
   const copy = researchLabCopy(language);
-  const healthButton = language === 'zh-TW' ? '資料狀態 →' : 'Data status →';
 
   const setResearchLanguage = next => {
     const normalized = persistLanguage(next);
@@ -49,6 +48,6 @@ export default function ResearchExperience() {
 
   return <>
     <RegimeExperience language={language} onLanguageChange={setResearchLanguage} />
-    <div className="research-dock"><span>{copy.dockLabel}</span><button onClick={() => go('scenario')}>{copy.scenarioButton}</button><button onClick={() => go('backtest')}>{copy.backtestButton}</button><button className="ops" onClick={() => go('health')}>{healthButton}</button></div>
+    <div className="research-dock"><details><summary>{language === 'zh-TW' ? '方法與假設' : 'Methods & assumptions'}</summary><div><button onClick={() => go('scenario')}>{copy.scenarioButton}</button><button onClick={() => go('backtest')}>{copy.backtestButton}</button></div></details></div>
   </>;
 }

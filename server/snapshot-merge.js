@@ -34,6 +34,7 @@ function mergeSnapshotHealth(previous = {}, current = {}, observations = []) {
     merged[source] = {
       ...priorWithoutDegradedMarkers,
       ...next,
+      ...(source === 'events' && degraded && !next.coverage ? { coverage: null } : {}),
       ...(degraded && !next.lastSuccessAt && prior.lastSuccessAt ? { lastSuccessAt: prior.lastSuccessAt } : {}),
       ...(degraded ? { retainedRecordCount: retainedCount } : {}),
     };
