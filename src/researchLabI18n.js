@@ -60,8 +60,8 @@ export const researchLabCopy = language => {
       hitRate: t('Follow-up matched signal direction', '後續走勢與訊號同向'),
       avgReturn: t('Avg direction-adjusted return', '平均方向調整報酬'),
       metricNote: t(
-        'For a downward signal, a subsequent price decline is positive in the direction-adjusted return metric.',
-        '方向調整報酬中，若訊號為向下，後續價格下跌會以正值計入。'
+        'Direction match: the share of completed signals whose price move from the next available close to 10 trading observations later matched the signal direction. Average direction-adjusted return: the average price change over that window, with the sign reversed for downward signals. These are retrospective measures, not actual trading returns or proof of predictive ability.',
+        '同向比例：已完成觀察中，從訊號後下一筆可得收盤價至 10 個交易觀察值後，價格變動符合訊號方向的比例。平均方向調整報酬：同一期間的價格變動率，向下訊號先反轉正負號，再取算術平均。兩者是歷史觀察值，並非實際交易報酬，也不能證明預測能力。'
       ),
       unavailable: t('Insufficient sourced price history for a completed follow-up window.', '有來源的價格歷史不足，尚無完成的後續觀察結果。'),
       ledger: t('Signal history', '訊號紀錄'),

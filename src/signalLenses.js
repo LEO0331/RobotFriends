@@ -1,4 +1,4 @@
-import { infrastructureEvents } from './eventModel';
+import { infrastructureEvents, eventTitle, REGION_ZH } from './eventModel';
 import {
   DEFAULT_SIGNAL_METHOD_ID,
   evaluateSnapshotSignalMethod,
@@ -134,9 +134,9 @@ export function signalLens(snapshot, ticker, lensId, now = new Date(), signalMet
     return gridDemandSignal(snapshot);
   }
   const latest = infrastructureEvents(snapshot, now).filter(item => !item.archived)[0];
-  return latest ? { available: true, label: latest.title, labelZh: latest.title,
+  return latest ? { available: true, label: latest.title, labelZh: eventTitle(latest, 'zh-TW'), originalTitle: latest.title,
       method: `${({ power: 'Power', grid: 'Grid', permit: 'Permit', capex: 'Capital spending' })[String(latest.category).toLowerCase()] || 'Infrastructure'} primary-source record for ${latest.region}; no quantified impact or company attribution is inferred.`,
-      methodZh: `${latest.region} 的${({ power: '電力', grid: '電網', permit: '許可', capex: '資本支出' })[String(latest.category).toLowerCase()] || '基礎設施'}原始紀錄；不據此推估量化影響或歸因於個別公司。`,
-      observedAt: latest.publishedAt, sourceUrl: latest.url, scope: latest.region, scopeZh: latest.region }
+      methodZh: `${REGION_ZH[latest.region] || latest.region} 的${({ power: '電力', grid: '電網', permit: '許可', capex: '資本支出' })[String(latest.category).toLowerCase()] || '基礎設施'}原始紀錄；不據此推估量化影響或歸因於個別公司。`,
+      observedAt: latest.publishedAt, sourceUrl: latest.url, scope: latest.region, scopeZh: REGION_ZH[latest.region] || latest.region }
     : { available: false, label: 'No verified current project milestone', labelZh: '目前沒有已核實的專案里程碑', method: 'Requires an accessible primary-source record with a matching title, publication date and supporting passage.', methodZh: '須有可存取的原始來源，且標題、發布日期及內文段落與事件相符。', scope: 'Sector', scopeZh: '產業' };
 }

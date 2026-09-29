@@ -13,6 +13,15 @@ test('snapshot summary uses generatedAt and real provider health', () => {
   expect(result.latestMarketDate).toBe('2026-09-17T00:00:00.000Z');
 });
 
+test('snapshot summary excludes inactive research connectors from source totals', () => {
+  const result = summarizeSnapshot({
+    generatedAt: '2026-09-17T22:05:00.000Z',
+    sourceHealth: { prices: { status: 'ok' }, eia: { status: 'ok' }, pjm: { status: 'degraded' }, ferc: { status: 'degraded' }, 'company-ir': { status: 'degraded' } },
+  });
+  expect(result.healthySources).toBe(2);
+  expect(result.totalSources).toBe(2);
+});
+
 test('manual event review keeps the market snapshot date and records its own check time', async () => {
   const originalFetch = global.fetch;
   global.fetch = jest.fn()

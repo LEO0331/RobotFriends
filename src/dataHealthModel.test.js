@@ -24,9 +24,10 @@ const readySnapshot = () => ({
   outcomes: [],
 });
 
-test('data health reports ready-with-warnings when demo-critical data is complete', () => {
+test('data health reports only sources used by the dashboard', () => {
   const result = buildDataHealth(readySnapshot(), new Date('2026-09-16T12:00:00.000Z'));
-  expect(result.state).toBe('ready-with-warnings');
+  expect(result.state).toBe('ready');
+  expect(result.sources.map(item => item.source)).toEqual(['prices', 'events', 'sec', 'eia']);
   expect(result.blockers).toEqual([]);
   expect(result.priceCoverage.every(item => item.ready)).toBe(true);
   expect(result.backtest.reconstructed).toBe(0);

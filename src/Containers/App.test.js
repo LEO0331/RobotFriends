@@ -124,3 +124,18 @@ test('account language can initialize a browser with no local language preferenc
 
   expect(onLanguageChange).toHaveBeenCalledWith('en');
 });
+
+test('Chinese milestone shows a translated headline, translated region and original title', () => {
+  const title = 'Loudoun Board Opposes Valley North Transmission Line, Denies Substation Near Dulles Airport';
+  const url = 'https://www.loudoun.gov/m/newsflash/Home/Detail/10876';
+  const withEvent = { ...snapshot, observations: [...snapshot.observations, {
+    id: 'loudoun-event', source: 'events', type: 'infrastructureEvent', retrievedAt: '2026-09-20T00:00:00Z',
+    value: { title, url, category: 'PERMIT', region: 'Northern Virginia', source: 'Loudoun', publishedAt: new Date(Date.now() - 86400000).toISOString() },
+  }] };
+  render(<App snapshot={withEvent} language="zh-TW" />);
+
+  fireEvent.click(screen.getByRole('button', { name: '專案里程碑' }));
+  expect(screen.getByRole('heading', { level: 2, name: '勞登郡董事會反對 Valley North 輸電線，否決杜勒斯機場附近的變電站申請' })).toBeInTheDocument();
+  expect(screen.getByText(/北維吉尼亞 的許可原始紀錄/)).toBeInTheDocument();
+  expect(screen.getByText(`原始標題：${title}`)).toBeInTheDocument();
+});

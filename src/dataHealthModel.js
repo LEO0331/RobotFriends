@@ -1,5 +1,5 @@
 const TRACKED_TICKERS = ['NBIS', 'CRWV', 'ORCL', 'AVGO'];
-const SOURCE_ORDER = ['prices', 'events', 'sec', 'eia', 'pjm', 'ferc', 'company-ir'];
+const SOURCE_ORDER = ['prices', 'events', 'sec', 'eia'];
 const DAY_MS = 24 * 60 * 60 * 1000;
 
 const validDate = value => Number.isFinite(Date.parse(value));

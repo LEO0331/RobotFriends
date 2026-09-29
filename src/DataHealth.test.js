@@ -54,17 +54,21 @@ test('data health exposes load errors as alerts while keeping refresh available'
 
 test('data health renders demo readiness and source/price coverage in English', async () => {
   render(<DataHealth language="en" onBack={() => {}} />);
-  await waitFor(() => expect(screen.getByText('PRICE DATA AVAILABLE · SOURCE GAPS')).toBeInTheDocument());
+  await waitFor(() => expect(screen.getByText('PRICE DATA AVAILABLE')).toBeInTheDocument());
   expect(screen.getByText('MARKET PRICE COVERAGE')).toBeInTheDocument();
   expect(screen.getByText('Reviewed event records')).toBeInTheDocument();
   expect(screen.getAllByText('Fixture provider')).toHaveLength(4);
+  expect(screen.queryByText('PJM')).not.toBeInTheDocument();
+  expect(screen.queryByText('FERC')).not.toBeInTheDocument();
+  expect(screen.queryByText('Company IR')).not.toBeInTheDocument();
 });
 
 test('data health renders Traditional Chinese labels', async () => {
   render(<DataHealth language="zh-TW" onBack={() => {}} />);
-  await waitFor(() => expect(screen.getByText('價格可用，部分來源未更新')).toBeInTheDocument());
+  await waitFor(() => expect(screen.getByText('價格資料可用')).toBeInTheDocument());
   expect(screen.getByText('市場價格涵蓋')).toBeInTheDocument();
   expect(screen.getByText('已審查事件紀錄')).toBeInTheDocument();
   expect(screen.getByText('市場價格')).toBeInTheDocument();
+  expect(screen.queryByText('公司投資人關係')).not.toBeInTheDocument();
   expect(screen.getByRole('button', { name: 'EN' })).toBeInTheDocument();
 });

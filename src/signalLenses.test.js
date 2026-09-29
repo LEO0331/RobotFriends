@@ -108,6 +108,18 @@ test('milestone keeps its source title and translates the evidence boundary', ()
     value: { title: 'PJM updates its load forecast', category: 'POWER', region: 'Mid-Atlantic', source: 'PJM', publishedAt: '2026-09-19T00:00:00Z', url },
   }] };
   const result = signalLens(snapshot, 'ORCL', 'milestones', new Date('2026-09-23T00:00:00Z'));
-  expect(result).toMatchObject({ available: true, label: 'PJM updates its load forecast', labelZh: 'PJM updates its load forecast', sourceUrl: url });
+  expect(result).toMatchObject({ available: true, label: 'PJM updates its load forecast', labelZh: '已驗證供電紀錄（PJM）', sourceUrl: url });
   expect(result.methodZh).toContain('不據此推估量化影響或歸因於個別公司');
+});
+
+test('reviewed Loudoun milestone has a Chinese title and region', () => {
+  const url = 'https://www.loudoun.gov/m/newsflash/Home/Detail/10876';
+  const snapshot = { observations: [{ source: 'events', type: 'infrastructureEvent', id: url, retrievedAt: '2026-09-20T00:00:00Z', value: {
+    title: 'Loudoun Board Opposes Valley North Transmission Line, Denies Substation Near Dulles Airport',
+    category: 'PERMIT', region: 'Northern Virginia', source: 'Loudoun', publishedAt: '2026-09-18T00:00:00Z', url,
+  } }] };
+  const result = signalLens(snapshot, 'ORCL', 'milestones', new Date('2026-09-23T00:00:00Z'));
+  expect(result.labelZh).toBe('勞登郡董事會反對 Valley North 輸電線，否決杜勒斯機場附近的變電站申請');
+  expect(result.methodZh).toContain('北維吉尼亞');
+  expect(result.scopeZh).toBe('北維吉尼亞');
 });

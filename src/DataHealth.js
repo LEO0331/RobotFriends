@@ -11,10 +11,7 @@ const sourceLabel = (source, language) => {
     prices: zh ? '市場價格' : 'Market prices',
     events: zh ? '事件來源' : 'Event sources',
     sec: 'SEC',
-    eia: 'EIA',
-    pjm: 'PJM',
-    ferc: 'FERC',
-    'company-ir': zh ? '公司投資人關係' : 'Company IR',
+    eia: zh ? 'EIA（PJM 用電需求）' : 'EIA (PJM grid demand)',
   };
   return labels[source] || source;
 };
@@ -37,8 +34,8 @@ function copyFor(language) {
     title: t('Know what is', '清楚掌握'),
     titleEm: t('current and available.', '資料更新與可用狀態。'),
     intro: t(
-      'See when market prices and event records were checked, which sources are available, and where coverage is incomplete.',
-      '查看市場價格與事件紀錄的檢查時間、可用來源及尚未完整涵蓋的資料。'
+      'See the status of sources used by this dashboard, including dated market prices, company filings, grid demand and verified events.',
+      '查看本儀表板實際使用的來源狀態，包括有日期的市場價格、公司申報資料、電網需求與已驗證事件。'
     ),
     refresh: t('Refresh status', '重新整理狀態'),
     loading: t('Loading snapshot…', '正在載入快照…'),

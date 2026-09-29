@@ -43,6 +43,8 @@ test('historical signal page uses customer-facing signal families in Traditional
   expect(screen.getByText('判定時間與衡量方式')).toBeInTheDocument();
   expect(screen.getByText('訊號日收盤價')).toBeInTheDocument();
   expect(screen.getByText('資料涵蓋')).toBeInTheDocument();
+  expect(screen.getByText(/同向比例：已完成觀察中/)).toHaveTextContent('平均方向調整報酬：');
+  expect(screen.getByText(/同向比例：已完成觀察中/)).toHaveTextContent('並非實際交易報酬');
   expect(screen.getByText('解讀限制')).toBeInTheDocument();
   expect(screen.queryByText(/MA5|MA10/)).not.toBeInTheDocument();
   await waitFor(() => expect(global.fetch).toHaveBeenCalled());
