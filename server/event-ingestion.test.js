@@ -23,8 +23,12 @@ test('event admission rejects generic and mismatched links', () => {
 });
 
 test('curated candidates carry specific primary-source URLs and publication dates', () => {
-  assert.equal(candidates.length, 3);
+  assert.equal(candidates.length, 2);
   for (const item of candidates) assert.equal(validCandidate(item, new Date('2026-09-23T00:00:00Z')), true);
+});
+
+test('active event candidates exclude the inaccessible Oracle earnings page', () => {
+  assert.equal(candidates.some(item => item.url.includes('investor.oracle.com/investor-news/news-details/2026/Oracle-Announces-Q1-Results')), false);
 });
 
 test('revised Loudoun candidate requires the current conditional headline and supporting text', async () => {
