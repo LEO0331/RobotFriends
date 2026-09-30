@@ -139,6 +139,8 @@ function buildRuntimeSnapshot(snapshot = {}) {
     generatedAt: snapshot.generatedAt || null,
     freshness: snapshot.freshness || 'unknown',
     sourceHealth: snapshot.sourceHealth || {},
+    methodologies: snapshot.methodologies || null,
+    backtestCoverage: snapshot.backtestCoverage || null,
     observations: [
       ...compactPrices(observations),
       ...compactEia(observations),

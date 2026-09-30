@@ -48,11 +48,13 @@ function copyFor(language) {
       ready: t('PRICE DATA AVAILABLE', '價格資料可用'),
       'ready-with-warnings': t('PRICE DATA AVAILABLE · SOURCE GAPS', '價格可用，部分來源未更新'),
       attention: t('PRICE COVERAGE INCOMPLETE', '價格資料涵蓋不足'),
+      metadata: t('SNAPSHOT METADATA INCOMPLETE', '快照中繼資料不完整'),
     },
     stateNotes: {
       ready: t('Tracked prices meet the current coverage rule. Check observation dates before use.', '追蹤價格符合目前的涵蓋規則；使用前請確認觀察日期。'),
       'ready-with-warnings': t('Tracked prices are available; another source is incomplete or unavailable.', '追蹤價格可用，但其他來源尚未完整更新或無法取得。'),
       attention: t('One or more tracked prices do not meet the coverage rule.', '一個或多個追蹤標的的價格資料未達涵蓋條件。'),
+      metadata: t('Price coverage is available, but required snapshot metadata is missing.', '價格資料可用，但快照缺少必要的中繼資料。'),
     },
     generated: t('Snapshot generated', '快照產生時間'),
     age: t('Snapshot age', '快照距今'),
@@ -105,6 +107,7 @@ export default function DataHealth({ onBack, language = 'en', onLanguageChange =
   useEffect(() => { mounted.current = true; load(); return () => { mounted.current = false; }; }, [load]);
   const health = useMemo(() => buildDataHealth(snapshot, new Date()), [snapshot]);
   const readyPrices = health.priceCoverage.filter(item => item.ready).length;
+  const statusCopyKey = health.state === 'attention' && !health.blockers.includes('prices') ? 'metadata' : health.state;
 
   return <main className="data-health-shell" lang={language} aria-busy={loadState === 'loading'}>
     <header className="data-health-header">
@@ -123,7 +126,7 @@ export default function DataHealth({ onBack, language = 'en', onLanguageChange =
         ? <section className="health-alert loading" role="status" aria-live="polite">{copy.loading}</section>
         : <>
       <section className={`health-status ${health.state}`} role="status">
-        <strong>{copy.states[health.state]}</strong><span>{copy.stateNotes[health.state]}</span>
+        <strong>{copy.states[statusCopyKey]}</strong><span>{copy.stateNotes[statusCopyKey]}</span>
       </section>
 
       <section className="health-metrics">

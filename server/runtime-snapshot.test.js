@@ -96,7 +96,8 @@ test('runtime snapshot retains customer-facing SEC and event fields but omits fu
     outcomes: [{ large: 'full-only' }],
     scores: [{ large: 'full-only' }],
     companyHistory: [{ large: 'full-only' }],
-    backtestCoverage: { large: 'full-only' },
+    backtestCoverage: { recorded: 2, reconstructed: 0 },
+    methodologies: { companyScore: 'gridline-price-signal-v2.0.0' },
     snapshotChanges: { available: true, changes: [] },
     demoReadiness: { status: 'ready' },
     observations: [
@@ -117,7 +118,8 @@ test('runtime snapshot retains customer-facing SEC and event fields but omits fu
   assert.equal(runtime.outcomes, undefined);
   assert.equal(runtime.scores, undefined);
   assert.equal(runtime.companyHistory, undefined);
-  assert.equal(runtime.backtestCoverage, undefined);
+  assert.deepEqual(runtime.backtestCoverage, { recorded: 2, reconstructed: 0 });
+  assert.deepEqual(runtime.methodologies, { companyScore: 'gridline-price-signal-v2.0.0' });
   assert.equal(runtime.snapshotChanges.available, true);
   assert.equal(runtime.demoReadiness.status, 'ready');
 

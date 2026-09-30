@@ -73,6 +73,14 @@ test('data health renders Traditional Chinese labels', async () => {
   expect(screen.getByRole('button', { name: 'EN' })).toBeInTheDocument();
 });
 
+test('missing runtime metadata is identified without blaming price coverage', async () => {
+  const incomplete = { ...fixture, backtestCoverage: undefined, methodologies: undefined };
+  global.fetch = jest.fn(() => Promise.resolve({ ok: true, json: () => Promise.resolve(incomplete) }));
+  render(<DataHealth language="en" onBack={() => {}} />);
+  expect(await screen.findByText('SNAPSHOT METADATA INCOMPLETE')).toBeInTheDocument();
+  expect(screen.getByText('Price coverage')).toBeInTheDocument();
+});
+
 test('retained event count treats source revisions as one record', async () => {
   const url = 'https://www.loudoun.gov/m/newsflash/home/detail/10874';
   const observations = [

@@ -33,6 +33,13 @@ test('data health reports only sources used by the dashboard', () => {
   expect(result.backtest.reconstructed).toBe(0);
 });
 
+test('committed compact dashboard supports the same Data Status readiness checks', () => {
+  const compact = require('../public/data/dashboard-overview.json');
+  const result = buildDataHealth(compact, new Date(compact.generatedAt));
+  expect(result.blockers).toEqual([]);
+  expect(result.priceCoverage.every(item => item.ready)).toBe(true);
+});
+
 test('data health makes missing price coverage visible as attention', () => {
   const snapshot = readySnapshot();
   snapshot.observations = snapshot.observations.filter(item => item.ticker !== 'AVGO');

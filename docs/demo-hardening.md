@@ -63,7 +63,7 @@ The exporter therefore writes two files:
 - `dashboard-snapshot.json` — the full audit/backtest snapshot retained for historical tools and operational inspection;
 - `dashboard-overview.json` — a compact runtime projection used by the public dashboard.
 
-The runtime projection keeps 120 dated closes per tracked ticker (enough for the 90-session chart plus technical-indicator warmup), the latest complete PJM demand day and the comparable day one week earlier, current SEC facts, verified events, source health, snapshot changes and demo-readiness metadata.
+The runtime projection keeps 120 dated closes per tracked ticker (enough for the 90-session chart plus technical-indicator warmup), the latest complete PJM demand day and the comparable day one week earlier, current SEC facts, verified events, source health, the methodology and backtest-coverage metadata needed by Data Status, snapshot changes and demo-readiness metadata.
 
 It removes duplicated provenance/lineage fields and full-history-only payloads from the critical request. The current committed full snapshot is about 1.6 MB uncompressed; the generated Overview projection is about 186 KB, an approximately 89% reduction before HTTP compression.
 
