@@ -8,8 +8,8 @@ The public dashboard needs no login. Accounts are optional and currently save a 
 2. Run `supabase/user-preferences.sql` in the project's SQL Editor. The script is safe to rerun: it creates the preference table when missing, enables Row Level Security, recreates the own-row policy, blocks anonymous preference access, and grants authenticated CRUD access.
 3. Enable Email authentication, keep email confirmation enabled, and set the minimum password length to at least 8.
 4. Under Authentication → URL Configuration:
-   - Site URL: `https://leo0331.github.io/RobotFriends/`
-   - Allow both `https://leo0331.github.io/RobotFriends/` and `https://leo0331.github.io/RobotFriends`
+   - Site URL: `https://leo0331.github.io/Gridline/`
+   - Allow both `https://leo0331.github.io/Gridline/` and `https://leo0331.github.io/Gridline`
    - For local development, allow the URL you actually use, normally `http://localhost:3000/` (or a suitable localhost wildcard while developing).
    - PKCE confirmation/recovery links must be opened in the same browser that started the flow.
 5. Copy the project URL and **publishable** key (`sb_publishable_...`) from the project's Connect/API Keys screen. Never put a secret/service-role key in React.

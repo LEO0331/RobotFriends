@@ -4,7 +4,7 @@ Gridline is a bilingual, focused research workflow for one question: **Is the da
 
 Broker platforms support trading, while [Yahoo Finance](https://finance.yahoo.com/portfolios) already provides watchlists, market data, news, charts and research. Gridline's contribution is a narrower, source-first investigation: show what each record supports, when it was last checked, and where evidence is missing. It does not have exclusive market data or demonstrated predictive skill, and it is not an automated trading system or investment advice.
 
-Public demo: [Gridline](https://leo0331.github.io/RobotFriends/)
+Public demo: [Gridline](https://leo0331.github.io/Gridline/)
 
 Demo readiness: [English](docs/demo-readiness.en.md) · [繁體中文](docs/demo-readiness.zh-TW.md)  
 Account setup (optional Supabase): [English](docs/accounts.en.md) · [繁體中文](docs/accounts.zh-TW.md)
@@ -63,7 +63,7 @@ npm run dev
 
 `npm run dev` starts both:
 
-- React UI: `http://localhost:3000/RobotFriends`
+- React UI: `http://localhost:3000/Gridline`
 - Research API: `http://localhost:8787`
 
 Use `Ctrl+C` to stop both processes. For UI-only development, use `npm start`. For API-only development, use `npm run api`.

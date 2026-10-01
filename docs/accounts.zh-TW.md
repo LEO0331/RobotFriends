@@ -8,8 +8,8 @@
 2. 在 SQL Editor 執行 `supabase/user-preferences.sql`。此腳本可重複執行：缺少資料表時建立 `user_preferences`、啟用 RLS、重新建立「只能存取自己資料列」政策、禁止匿名偏好存取，並授權 authenticated 使用者 CRUD。
 3. 啟用 Email 登入、保留 Email 確認，密碼最短長度至少設為 8。
 4. Authentication → URL Configuration：
-   - Site URL：`https://leo0331.github.io/RobotFriends/`
-   - 允許 `https://leo0331.github.io/RobotFriends/` 與無尾端斜線版本。
+   - Site URL：`https://leo0331.github.io/Gridline/`
+   - 允許 `https://leo0331.github.io/Gridline/` 與無尾端斜線版本。
    - 本機開發請允許你實際使用的網址，通常是 `http://localhost:3000/`；開發期間也可使用合適的 localhost wildcard。
    - PKCE 的註冊確認／密碼重設連結，要在發起流程的同一個瀏覽器開啟。
 5. 從 Connect/API Keys 複製專案 URL 與 **publishable** key（`sb_publishable_...`）。React 前端絕對不要放 secret／service-role key。

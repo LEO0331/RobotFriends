@@ -1,8 +1,8 @@
 {
-  "name": "robot",
+  "name": "gridline",
   "version": "0.1.0",
   "private": true,
-  "homepage": "https://leo0331.github.io/RobotFriends",
+  "homepage": "https://leo0331.github.io/Gridline",
   "dependencies": {
     "@supabase/supabase-js": "^2.116.0",
     "@testing-library/jest-dom": "^5.11.9",

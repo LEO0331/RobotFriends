@@ -15,7 +15,7 @@ jest.mock('../auth/client', () => {
   query.eq.mockReturnValue(query);
 
   return {
-    redirectUrl: () => 'http://localhost/RobotFriends',
+    redirectUrl: () => 'http://localhost/Gridline',
     __query: query,
     supabase: {
       auth: {
@@ -102,14 +102,14 @@ test('signup with confirmation required can resend the confirmation email', asyn
 
   await waitFor(() => expect(screen.getByRole('status')).toHaveTextContent('confirm the account'));
   expect(supabase.auth.signUp).toHaveBeenCalledWith(expect.objectContaining({
-    options: { emailRedirectTo: 'http://localhost/RobotFriends' }
+    options: { emailRedirectTo: 'http://localhost/Gridline' }
   }));
 
   fireEvent.click(screen.getByRole('button', { name: 'Resend confirmation email' }));
   await waitFor(() => expect(supabase.auth.resend).toHaveBeenCalledWith({
     type: 'signup',
     email: 'test@example.com',
-    options: { emailRedirectTo: 'http://localhost/RobotFriends' }
+    options: { emailRedirectTo: 'http://localhost/Gridline' }
   }));
 });
 
@@ -125,7 +125,7 @@ test('password reset keeps the response generic and uses the configured redirect
   await waitFor(() => expect(screen.getByRole('status')).toHaveTextContent('If this email is linked to an account'));
   expect(supabase.auth.resetPasswordForEmail).toHaveBeenCalledWith(
     'unknown@example.com',
-    { redirectTo: 'http://localhost/RobotFriends' }
+    { redirectTo: 'http://localhost/Gridline' }
   );
 });
 

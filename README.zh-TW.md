@@ -4,7 +4,7 @@ Gridline 是雙語、聚焦特定問題的研究流程：**資料中心建設是
 
 券商平台提供交易功能，[Yahoo Finance](https://finance.yahoo.com/portfolios) 則已有股票清單、市場資料、新聞、圖表及研究資訊。Gridline 的價值在於較聚焦、以來源為先的查證流程：說明每筆紀錄能支持甚麼、上次何時檢查，以及哪些證據仍然不足。它沒有獨家市場資料，也未證明預測能力；不是自動交易系統或投資建議。
 
-公開示範：[Gridline](https://leo0331.github.io/RobotFriends/)
+公開示範：[Gridline](https://leo0331.github.io/Gridline/)
 
 示範準備度：[繁體中文](docs/demo-readiness.zh-TW.md) · [English](docs/demo-readiness.en.md)  
 帳戶設定（選用 Supabase）：[繁體中文](docs/accounts.zh-TW.md) · [English](docs/accounts.en.md)
@@ -63,7 +63,7 @@ npm run dev
 
 `npm run dev` 會同時啟動：
 
-- React UI：`http://localhost:3000/RobotFriends`
+- React UI：`http://localhost:3000/Gridline`
 - Research API：`http://localhost:8787`
 
 按 `Ctrl+C` 可一起停止。只開 UI 可用 `npm start`；只開 API 可用 `npm run api`。

@@ -1,12 +1,12 @@
 {
   "files": {
-    "main.css": "/RobotFriends/static/css/main.60c4a024.css",
-    "main.js": "/RobotFriends/static/js/main.49d6273a.js",
-    "static/js/453.bc1b2e44.chunk.js": "/RobotFriends/static/js/453.bc1b2e44.chunk.js",
-    "index.html": "/RobotFriends/index.html",
-    "main.60c4a024.css.map": "/RobotFriends/static/css/main.60c4a024.css.map",
-    "main.49d6273a.js.map": "/RobotFriends/static/js/main.49d6273a.js.map",
-    "453.bc1b2e44.chunk.js.map": "/RobotFriends/static/js/453.bc1b2e44.chunk.js.map"
+    "main.css": "/Gridline/static/css/main.60c4a024.css",
+    "main.js": "/Gridline/static/js/main.49d6273a.js",
+    "static/js/453.bc1b2e44.chunk.js": "/Gridline/static/js/453.bc1b2e44.chunk.js",
+    "index.html": "/Gridline/index.html",
+    "main.60c4a024.css.map": "/Gridline/static/css/main.60c4a024.css.map",
+    "main.49d6273a.js.map": "/Gridline/static/js/main.49d6273a.js.map",
+    "453.bc1b2e44.chunk.js.map": "/Gridline/static/js/453.bc1b2e44.chunk.js.map"
   },
   "entrypoints": [
     "static/css/main.60c4a024.css",
