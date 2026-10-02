@@ -27,6 +27,8 @@ jobs:
           node-version: 22
           cache: npm
       - run: npm ci
+      - name: Development server compatibility
+        run: npm run test:dev-server
       - name: Server and domain tests
         run: npm run test:api
       - name: Frontend unit tests

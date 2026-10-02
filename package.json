@@ -14,15 +14,16 @@
     "web-vitals": "^1.1.0"
   },
   "scripts": {
-    "start": "react-scripts start",
+    "start": "node scripts/start.js",
     "dev": "node scripts/dev.js",
     "api": "node server/index.js",
     "ingest": "node server/cli.js ingest",
     "snapshot": "node server/export-static-snapshot.js",
     "demo:check": "node scripts/verify-demo-snapshot.js",
     "test:api": "node --test server/*.test.js server/**/*.test.js",
+    "test:dev-server": "node --test scripts/dev-server-config.test.js",
     "test:unit": "react-scripts test --watchAll=false --runInBand",
-    "verify": "npm run test:api && npm run test:unit && npm run build",
+    "verify": "npm run test:dev-server && npm run test:api && npm run test:unit && npm run build",
     "verify:demo": "npm run verify && npm run demo:check",
     "build": "react-scripts build",
     "test": "react-scripts test",
@@ -30,6 +31,7 @@
   },
   "proxy": "http://localhost:8787",
   "overrides": {
+    "webpack-dev-server": "^5.2.6",
     "loader-utils": "^2.0.4",
     "serialize-javascript": "^7.0.0",
     "nth-check": "^2.1.1",
